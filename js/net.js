@@ -30,8 +30,13 @@
   function Client(url) {
     this.url = url; this.subs = new Set(); this.msgL = []; this.stL = [];
     this.online = false; this.ws = null; this.buf = new Uint8Array(0); this.mid = 1;
-    this.pendR = new Map(); this.queue = []; this.closed = false; this.backoff = 700;
+    this.pendR = new Map(); this.queue = []; this.closed = false; this.backoff = 700; this.lastRx = 0;
     this.connect();
+    var self = this, wake = function () { if (!document.hidden) self.kick(); };
+    document.addEventListener('visibilitychange', wake);
+    window.addEventListener('pageshow', wake);
+    window.addEventListener('focus', wake);
+    window.addEventListener('online', wake);
   }
   Client.prototype.setStatus = function (on) {
     if (this.online === on) return; this.online = on;
@@ -43,13 +48,13 @@
     var self = this; if (this.closed) return;
     var ws;
     try { ws = new WebSocket(this.url, ['mqtt']); } catch (e) { return this.retry(); }
-    this.ws = ws; ws.binaryType = 'arraybuffer'; this.buf = new Uint8Array(0);
+    this.ws = ws; ws.binaryType = 'arraybuffer'; this.buf = new Uint8Array(0); this.connAt = Date.now();
     var to = setTimeout(function () { try { ws.close(); } catch (e) {} }, 7000);
     ws.onopen = function () {
       var id = 'sv' + Math.random().toString(36).slice(2, 12);
-      ws.send(pkt(0x10, [str('MQTT'), new Uint8Array([4, 2, 0, 30]), str(id)]));
+      ws.send(pkt(0x10, [str('MQTT'), new Uint8Array([4, 2, 0, 90]), str(id)]));
     };
-    ws.onmessage = function (ev) { if (self.ws === ws) self.feed(new Uint8Array(ev.data), to); };
+    ws.onmessage = function (ev) { if (self.ws === ws) { self.lastRx = Date.now(); self.feed(new Uint8Array(ev.data), to); } };
     ws.onclose = function () {
       clearTimeout(to);
       if (self.ws === ws) { clearInterval(self.ping); self.ws = null; self.setStatus(false); self.retry(); }
@@ -62,11 +67,25 @@
     this.rt = setTimeout(function () { self.connect(); }, this.backoff);
     this.backoff = Math.min(this.backoff * 1.6, 6000);
   };
-  // разбудить соединение (телефон снова включили)
+  // оборвать соединение и сразу подключиться заново (зависшее соединение после сна телефона)
+  Client.prototype.drop = function () {
+    var ws = this.ws; this.ws = null; clearInterval(this.ping); clearTimeout(this.rt);
+    if (ws) { ws.onopen = ws.onmessage = ws.onclose = ws.onerror = null; try { ws.close(); } catch (e) {} }
+    this.setStatus(false); this.backoff = 700;
+    if (!this.closed) this.connect();
+  };
+  // проверка, живо ли соединение: сервер отвечает на пинг; тишина 15 секунд — переподключаемся
+  Client.prototype.check = function () {
+    if (!this.ws || !this.online) return;
+    if (Date.now() - this.lastRx > 15000) return this.drop();
+    this.send(new Uint8Array([0xC0, 0]));
+  };
+  // телефон снова включили / вернулись во вкладку: не доверяем старому соединению
   Client.prototype.kick = function () {
-    if (this.online || this.closed) return;
-    this.backoff = 300;
-    if (this.ws) { try { this.ws.close(); } catch (e) {} } else { clearTimeout(this.rt); this.connect(); }
+    if (this.closed) return;
+    if (this.ws && !this.online && Date.now() - this.connAt < 4000) return; // уже подключаемся
+    if (this.ws && this.online && Date.now() - this.lastRx < 8000) { this.send(new Uint8Array([0xC0, 0])); return; }
+    this.drop();
   };
   Client.prototype.feed = function (chunk, to) {
     var b = new Uint8Array(this.buf.length + chunk.length); b.set(this.buf); b.set(chunk, this.buf.length); this.buf = b;
@@ -91,7 +110,7 @@
       var now = Date.now();
       this.queue.forEach(function (q) { if (now - q.at < 8000) self.raw(q.t, q.p, false); }); this.queue = [];
       clearInterval(this.ping);
-      this.ping = setInterval(function () { self.send(new Uint8Array([0xC0, 0])); }, 20000);
+      this.ping = setInterval(function () { self.check(); }, 5000);
     } else if (type === 3) { // PUBLISH
       var tl = (body[0] << 8) | body[1], topic = td.decode(body.subarray(2, 2 + tl));
       var off = 2 + tl; if ((first >> 1) & 3) off += 2;

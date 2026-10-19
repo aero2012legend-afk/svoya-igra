@@ -92,13 +92,13 @@
   const T = s => Net.PREFIX + G.room + '/' + s;
   function netStart() {
     if (client) client.close();
-    everOnline = false; netOnline = false; packSent = false;
+    everOnline = false; netOnline = false;
     const c = client = new Net.Client(Net.brokerUrl(G.broker));
     c.subscribe(T('i')); c.subscribe(T('c/' + G.key));
     c.onMessage(onNet);
     c.onStatus(on => {
       if (c !== client) return;
-      netOnline = on; if (on) { everOnline = true; publishNow(); publishHost(true); }
+      netOnline = on; if (on) { everOnline = true; publishNow(); }
       renderTop(); if (G.phase === 'lobby') updLobby();
     });
     clearTimeout(connT);
@@ -128,15 +128,14 @@
       fin: f ? { st: f.stage, th: (PACK.final || {}).theme, pt: f.part, bt: Object.keys(f.bets), an: Object.keys(f.answers), tm: { l: Math.round(f.tl * 10) / 10, r: !!f.tr, tot: G.set.ftimer } } : null,
     };
   }
-  function publishHost(force) {
+  function publishHost(withPack) {
     if (!client) return;
     const P = 'h/' + G.key + '/';
-    if (force || !packSent) {
+    if (withPack) { // все вопросы — только когда открыт пульт
       client.publish(T(P + 'pack'), {
         title: PACK.title, final: PACK.final || null,
         rounds: PACK.rounds.map(r => ({ name: r.name, themes: (r.themes || []).map(th => ({ name: th.name, questions: (th.questions || []).map(x => ({ price: x.price, q: x.q, a: x.a, hint: x.hint || '', type: x.type || '', catTheme: x.catTheme || '' })) })) })),
       }, true);
-      packSent = true;
     }
     const q = G.q, d = curD(), f = G.fin, F = PACK.final || {};
     client.publish(T(P + 'cur'), {
@@ -184,7 +183,7 @@
   }
   function onRemote(d) {
     if (d.t === 'ok') judge(true); else if (d.t === 'bad') judge(false); else if (d.t === 'ans') reveal();
-    else if (d.t === 'space') spaceAction(); else if (d.t === 'next') nextAction();
+    else if (d.t === 'space') spaceAction(); else if (d.t === 'next') nextAction(); else if (d.t === 'hello') publishHost(true);
   }
 
   /* ================= отрисовка ================= */
@@ -1132,5 +1131,6 @@
   if (!load()) G = newState();
   render(); netStart(); splash();
   setInterval(() => { renderScores(); if (G.phase === 'lobby') updLobby(); }, 4000);
+  setInterval(() => { if (client && client.online) publishNow(); }, 10000); // сердцебиение для телефонов
   window.__svi = { get G() { return G; }, act, judge, reveal, nextAction, spaceAction, force: FORCE };
 })();

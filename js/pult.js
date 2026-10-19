@@ -18,8 +18,7 @@
       if (t === T('h/' + key + '/pack')) { pack = d; renderList(); }
       else if (t === T('h/' + key + '/cur')) { cur = d; renderCur(); renderList(); }
     });
-    client.onStatus(on => { online = on; renderCur(); });
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) client.kick(); });
+    client.onStatus(on => { online = on; if (on) client.publish(T('c/' + key), { t: 'hello' }, false); renderCur(); });
   }
   function cmd(t) { if (!client) return; client.publish(T('c/' + key), { t, at: Date.now() }, false); try { if (navigator.vibrate) navigator.vibrate(25); } catch (e) { /* нет */ } }
   document.addEventListener('click', e => { const b = e.target.closest('[data-c]'); if (b) cmd(b.dataset.c); });

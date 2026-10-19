@@ -15,6 +15,7 @@
   let pid = ls(PKEY);
   if (!pid) { pid = 'p' + Net.code(9, 'abcdefghijkmnpqrstuvwxyz23456789'); ls(PKEY, pid); }
   let myName = ls('sviq.name') || '';
+  let lastMsg = 0, offSince = 0;
   let S = null, sAt = 0, priv = null, client = null, online = false, sig = '', lockUntil = 0, pressed = '', armUntil = 0, joinSent = 0, wl = null, prevSt = '', prevAns = '', myBet = null, started = false;
   const app = $('#app');
   const T = s => Net.PREFIX + room + '/' + s;
@@ -25,15 +26,26 @@
     client = new Net.Client(Net.brokerUrl(bi));
     client.subscribe(T('s')); client.subscribe(T('p/' + pid));
     client.onMessage((t, d) => {
-      if (t === T('s')) { if (d && typeof d === 'object') { S = d; sAt = Date.now(); onState(); } }
+      if (t === T('s')) { if (d && typeof d === 'object') { S = d; sAt = lastMsg = Date.now(); onState(); netbar(); } }
       else if (t === T('p/' + pid)) { priv = d; sig = ''; render(); }
     });
-    client.onStatus(on => { online = on; if (on && myEnt()) send({ t: 'hb' }); render(); });
+    client.onStatus(on => { online = on; if (!on) offSince = Date.now(); if (on && myEnt()) send({ t: 'hb' }); render(); netbar(); });
     setInterval(() => { if (online && myEnt()) send({ t: 'hb' }); }, 12000);
     setInterval(tickUI, 250);
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) { client.kick(); wake(); } });
+    // экран игры шлёт состояние каждые 10 секунд; если тишина — переподключаемся сами
+    setInterval(() => { netbar(); if (online && S && Date.now() - lastMsg > 22000) { lastMsg = Date.now(); client.drop(); } }, 1000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) wake(); });
     render();
   }
+  function netbar() {
+    const nb = $('#netbar'); if (!nb) return;
+    let txt = '';
+    if (client && !online && Date.now() - offSince > 1500) txt = '📡 Нет связи — переподключаемся… Нажми, чтобы обновить';
+    else if (online && S && Date.now() - lastMsg > 20000) txt = '⏳ Экран игры не отвечает… Нажми, чтобы обновить';
+    if (nb.textContent !== txt) nb.textContent = txt;
+    nb.style.display = txt ? 'block' : 'none';
+  }
+  window.__play = { get client() { return client; }, get S() { return S; } };
   async function wake() {
     try { if ('wakeLock' in navigator && !document.hidden && !wl) { wl = await navigator.wakeLock.request('screen'); wl.addEventListener('release', () => { wl = null; }); } } catch (e) { /* не поддерживается */ }
   }
@@ -222,6 +234,7 @@
   }
   document.addEventListener('click', e => {
     const t = e.target;
+    if (t.closest('#netbar')) { location.reload(); return; }
     if (t.closest('#rcgo')) {
       const v = (($('#rc') || {}).value || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); if (v.length < 4) return;
       room = v;

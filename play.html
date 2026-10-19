@@ -68,11 +68,13 @@ input.err { border-color: var(--red); }
 .abtns .pass { background: transparent; color: var(--mut); }
 .qb { display: flex; gap: 10px; width: 100%; max-width: 420px; }
 .qb button { flex: 1; }
+#netbar { display: none; position: fixed; left: 0; right: 0; top: 0; z-index: 10; padding: calc(8px + env(safe-area-inset-top)) 14px 8px; background: #b3263a; color: #fff; font-size: 15px; font-weight: 700; text-align: center; box-shadow: 0 4px 14px rgba(0, 0, 0, .4); }
 </style>
 </head>
 <body>
+<div id="netbar"></div>
 <div id="app"></div>
-<script src="js/net.js?v=1"></script>
-<script src="js/play.js?v=1"></script>
+<script src="js/net.js?v=2"></script>
+<script src="js/play.js?v=2"></script>
 </body>
 </html>
