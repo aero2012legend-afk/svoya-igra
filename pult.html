@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060b2e">
+<title>Пульт ведущего</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔑</text></svg>">
+<style>
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { margin: 0; background: #060b2e; color: #f3f6ff; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.wrap { max-width: 720px; margin: 0 auto; padding: calc(10px + env(safe-area-inset-top)) 14px 40px; }
+h1 { font-size: 22px; color: #ffcc33; margin: 4px 0 10px; }
+#cur { position: sticky; top: 0; z-index: 2; background: #0b1458; border: 2px solid rgba(140, 170, 255, .3); border-radius: 16px; padding: 12px 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, .5); }
+.st { font-size: 13px; color: #a3b4ee; display: flex; align-items: center; gap: 6px; }
+.net { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #555; } .net.on { background: #2ee59d; }
+.qth { margin-top: 6px; font-size: 15px; color: #a3b4ee; font-weight: 700; } .qth b { color: #ffcc33; }
+.qq { font-size: 17px; margin-top: 4px; line-height: 1.35; }
+.qa { font-size: 26px; font-weight: 900; color: #ffe9a6; margin-top: 6px; line-height: 1.2; }
+.qh { font-size: 15px; color: #36e2ff; margin-top: 4px; }
+.who, .br { font-size: 15px; margin-top: 6px; } .who b { color: #ffcc33; } .br { color: #ffcc33; }
+.tag { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: #ff3fa4; color: #fff; font-weight: 700; white-space: nowrap; }
+.ctl { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.ctl button { font: inherit; font-size: 17px; font-weight: 800; padding: 13px 8px; border-radius: 12px; border: 0; background: #2a44c8; color: #fff; }
+.ctl .ok { background: #12a868; } .ctl .bad { background: #c9283d; } .ctl .wide { grid-column: span 2; background: #e59c00; color: #2b1900; }
+.ctl button:active { transform: translateY(2px); }
+h2 { font-size: 20px; color: #ffcc33; margin: 22px 0 6px; }
+h3 { font-size: 14px; color: #a3b4ee; margin: 14px 0 6px; text-transform: uppercase; letter-spacing: .05em; }
+.it { padding: 10px 12px; border-radius: 12px; background: rgba(20, 36, 120, .6); margin-bottom: 6px; border-left: 4px solid #2550e6; }
+.it.pl { opacity: .4; } .it.cu { border-left-color: #ffcc33; background: rgba(255, 204, 51, .15); opacity: 1; }
+.ip { font-size: 14px; color: #a3b4ee; } .ip b { color: #ffcc33; font-size: 16px; }
+.iq { font-size: 15px; margin-top: 2px; } .ia { font-size: 16px; font-weight: 800; color: #ffe9a6; margin-top: 2px; } .ih { font-size: 13px; color: #36e2ff; margin-top: 2px; }
+.s { font-size: 14px; color: #a3b4ee; line-height: 1.45; }
+@media print { #cur { display: none; } body { background: #fff; color: #000; } .it { background: none; border: 1px solid #bbb; } .ia, h1, h2, h3, .ip b { color: #000; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔑 Пульт ведущего</h1>
+  <div id="cur"></div>
+  <div id="list"></div>
+</div>
+<script src="questions.js?v=1"></script>
+<script src="js/net.js?v=1"></script>
+<script src="js/pult.js?v=1"></script>
+</body>
+</html>
