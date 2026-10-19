@@ -20,36 +20,86 @@
   const app = $('#app');
   const T = s => Net.PREFIX + room + '/' + s;
 
-  function send(m) { if (!client) return; m.p = pid; client.publish(T('i'), m, false); }
+  function send(m, viaServer) {
+    if (!client) return; m.p = pid; m.m = Net.id();
+    if (!viaServer && rtcOpen && dc && dc.readyState === 'open') { try { dc.send(JSON.stringify(m)); return; } catch (e) { /* запасной путь ниже */ } }
+    client.publish(T('i'), m, false);
+  }
+  /* ----- прямое соединение с экраном игры по Wi-Fi (WebRTC) ----- */
+  let pc = null, dc = null, rtcOpen = false, rtcT = null, rtcTries = 0, rtcNext = 0;
+  function rtcStart() {
+    clearTimeout(rtcT); rtcT = null;
+    if (!Net.rtc || pc || !client || !myEnt()) return;
+    let my; try { my = pc = new RTCPeerConnection({ iceServers: Net.ICE }); } catch (e) { return; }
+    const ch = dc = my.createDataChannel('g', { ordered: true });
+    ch.onopen = () => { if (pc !== my) return; rtcOpen = true; rtcTries = 0; lastMsg = Date.now(); client.unsubscribe(T('s')); sig = ''; render(); netbar(); };
+    ch.onmessage = ev => {
+      if (pc !== my) return;
+      let m; try { m = JSON.parse(ev.data); } catch (e) { return; }
+      lastMsg = Date.now();
+      if (m.s && typeof m.s === 'object') { S = m.s; sAt = Date.now(); onState(); }
+      if (m.p) { priv = m.p; sig = ''; render(); }
+      netbar();
+    };
+    ch.onclose = () => { if (pc === my) rtcReset(); };
+    my.onconnectionstatechange = () => { if (pc === my && ['failed', 'closed'].includes(my.connectionState)) rtcReset(); };
+    (async () => {
+      try {
+        await my.setLocalDescription(await my.createOffer());
+        await Net.iceDone(my, 2000);
+        if (pc !== my) return;
+        send({ t: 'rtc', sdp: my.localDescription.sdp }, true);
+        rtcT = setTimeout(() => { if (pc === my && !rtcOpen) rtcReset(); }, 12000);
+      } catch (e) { if (pc === my) rtcReset(); }
+    })();
+  }
+  function rtcReset() {
+    clearTimeout(rtcT);
+    const was = rtcOpen, ch = dc, my = pc; rtcOpen = false; pc = dc = null;
+    if (ch) { ch.onopen = ch.onmessage = ch.onclose = null; try { ch.close(); } catch (e) { /* уже */ } }
+    if (my) { my.onconnectionstatechange = null; try { my.close(); } catch (e) { /* уже */ } }
+    if (client) client.subscribe(T('s'));
+    if (was) { sig = ''; render(); netbar(); }
+    rtcTries++; const wait = Math.min(30000, 2500 * rtcTries); rtcNext = Date.now() + wait;
+    rtcT = setTimeout(rtcStart, wait);
+  }
+  const linked = () => online || rtcOpen;
   function start() {
     if (started) return; started = true;
     client = new Net.Client(Net.brokerUrl(bi));
-    client.subscribe(T('s')); client.subscribe(T('p/' + pid));
+    client.subscribe(T('s')); client.subscribe(T('p/' + pid)); client.subscribe(T('r/' + pid)); client.subscribe(T('hb'));
     client.onMessage((t, d) => {
       if (t === T('s')) { if (d && typeof d === 'object') { S = d; sAt = lastMsg = Date.now(); onState(); netbar(); } }
+      else if (t === T('hb')) { lastMsg = Date.now(); netbar(); }
       else if (t === T('p/' + pid)) { priv = d; sig = ''; render(); }
+      else if (t === T('r/' + pid)) { if (pc && !rtcOpen && pc.signalingState === 'have-local-offer' && d && typeof d.sdp === 'string') pc.setRemoteDescription({ type: 'answer', sdp: d.sdp }).catch(() => rtcReset()); }
     });
     client.onStatus(on => { online = on; if (!on) offSince = Date.now(); if (on && myEnt()) send({ t: 'hb' }); render(); netbar(); });
-    setInterval(() => { if (online && myEnt()) send({ t: 'hb' }); }, 12000);
+    setInterval(() => { if (linked() && myEnt()) send({ t: 'hb' }); }, 12000);
     setInterval(tickUI, 250);
-    // экран игры шлёт состояние каждые 10 секунд; если тишина — переподключаемся сами
-    setInterval(() => { netbar(); if (online && S && Date.now() - lastMsg > 22000) { lastMsg = Date.now(); client.drop(); } }, 1000);
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) wake(); });
+    // экран игры подаёт сигнал каждые 10 секунд; если тишина — переподключаемся сами
+    setInterval(() => {
+      netbar(); if (!S) return;
+      const quiet = Date.now() - lastMsg;
+      if (rtcOpen && quiet > 22000) { lastMsg = Date.now(); rtcReset(); }
+      else if (!rtcOpen && online && quiet > 22000) { lastMsg = Date.now(); client.drop(); }
+    }, 1000);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) return; wake(); if (rtcOpen && Date.now() - lastMsg > 12000) rtcReset(); });
     render();
   }
   function netbar() {
     const nb = $('#netbar'); if (!nb) return;
     let txt = '';
-    if (client && !online && Date.now() - offSince > 1500) txt = '📡 Нет связи — переподключаемся… Нажми, чтобы обновить';
-    else if (online && S && Date.now() - lastMsg > 20000) txt = '⏳ Экран игры не отвечает… Нажми, чтобы обновить';
+    if (client && !linked() && Date.now() - offSince > 1500) txt = '📡 Нет связи — переподключаемся… Нажми, чтобы обновить';
+    else if (linked() && S && Date.now() - lastMsg > 20000) txt = '⏳ Экран игры не отвечает… Нажми, чтобы обновить';
     if (nb.textContent !== txt) nb.textContent = txt;
     nb.style.display = txt ? 'block' : 'none';
   }
-  window.__play = { get client() { return client; }, get S() { return S; } };
+  window.__play = { get client() { return client; }, get S() { return S; }, get rtc() { return rtcOpen; } };
   async function wake() {
     try { if ('wakeLock' in navigator && !document.hidden && !wl) { wl = await navigator.wakeLock.request('screen'); wl.addEventListener('release', () => { wl = null; }); } } catch (e) { /* не поддерживается */ }
   }
-  const myEnt = () => { if (!S || !S.pm || !S.ents) return null; const id = S.pm[pid]; return id && S.ents.some(e => e.id === id) ? id : null; };
+  const myEnt = () => { if (!S || !S.ents) return null; const id = (S.pm && S.pm[pid]) || pid; return S.ents.some(e => e.id === id) ? id : null; };
   const myMe = () => { const id = myEnt(); return id ? S.ents.find(e => e.id === id) : null; };
   const entN = id => esc((S.ents.find(e => e.id === id) || {}).n || '—');
   const fzMe = eid => { const e = S.ents.find(x => x.id === eid); return !!(e && e.fz > 0); };
@@ -63,6 +113,7 @@
       const ak = q.k + (q.an || '') + (q.ow || '');
       if (ak !== prevAns) { prevAns = ak; if (q.an === eid || q.ow === eid) vib([150, 80, 150]); }
     }
+    if (Net.rtc && !pc && Date.now() >= rtcNext && eid) rtcStart();
     render();
   }
 
@@ -71,7 +122,7 @@
   const center = (ic, t, s) => `<div class="center"><div class="big">${ic}</div><div class="t">${t}</div>${s ? `<div class="s">${s}</div>` : ''}</div>`;
   function render() {
     if (!room) return setScreen('code', `<div class="center"><div class="logo">Своя игра</div><div class="t">Код комнаты</div><input id="rc" maxlength="6" placeholder="КОД" autocomplete="off" autocapitalize="characters"><button class="go" id="rcgo">Дальше</button><div class="s">Код написан на экране телевизора</div></div>`);
-    if (!S) return setScreen('wait' + online, center(online ? '⏳' : '📡', online ? 'Ждём ведущего…' : 'Подключаемся…', `Комната <b>${esc(room)}</b>${online ? '<br>Экран игры на телевизоре должен быть открыт' : ''}`));
+    if (!S) return setScreen('wait' + linked(), center(linked() ? '⏳' : '📡', linked() ? 'Ждём ведущего…' : 'Подключаемся…', `Комната <b>${esc(room)}</b>${linked() ? '<br>Экран игры на телевизоре должен быть открыт' : ''}`));
     const eid = myEnt();
     if (!eid) return renderJoin();
     renderGame(eid);
@@ -89,9 +140,9 @@
     const nm = $('#nm'), name = (nm ? nm.value : myName).trim().slice(0, 20);
     if (!name) { if (nm) { nm.classList.add('err'); nm.focus(); } return; }
     myName = name; ls('sviq.name', name); joinSent = Date.now();
-    send({ t: 'join', n: name, team: team || null }); vib(20); wake();
+    send({ t: 'join', n: name, team: team || null }, true); vib(20); wake();
     const n = $('#jnote'); if (n) n.textContent = 'Подключаемся к игре…';
-    setTimeout(() => { if (!myEnt()) send({ t: 'join', n: name, team: team || null }); }, 4000);
+    setTimeout(() => { if (!myEnt()) send({ t: 'join', n: name, team: team || null }, true); }, 4000);
   }
   function gameSig(eid) {
     const q = S.q, f = S.fin;
@@ -113,7 +164,7 @@
     const hd = $('#hd'); if (!hd) return;
     const rank = S.ents.slice().sort((a, b) => b.s - a.s).findIndex(e => e.id === me.id) + 1;
     const h = `<div class="hn" style="--c:${me.c}"><b>${esc(me.n)}</b>${S.mode === 'teams' ? `<small>${esc(myName)}</small>` : ''}</div><div class="hs ${me.s < 0 ? 'neg' : ''}">${fmt(me.s)}</div>`
-      + `<div class="hr">${rank}-е место из ${S.ents.length}${me.fz ? ' · ❄️ заморожен' : ''}${me.x2 ? ' · ×2' : ''}</div><i class="net ${online ? 'on' : ''}"></i>`;
+      + `<div class="hr">${rank}-е место из ${S.ents.length}${me.fz ? ' · ❄️ заморожен' : ''}${me.x2 ? ' · ×2' : ''}${rtcOpen ? ' · 📶 напрямую' : ''}</div><i class="net ${rtcOpen ? 'p2p' : online ? 'on' : ''}"></i>`;
     if (hd.dataset.h !== h) { hd.innerHTML = h; hd.dataset.h = h; }
   }
   function mainHTML(eid, me) {

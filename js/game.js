@@ -111,13 +111,18 @@
     }, 9000);
   }
   function publish() { clearTimeout(pubT); pubT = setTimeout(publishNow, 50); }
-  function publishNow() { clearTimeout(pubT); if (!client) return; client.publish(T('s'), pubState(), true); publishHost(false); }
-  function phoneMap() { const m = {}; for (const pid in G.phones) { const p = G.phones[pid]; if (p.ent && ent(p.ent)) m[pid] = p.ent; } return m; }
+  function publishNow() {
+    clearTimeout(pubT); if (!client) return;
+    const st = pubState(); client.publish(T('s'), st, true);
+    const msg = JSON.stringify({ s: st }); for (const pid in peers) dcRaw(pid, msg);
+    publishHost(false);
+  }
+  function phoneMap() { const m = {}; for (const pid in G.phones) { const p = G.phones[pid]; if (p.ent && ent(p.ent) && p.ent !== pid) m[pid] = p.ent; } return m; }
   function pubState() {
     const q = G.q, f = G.fin;
     return {
       v: 1, t: Date.now(), title: PACK.title, mode: G.mode, phase: G.phase, round: roundName(), chooser: G.chooser,
-      ents: G.ents.map(e => ({ id: e.id, n: e.name, s: e.score, c: e.color, fz: G.fz[e.id] || 0, x2: !!G.x2[e.id] })),
+      ents: G.ents.map(e => { const o = { id: e.id, n: e.name, s: e.score, c: e.color }; if (G.fz[e.id]) o.fz = G.fz[e.id]; if (G.x2[e.id]) o.x2 = 1; return o; }),
       pm: phoneMap(),
       q: q ? {
         k: q.key, th: themeOf(q), p: q.price, ty: q.type, st: q.stage, ow: q.owner, an: q.ans, tr: q.tried, bb: q.bribed, bc: bribeCost(q),
@@ -148,13 +153,50 @@
       fin: f ? { st: f.stage, th: F.theme, q: F.q, a: F.a, answers: Object.keys(f.answers).map(id => ({ n: entName(id), v: f.answers[id], b: f.bets[id] })) } : null,
     }, true);
   }
-  function sendPrivate(eid, msg) { if (!client) return; for (const pid in G.phones) if (G.phones[pid].ent === eid) client.publish(T('p/' + pid), msg, true); }
+  function sendPrivate(eid, msg) {
+    if (!client) return;
+    for (const pid in G.phones) if (G.phones[pid].ent === eid) { client.publish(T('p/' + pid), msg, true); dcRaw(pid, JSON.stringify({ p: msg })); }
+  }
+
+  /* ----- прямое соединение с телефонами (WebRTC по Wi-Fi) ----- */
+  const peers = {};
+  const p2p = eid => Object.keys(G.phones).some(pid => G.phones[pid].ent === eid && peers[pid] && peers[pid].dc && peers[pid].dc.readyState === 'open');
+  function dcRaw(pid, text) { const P = peers[pid]; if (!P || !P.dc || P.dc.readyState !== 'open') return false; try { P.dc.send(text); return true; } catch (e) { return false; } }
+  function peersChanged() { if (!G) return; renderScores(); if (G.phase === 'lobby') updLobby(); }
+  function closePeer(pid) {
+    const P = peers[pid]; if (!P) return; delete peers[pid];
+    try { if (P.dc) P.dc.close(); } catch (e) { /* уже закрыт */ }
+    try { P.pc.close(); } catch (e) { /* уже закрыт */ }
+    peersChanged();
+  }
+  async function onRtc(pid, sdp) {
+    if (!Net.rtc || typeof sdp !== 'string' || sdp.length > 30000) return;
+    closePeer(pid);
+    let pc; try { pc = new RTCPeerConnection({ iceServers: Net.ICE }); } catch (e) { return; }
+    const P = peers[pid] = { pc, dc: null };
+    pc.ondatachannel = e => {
+      const dc = e.channel; P.dc = dc;
+      dc.onopen = () => { dcRaw(pid, JSON.stringify({ s: pubState() })); peersChanged(); };
+      dc.onmessage = ev => { let d; try { d = JSON.parse(ev.data); } catch (err) { return; } if (d && typeof d === 'object') { d.p = pid; onNet(T('i'), d); } };
+      dc.onclose = () => { if (peers[pid] === P) closePeer(pid); };
+    };
+    pc.onconnectionstatechange = () => { if (['failed', 'closed'].includes(pc.connectionState) && peers[pid] === P) closePeer(pid); };
+    try {
+      await pc.setRemoteDescription({ type: 'offer', sdp });
+      await pc.setLocalDescription(await pc.createAnswer());
+      await Net.iceDone(pc, 2000);
+      if (peers[pid] === P && client) client.publish(T('r/' + pid), { sdp: pc.localDescription.sdp }, false);
+    } catch (e) { if (peers[pid] === P) closePeer(pid); }
+  }
+  const seenIds = new Set();
+  function dup(id) { if (!id) return false; id = String(id); if (seenIds.has(id)) return true; seenIds.add(id); if (seenIds.size > 500) seenIds.delete(seenIds.values().next().value); return false; }
 
   function onNet(topic, d) {
-    if (!d || typeof d !== 'object') return;
+    if (!d || typeof d !== 'object' || dup(d.m)) return;
     if (topic === T('c/' + G.key)) return onRemote(d);
     if (topic !== T('i')) return;
     const pid = clean(d.p, 24); if (!pid) return;
+    if (d.t === 'rtc') { if (G.phones[pid]) onRtc(pid, d.sdp); return; }
     if (d.t === 'join') return onJoin(pid, d);
     const ph = G.phones[pid]; if (!ph) return;
     const wasOff = Date.now() - ph.seen > 35000; ph.seen = Date.now();
@@ -239,7 +281,7 @@
       c.style.setProperty('--c', e.color);
       $('.k', c).textContent = idx < 10 ? String((idx + 1) % 10) : '';
       $('.n', c).textContent = e.name;
-      $('.dot', c).classList.toggle('on', isOnline(e.id));
+      $('.dot', c).classList.toggle('on', isOnline(e.id)); $('.dot', c).classList.toggle('p2p', p2p(e.id));
       $('.mem', c).textContent = G.mode === 'teams' ? members(e.id).join(', ') : '';
       $('.bd', c).textContent = (G.chooser === e.id && G.phase !== 'lobby' ? '⭐' : '') + (G.fz[e.id] ? '❄️' : '') + (G.x2[e.id] ? '✖️2' : '');
       const old = +c.dataset.sv;
@@ -287,7 +329,7 @@
     if (box) {
       const html = G.ents.length ? G.ents.map(e => `<div class="le" style="--c:${e.color}"><b>${esc(e.name)}</b><small>${G.mode === 'teams'
         ? esc(members(e.id).join(', ') || 'ждём игроков')
-        : (isOnline(e.id) ? 'телефон на связи' : G.phones[e.id] ? 'телефон не на связи' : 'без телефона')}</small><span class="dot ${isOnline(e.id) ? 'on' : ''}"></span>`
+        : (isOnline(e.id) ? (p2p(e.id) ? 'на связи · напрямую по Wi-Fi 📶' : 'на связи · через интернет') : G.phones[e.id] ? 'телефон не на связи' : 'без телефона')}</small><span class="dot ${isOnline(e.id) ? 'on' : ''} ${p2p(e.id) ? 'p2p' : ''}"></span>`
         + `<button class="x r" data-act="ren" data-id="${esc(e.id)}" title="Переименовать">✎</button><button class="x d" data-act="del" data-id="${esc(e.id)}" title="Удалить">✕</button></div>`).join('')
         : `<div class="empty">${G.mode === 'teams' ? 'Добавь команды — гости выберут свою на телефоне' : 'Гости сканируют QR-код и сразу появляются здесь'}</div>`;
       if (box.dataset.h !== html) { box.innerHTML = html; box.dataset.h = html; }
@@ -899,12 +941,12 @@
   function removeEnt(id) {
     if (!ent(id)) return;
     snap(); G.ents = G.ents.filter(e => e.id !== id);
-    for (const pid in G.phones) if (G.phones[pid].ent === id) { if (G.mode === 'solo') delete G.phones[pid]; else G.phones[pid].ent = null; }
+    for (const pid in G.phones) if (G.phones[pid].ent === id) { if (G.mode === 'solo') { delete G.phones[pid]; closePeer(pid); } else G.phones[pid].ent = null; }
     if (G.chooser === id) G.chooser = null;
     changed();
   }
   function switchBroker() { G.broker = (G.broker + 1) % Net.BROKERS.length; save(); netStart(); toast(`Сервер связи: ${Net.brokerName(G.broker)}. Гостям нужно заново отсканировать QR`); if (G.phase !== 'lobby') toLobby(); render(); }
-  function newRoom() { G.room = Net.code(5); G.phones = {}; save(); netStart(); toast(`Новый код комнаты: ${G.room}. Гостям нужно заново отсканировать QR`); if (G.phase !== 'lobby') toLobby(); render(); }
+  function newRoom() { Object.keys(peers).forEach(closePeer); G.room = Net.code(5); G.phones = {}; save(); netStart(); toast(`Новый код комнаты: ${G.room}. Гостям нужно заново отсканировать QR`); if (G.phase !== 'lobby') toLobby(); render(); }
 
   /* ================= оверлеи и эффекты ================= */
   const letters = s => Array.from(String(s)).map((ch, i) => (ch === ' ' ? ' ' : `<span style="animation-delay:${(i * 0.05).toFixed(2)}s">${esc(ch)}</span>`)).join('');
@@ -1131,6 +1173,6 @@
   if (!load()) G = newState();
   render(); netStart(); splash();
   setInterval(() => { renderScores(); if (G.phase === 'lobby') updLobby(); }, 4000);
-  setInterval(() => { if (client && client.online) publishNow(); }, 10000); // сердцебиение для телефонов
+  setInterval(() => { if (client) client.publish(T('hb'), 1, false); const hb = JSON.stringify({ hb: 1 }); for (const pid in peers) dcRaw(pid, hb); }, 10000); // сердцебиение для телефонов
   window.__svi = { get G() { return G; }, act, judge, reveal, nextAction, spaceAction, force: FORCE };
 })();
