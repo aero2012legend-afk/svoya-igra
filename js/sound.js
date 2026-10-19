@@ -88,7 +88,50 @@
     swap: function (t) { osc('triangle', 300, 1200, t, 0.3, 0.2); osc('triangle', 1200, 300, t + 0.3, 0.3, 0.2); },
     freeze: function (t) { [96, 91, 98, 93, 100].forEach(function (n, i) { osc('sine', N(n), null, t + i * 0.07, 0.6, 0.08); }); noise(t, 0.8, 0.15, 'highpass', 5000); },
     bid: function (t) { osc('triangle', N(79), null, t, 0.15, 0.15); osc('triangle', N(86), null, t + 0.06, 0.2, 0.12); },
+    angel: function (t) {
+      [60, 64, 67, 72, 76, 79, 84, 88, 91, 96].forEach(function (n, i) { osc('sine', N(n), null, t + i * 0.055, 1.3, 0.09); osc('triangle', N(n + 12), null, t + i * 0.055, 0.5, 0.025); });
+      [84, 88, 91].forEach(function (n) { osc('sine', N(n), null, t + 0.6, 1.6, 0.05); }); noise(t + 0.4, 1.4, 0.04, 'highpass', 8000);
+    },
+    devil: function (t) {
+      osc('sawtooth', N(38), N(26), t, 1.7, 0.2); osc('sawtooth', N(39), N(27), t, 1.7, 0.13); noise(t, 1.5, 0.35, 'lowpass', 420, 60);
+      [62, 56, 50].forEach(function (n, i) { osc('square', N(n), null, t + 0.25 + i * 0.32, 0.38, 0.06); });
+    },
+    bonus: function (t) {
+      [72, 76, 79, 84, 88, 91, 96].forEach(function (n, i) { osc('triangle', N(n), null, t + i * 0.05, 0.3, 0.13); });
+      [84, 88, 91, 96].forEach(function (n) { osc('sine', N(n), null, t + 0.4, 1.1, 0.08); }); noise(t + 0.35, 0.8, 0.05, 'highpass', 7000);
+    },
+    horn: function (t) { osc('square', 150, null, t, 0.95, 0.2, 0.02); osc('sawtooth', 155, null, t, 0.95, 0.13, 0.02); },
+    strike: function (t) { noise(t, 0.28, 0.45, 'bandpass', 3200, 1100, 2); osc('sawtooth', 900, 180, t, 0.26, 0.07); },
+    roll: function (t) { for (var i = 0; i < 26; i++) noise(t + i * 0.055, 0.06, 0.12 + i * 0.012, 'bandpass', 260, 200, 1); osc('sine', 85, 45, t + 1.45, 0.45, 0.45); noise(t + 1.45, 0.5, 0.35, 'highpass', 5000); },
+    vote: function (t) { osc('sine', N(84), N(91), t, 0.14, 0.16); },
+    heart: function (t) { osc('sine', 72, 42, t, 0.18, 0.55); osc('sine', 66, 38, t + 0.24, 0.2, 0.42); },
+    clap: function (t) { noise(t, 0.13, 0.55, 'bandpass', 1500, 900, 1.4); osc('sine', 200, 90, t, 0.1, 0.15); },
+    beep: function (t) { osc('square', 880, null, t, 0.14, 0.12); },
+    go: function (t) { osc('square', 1320, null, t, 0.32, 0.13); [72, 79, 84].forEach(function (n) { osc('sawtooth', N(n), null, t, 0.5, 0.06); }); },
+    win: function (t) {
+      [[72, 0], [76, 0.1], [79, 0.2], [84, 0.32]].forEach(function (s) { osc('sawtooth', N(s[0]), null, t + s[1], 0.3, 0.08); osc('square', N(s[0] - 12), null, t + s[1], 0.3, 0.04); });
+      [72, 76, 79, 84].forEach(function (n) { osc('triangle', N(n), null, t + 0.45, 1.2, 0.09); });
+    },
   };
+  // танцевальный бит 124 BPM: бочка в каждую долю, тарелки, хлопки, бас на слабую долю, аккорды Am–F–C–G
+  var beatT = null;
+  function beat(on) {
+    clearInterval(beatT); beatT = null; if (!on) return; init(); if (!ctx) return;
+    var step = 0, dt = 60 / 124 / 4, next = ctx.currentTime + 0.06;
+    var BASS = [45, 41, 48, 43], PADS = [[57, 60, 64], [53, 57, 60], [55, 60, 64], [55, 59, 62]];
+    beatT = setInterval(function () {
+      while (next < ctx.currentTime + 0.25) {
+        var s = step % 16, bar = Math.floor(step / 16) % 4, t = next;
+        if (s % 4 === 0) osc('sine', 160, 45, t, 0.26, 0.9, 0.003);
+        if (s % 4 === 2) { noise(t, 0.09, 0.16, 'highpass', 7000); osc('triangle', N(BASS[bar]), null, t, 0.2, 0.28); }
+        if (s % 2 === 1) noise(t, 0.035, 0.05, 'highpass', 9000);
+        if (s === 4 || s === 12) noise(t, 0.14, 0.38, 'bandpass', 1300, 900, 1.2);
+        if (s === 0) PADS[bar].forEach(function (n) { osc('triangle', N(n), null, t, 1.85, 0.035, 0.08); });
+        if (s === 14 && bar === 3) osc('sawtooth', N(76), N(88), t, 0.2, 0.05);
+        next += dt; step++;
+      }
+    }, 60);
+  }
 
   function play(name) {
     if (muted) return; init(); if (!ctx) return;
@@ -107,8 +150,9 @@
     }, 300);
   }
   window.Sound = {
-    init: init, play: play, think: think,
-    toggleMute: function () { muted = !muted; if (muted) think(false); return muted; },
+    init: init, play: play, think: think, beat: beat,
+    toggleMute: function () { muted = !muted; if (muted) think(false); if (master) master.gain.value = muted ? 0 : vol; return muted; },
     get muted() { return muted; },
+    ctx: function () { init(); return ctx; }, out: function () { init(); return master; },
   };
 })();

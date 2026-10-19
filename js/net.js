@@ -212,10 +212,32 @@
     });
   }
 
+  // общие для экрана игры и пульта: короткий отпечаток текста и вопросы без лишнего
+  function hash(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); }
+  function finThemes(P) {
+    var F = P && P.final; if (!F) return [];
+    if (Array.isArray(F.themes)) return F.themes.filter(function (x) { return x && x.q; });
+    return F.q ? [{ theme: F.theme || 'Финал', q: F.q, a: F.a }] : [];
+  }
+  function stripPack(P) {
+    P = P || {};
+    return {
+      title: P.title || '', final: finThemes(P).map(function (x) { return { theme: x.theme || '', q: x.q || '', a: x.a || '' }; }),
+      rounds: (P.rounds || []).map(function (r) {
+        return { name: r.name || '', themes: (r.themes || []).map(function (th) {
+          return { name: th.name || '', questions: (th.questions || []).map(function (x) {
+            return { price: x.price || 0, q: x.q || '', a: x.a || '', hint: x.hint || '', type: x.type || '', catTheme: x.catTheme || '', md: x.audio ? 'a' : x.video ? 'v' : '' };
+          }) };
+        }) };
+      }),
+    };
+  }
+
   window.Net = {
     BROKERS: BROKERS, PREFIX: PREFIX, Client: Client, code: code, brokerUrl: brokerUrl, brokerName: brokerName, override: override, params: params,
     rtc: typeof RTCPeerConnection === 'function' && !params.get('nortc'),
     ICE: [{ urls: 'stun:stun.l.google.com:19302' }], iceDone: iceDone,
     id: function () { return Math.random().toString(36).slice(2, 10); },
+    hash: hash, finThemes: finThemes, stripPack: stripPack,
   };
 })();
