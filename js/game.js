@@ -66,6 +66,7 @@
     }
     if (G.phase === 'trans') G.phase = G.fin ? 'final' : G.q ? 'q' : 'board';
     if (G.phase === 'q' && !G.q) G.phase = 'board';
+    if (G.phase === 'results' && !G.res) G.phase = 'board';
   }
   function snap() { undo.push(JSON.stringify(G)); if (undo.length > 40) undo.shift(); }
   function doUndo() {
@@ -117,6 +118,14 @@
   const prefIcons = eid => PREFS.filter(([k]) => entPref(eid, k)).map(p => p[1]).join('');
   const hasPhone = eid => isOnline(eid);
   const isMediaQ = d => !!(d && (d.audio || d.video));
+  // последние три вопроса темы — бронза, серебро и золото
+  const MEDALS = { 1: ['🥉', 'Бронза', 'bronze'], 2: ['🥈', 'Серебро', 'silver'], 3: ['🥇', 'Золото', 'gold'] };
+  function medalOf(r, t, i) {
+    const th = ((r && r.themes) || [])[t], n = th && th.questions ? th.questions.length : 0;
+    if (n < 6) return 0;
+    const k = i - (n - 3); return k >= 0 ? k + 1 : 0;
+  }
+  const qMedal = q => (q ? medalOf(PACK.rounds[q.r], q.t, q.i) : 0);
 
   /* ================= связь ================= */
   const T = s => Net.PREFIX + G.room + '/' + s;
@@ -159,6 +168,7 @@
         return o;
       }),
       pm: phoneMap(), q: q ? pubQ(q) : null, fin: f ? pubFin(f) : null,
+      res: G.phase === 'results' && G.res ? { lo: G.res.losers, a: G.res.acts } : null,
     };
     if (discoOn) st.dj = 1;
     return st;
@@ -176,6 +186,7 @@
       o.side = T.side || null;
       if (ev) o.ev = { id: ev.id, i: ev.icon, n: ev.name, d: ev.desc(q.price) };
       if (T.card) o.card = T.card;
+      if (T.ask) o.ask = T.ask;
       if (T.done) o.res = T.res;
       if (ev && ev.id === 'give' && !T.done) o.el = G.ents.filter(e => e.id !== q.victim).map(e => e.id);
     }
@@ -209,7 +220,7 @@
         ans: q.ans ? entName(q.ans) : '', ow: q.owner ? entName(q.owner) : '', stake: q.stake || 0,
         bribes: (q.blog || []).map(b => ({ n: entName(b.e), h: b.h, f: b.f ? 1 : 0 })),
         ev: T0 ? (T0.side === 'a' ? '😇 Ангел' : T0.side === 'd' ? '😈 Дьявол' : '') + (T0.ev && EVX[T0.ev] ? ': ' + EVX[T0.ev].name : '') : '',
-        card: (T0 && T0.card) || '', vic: q.victim ? entName(q.victim) : '',
+        card: (T0 && (T0.card || T0.poem)) || '', c: d.c || '', names: d.names || null, mp: q.mp ? q.mp.n : null, vic: q.victim ? entName(q.victim) : '',
         con: c ? { n: (CX[c.id] || {}).name || 'Бонус', st: c.step, a: c.a ? entName(c.a) : '', b: c.b ? entName(c.b) : '', stake: c.stake || 0, word: c.word || '' } : null,
       } : null,
       fin: f ? { st: f.stage, th: f.ti != null && FT[f.ti] ? FT[f.ti].theme : '', q: f.ti != null && FT[f.ti] ? FT[f.ti].q : '', a: f.ti != null && FT[f.ti] ? FT[f.ti].a : '', answers: Object.keys(f.answers).map(id => ({ n: entName(id), v: f.answers[id], b: f.bets[id] })) } : null,
@@ -274,6 +285,7 @@
       case 'coin': return phoneCoin(eid, d.k);
       case 'spin': return phoneSpin(eid, d.k);
       case 'pick': return phonePick(eid, d.k, d.v);
+      case 'ask': return phoneAsk(eid, d.k, d.v);
       case 'rps': return conRps(eid, d.k, d.v);
       case 'vote': return conVote(pid, eid, d.k, d.v);
       case 'tap': return conTap(eid, d.k, d.n, d.g, d.fin);
@@ -307,12 +319,22 @@
     if (d.t === 'hello') { pultSeen = Date.now(); publishHost(true); if (d.ps !== PSIG) sendPack(); return; }
     if (d.t === 'pk') { pultSeen = Date.now(); sendPack(d.miss); return; }
     if (d.t === 'ok') judge(true); else if (d.t === 'bad') judge(false); else if (d.t === 'ans') reveal();
+    else if (d.t === 'mp1' || d.t === 'mp2') mashPartial(d.t === 'mp2' ? 2 : 1);
     else if (d.t === 'space') spaceAction(); else if (d.t === 'next') nextAction(); else if (d.t === 'media') mediaToggle();
   }
 
   /* ================= отрисовка ================= */
   function changed() { save(); publish(); render(); }
-  function render() { renderTop(); renderStage(); renderScores(); }
+  function render() { renderTop(); renderStage(); renderScores(); musicSync(); }
+  // фоновая музыка: в лобби, на табло и в итогах; во время вопроса — тишина, чтобы слышать игроков
+  let musicMode;
+  function musicSync() {
+    if (!Sound.music || $('#splash')) return;
+    const f = G.fin, m = G.phase === 'lobby' ? 'lobby' : G.phase === 'board' ? 'board' : G.phase === 'results' ? 'results' : G.phase === 'end' ? 'end'
+      : G.phase === 'final' && f && ['strike', 'theme', 'bet'].includes(f.stage) ? 'board' : null;
+    if (m === musicMode) return;
+    musicMode = m; try { Sound.music(m); } catch (e) { /* музыка не обязательна */ }
+  }
 
   function renderTop() {
     let c = '';
@@ -331,11 +353,12 @@
       return ['q', q.key, q.stage, q.ans, q.owner, q.victim, q.trap ? q.trap.step + (q.trap.side || '') : '', c.step, c.id, c.b, c.rnd, c.turn].join(':');
     }
     if (G.phase === 'final') return 'fin:' + G.fin.stage + ':' + (G.fin.showA ? 1 : 0);
+    if (G.phase === 'results') return 'res:' + G.round;
     return G.phase;
   }
   function renderStage() {
     const st = $('#stage'), sig = stageSig();
-    if (sig !== curSig) { curSig = sig; st.innerHTML = ''; const v = build(); if (v) st.appendChild(v); if (G.phase === 'q') mediaAttach(); }
+    if (sig !== curSig) { curSig = sig; st.innerHTML = ''; const v = build(); if (v) st.appendChild(v); if (G.phase === 'q') { mediaAttach(); picAttach(); karLoop(); } }
     if (G.phase === 'lobby') updLobby();
     else if (G.phase === 'board') updBoard();
     else if (G.phase === 'q') updQ();
@@ -347,6 +370,7 @@
     if (G.phase === 'q') return vQ();
     if (G.phase === 'final') return vFinal();
     if (G.phase === 'end') return vEnd();
+    if (G.phase === 'results' && G.res) return vResults();
     return el('<div></div>');
   }
 
@@ -454,8 +478,8 @@
       for (let i = 0; i < maxQ; i++) {
         const x = (th.questions || [])[i];
         if (!x) { html.push('<div class="cell blank"></div>'); continue; }
-        const delay = intro ? 0.3 + t * 0.05 + i * 0.07 : (t + i) * 0.015, bonus = x.type === 'bonus';
-        html.push(`<div class="cell ${bonus ? 'bonus' : ''} ${G.played[`${G.round}-${t}-${i}`] ? 'played' : ''}" data-act="cell" data-t="${t}" data-i="${i}" style="animation-delay:${delay.toFixed(2)}s">${bonus ? '<span>?</span>' : esc(x.price)}</div>`);
+        const delay = intro ? 0.3 + t * 0.05 + i * 0.07 : (t + i) * 0.015, md = medalOf(r, t, i); // бонус спрятан: выглядит как обычная клетка
+        html.push(`<div class="cell ${md ? 'medal m' + md : ''} ${G.played[`${G.round}-${t}-${i}`] ? 'played' : ''}" data-act="cell" data-t="${t}" data-i="${i}" style="animation-delay:${delay.toFixed(2)}s">${md ? `<i>${MEDALS[md][0]}</i>` : ''}<span>${esc(x.price)}</span></div>`);
       }
     });
     g.innerHTML = html.join('');
@@ -478,8 +502,141 @@
   }
 
   /* ----- вопрос ----- */
-  const badge = q => q.type === 'cat' ? '<span class="badge cat">🐱 Кот в мешке</span>' : q.type === 'auction' ? '<span class="badge auction">🔨 Аукцион</span>'
-    : q.type === 'trap' ? `<span class="badge trap ${q.trap && q.trap.side === 'a' ? 'angel' : ''}">${q.trap && q.trap.side === 'a' ? '😇 Ангел' : q.trap && q.trap.side === 'd' ? '😈 Дьявол' : '⚠ Ловушка'}</span>` : '';
+  const badge = q => (q.type === 'cat' ? '<span class="badge cat">🐱 Кот в мешке</span>' : q.type === 'auction' ? '<span class="badge auction">🔨 Аукцион</span>'
+    : q.type === 'trap' ? `<span class="badge trap ${q.trap && q.trap.side === 'a' ? 'angel' : ''}">${q.trap && q.trap.side === 'a' ? '😇 Ангел' : q.trap && q.trap.side === 'd' ? '😈 Дьявол' : '⚠ Ловушка'}</span>` : '')
+    + (qMedal(q) ? `<span class="badge medal m${qMedal(q)}">${MEDALS[qMedal(q)][0]} ${MEDALS[qMedal(q)][1]}</span>` : '');
+
+  /* ----- картинка вопроса с эффектами: размытие, кусочек, пазл, силуэт… При ответе эффект снимается ----- */
+  const FXS = ['blur', 'deblur', 'pixel', 'zoom', 'crop', 'tiles', 'silhouette', 'negative', 'mirror'];
+  let PIC = null; // картинка текущего вопроса живёт между перерисовками, чтобы эффекты снимались плавно
+  function picBuild(d, q) {
+    const P = { key: q.key, w: 4, h: 3, ok: false, mash: d.type === 'mashup' && Array.isArray(d.pics) };
+    if (P.mash) {
+      const nm = Array.isArray(d.names) ? d.names : [];
+      P.node = el(`<div class="qpic mash"><div class="mp a"><img alt="" draggable="false"><b>${esc(nm[0] || '')}</b></div><div class="mp b"><img alt="" draggable="false"><b>${esc(nm[1] || '')}</b></div><img class="pi" alt="" draggable="false"></div>`);
+      const ims = $$('.mp img', P.node); setSrc(ims[0], d.pics[0]); setSrc(ims[1], d.pics[1]);
+    } else {
+      P.fx = FXS.includes(d.fx) ? d.fx : '';
+      P.node = el(`<div class="qpic ${P.fx ? 'fx fx-' + P.fx : ''}"><img class="pi" alt="" draggable="false">${d.aimg ? '<img class="pa" alt="" draggable="false">' : ''}</div>`);
+      if (d.aimg) setSrc($('.pa', P.node), d.aimg);
+    }
+    const img = $('.pi', P.node);
+    img.addEventListener('load', () => {
+      P.w = img.naturalWidth || 4; P.h = img.naturalHeight || 3; P.ok = true;
+      if (P.fx === 'zoom' || P.fx === 'crop') picArea(P, img, d.area);
+      if (P.fx === 'tiles') picTiles(P, img, Math.max(2, Math.min(8, +d.tiles || 4)));
+      if (P.fx === 'pixel') picPixel(P, img, Math.max(8, Math.min(80, +d.px || 28)));
+      picFit(); picState();
+    }, { once: true });
+    img.addEventListener('error', () => { P.node.classList.add('err'); P.node.setAttribute('data-err', '⚠ Нет картинки: ' + d.img); });
+    setSrc(img, d.img);
+    return P;
+  }
+  function setSrc(node, path) { mediaUrl(path).then(u => { node.src = u || path; }); }
+  function picArea(P, img, a) {
+    if (!Array.isArray(a) || a.length < 4) a = [35, 35, 30, 30];
+    const [x, y, w, h] = a.map(Number), clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    if (P.fx === 'crop') { img.style.clipPath = `inset(${y}% ${clamp(100 - x - w, 0, 100)}% ${clamp(100 - y - h, 0, 100)}% ${x}% round 1rem)`; return; }
+    const s = clamp(Math.min(100 / Math.max(1, w), 100 / Math.max(1, h)), 1, 14), cx = x + w / 2, cy = y + h / 2;
+    const tx = clamp(50 - s * cx, 100 - 100 * s, 0), ty = clamp(50 - s * cy, 100 - 100 * s, 0);
+    img.style.transformOrigin = '0 0'; img.style.transform = `translate(${tx}%, ${ty}%) scale(${s})`;
+  }
+  function picTiles(P, img, n) {
+    let seed = 0; for (const ch of P.key) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0;
+    const rnd = () => { seed = (seed * 1103515245 + 12345) >>> 0; return seed / 4294967296; };
+    const idx = Array.from({ length: n * n }, (_, i) => i);
+    for (let i = idx.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+    if (idx.every((v, i) => v === i)) idx.reverse();
+    const wrap = el('<div class="tiles"></div>'), u = img.currentSrc || img.src;
+    for (let i = 0; i < n * n; i++) {
+      const c = i % n, r = Math.floor(i / n), s = idx[i], sc = s % n, sr = Math.floor(s / n);
+      const t = el('<i></i>');
+      Object.assign(t.style, { width: 100 / n + '%', height: 100 / n + '%', left: sc * 100 / n + '%', top: sr * 100 / n + '%', backgroundImage: `url("${u}")`,
+        backgroundSize: `${n * 100}% ${n * 100}%`, backgroundPosition: `${n > 1 ? c / (n - 1) * 100 : 0}% ${n > 1 ? r / (n - 1) * 100 : 0}%`, transitionDelay: (i * 0.03).toFixed(2) + 's' });
+      t.dataset.l = c * 100 / n; t.dataset.t = r * 100 / n; wrap.appendChild(t);
+    }
+    P.node.appendChild(wrap);
+  }
+  function picPixel(P, img, px) {
+    const cv = document.createElement('canvas'); cv.className = 'pix';
+    cv.width = px; cv.height = Math.max(4, Math.round(px * P.h / P.w));
+    try { cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); } catch (e) { return; }
+    P.node.appendChild(cv);
+  }
+  function picAttach() {
+    const q = G.q, slot = $('#picslot'); if (!slot || !q) return;
+    const d = curD(); if (!d.img) return;
+    if (!PIC || PIC.key !== q.key) PIC = picBuild(d, q);
+    if (PIC.node.parentNode !== slot) slot.appendChild(PIC.node);
+    picFit(); picState();
+  }
+  // размер картинки — в rem, чтобы на 4K всё просто становилось чётче; к ответу картинка чуть уменьшается
+  function picFit() {
+    const P = PIC, q = G.q; if (!P || !q || !P.node.isConnected) return;
+    const d = curD(), rv = q.stage === 'reveal', long = String(d.q || '').length > 90;
+    const maxH = P.mash ? (rv ? 25 : 31) : (rv ? 24 : long ? 29 : 33), maxW = P.mash ? 44 : 78;
+    const s = Math.min(maxW / P.w, maxH / P.h);
+    P.node.style.width = (P.w * s).toFixed(2) + 'rem'; P.node.style.height = (P.h * s).toFixed(2) + 'rem';
+  }
+  function picState() {
+    const P = PIC, q = G.q; if (!P || !q || !P.ok) return;
+    const n = P.node, rv = q.stage === 'reveal';
+    if (P.mash) { const m = q.mp ? q.mp.n : 0; n.classList.toggle('out-a', rv || m === 1); n.classList.toggle('out-b', rv || m === 2); n.classList.toggle('done', rv); return; }
+    if (P.fx === 'deblur') { const tot = q.tot || G.set.timer, k = rv ? 0 : ['open', 'ans', 'timeup'].includes(q.stage) ? Math.max(0, Math.min(1, q.tl / tot)) : 1; n.style.setProperty('--blur', (k * 2.6).toFixed(3) + 'rem'); }
+    if (rv && !n.classList.contains('shown')) requestAnimationFrame(() => requestAnimationFrame(() => {
+      n.classList.add('shown');
+      $$('.tiles i', n).forEach(t => { t.style.left = t.dataset.l + '%'; t.style.top = t.dataset.t + '%'; });
+    }));
+  }
+
+  /* ----- караоке: строчки текста синхронно с музыкой; что после остановки — прячем до ответа ----- */
+  function karHTML(d) { return Array.isArray(d.kar) && d.kar.length ? '<div class="kar" id="kar"><div class="kl k0"></div><div class="kl k1"></div><div class="kl k2"></div></div>' : ''; }
+  let karRaf = 0;
+  function karLoop() {
+    cancelAnimationFrame(karRaf);
+    const box = $('#kar'), q = G.q, d = curD(); if (!box || !q || !Array.isArray(d.kar)) return;
+    karRaf = requestAnimationFrame(karLoop);
+    const L = d.kar.filter(x => Array.isArray(x) && x.length >= 2), m = MP && MP.key === q.key ? MP : null;
+    const t = m && m.el ? m.el.currentTime : 0, rv = q.stage === 'reveal', cut = +d.end || 0;
+    let i = -1; for (let k = 0; k < L.length; k++) if (t + 0.05 >= +L[k][0]) i = k;
+    const hide = k => !rv && cut && +L[k][0] >= cut - 0.05;
+    const txt = k => (k < 0 || k >= L.length ? '' : hide(k) ? '♪ ♪ ♪  ?' : String(L[k][1]));
+    const lines = $$('.kl', box), cur = Math.max(0, i), sig = cur + ':' + rv;
+    if (box.dataset.sig !== sig) {
+      box.dataset.sig = sig;
+      lines[0].textContent = i > 0 ? txt(i - 1) : ''; lines[1].textContent = txt(cur); lines[2].textContent = txt(cur + 1);
+      lines[1].classList.toggle('hid', hide(cur)); lines[2].classList.toggle('hid', cur + 1 < L.length && hide(cur + 1));
+    }
+    const st = i >= 0 ? +L[i][0] : 0, en = i >= 0 && i + 1 < L.length ? +L[i + 1][0] : st + 4, k = i < 0 ? 0 : Math.max(0, Math.min(1, (t - st) / Math.max(0.3, en - st)));
+    lines[1].style.setProperty('--k', (k * 100).toFixed(1) + '%');
+  }
+
+  /* ----- шутки и подколы ----- */
+  const JDEF = {
+    correct: ['{name}, красавчик! Мама гордится.', 'Вот это мозг! {name}, ты что, гуглил?', '{name} знает! Подозрительно…', 'Верно! {name}, проверь карманы — там шпаргалка?'],
+    wrong: ['{name}, мимо. Как Старый мимо спортзала.', 'Нет! {name}, но звучало уверенно.', '{name}, это был смелый ход. Глупый, но смелый.', 'Минус! {name}, не расстраивайся, у тебя есть другие таланты. Наверное.'],
+    timeout: ['Тишина… Слышно, как думает Старый.', 'Никто не знает? Значит, вопрос был отличный.', 'Мозги загружаются… 3%…'],
+    bribe: ['Коррупция на марше!', 'Судья делает вид, что не видел.'],
+    medal: ['Дорогой вопрос — дорогие нервы.', 'Сейчас станет жарко.', 'Это вопрос для настоящих олдов.'],
+    leader: ['{name} рвёт всех. Проверьте у {name} телефон.', '{name} лидирует. Остальные — на позитиве.'],
+    loser: ['{name}, главное — не победа, а участие. Так говорят те, кто проиграл.', '{name}, дно ещё не пробито — копай аккуратнее.'],
+    winner: ['{name} — легенда вечера!', 'Поздравляем, {name}! Теперь с тебя тост.'],
+  };
+  function joke(kind, name) {
+    const J = PACK.jokes || {}, list = (Array.isArray(J[kind]) && J[kind].length ? J[kind] : JDEF[kind]) || [];
+    if (!list.length) return '';
+    G.uj = G.uj || {}; const used = G.uj[kind] || [];
+    let free = list.map((x, i) => i).filter(i => !used.includes(i)); if (!free.length) free = list.map((x, i) => i).filter(i => i !== used[used.length - 1]);
+    const i = pick(free.length ? free : [0]); G.uj[kind] = used.concat(i).slice(-Math.max(1, list.length - 1));
+    return String(list[i]).replace(/\{name\}/g, name || '');
+  }
+  let quipT = null;
+  function quip(text, kind) {
+    if (!text) return;
+    let box = $('#quip'); if (!box) { box = el('<div id="quip"></div>'); document.body.appendChild(box); }
+    box.innerHTML = ''; box.appendChild(el(`<div class="qp ${kind || ''}">${esc(text)}</div>`));
+    clearTimeout(quipT); quipT = setTimeout(() => { const q = $('.qp', box); if (q) q.classList.add('out'); }, 5200);
+  }
   const qSize = s => { s = s || ''; if (/^[\p{Extended_Pictographic}\s‍️]+$/u.test(s)) return 10; const n = s.length; return n < 30 ? 5.4 : n < 60 ? 4.6 : n < 100 ? 3.9 : n < 160 ? 3.2 : n < 240 ? 2.7 : 2.2; };
   const pickerHTML = (list, act) => `<div class="picker">${list.map(e => `<button class="pk" style="--c:${e.color}" data-act="${act}" data-id="${esc(e.id)}">${esc(e.name)}</button>`).join('')}</div>`;
 
@@ -501,14 +658,15 @@
     if (q.stage === 'trapev') return vTrapEv(q);
     if (q.stage === 'bonus') return vCon(q);
     const md = d.audio ? 'audio' : d.video ? 'video' : '';
-    const media = d.img ? `<img class="qimg" src="${esc(d.img)}" alt="">` : md === 'video' ? '<div class="vslot" id="vslot"></div>'
-      : md === 'audio' ? '<div class="viz"><canvas id="viz" width="960" height="220"></canvas><div class="vizlbl" id="vizlbl"></div></div>' : '';
+    const media = (md === 'video' ? '<div class="vslot" id="vslot"></div>' : '') + (d.img ? '<div class="picslot" id="picslot"></div>' : '')
+      + (md === 'audio' ? `<div class="viz ${d.img ? 'mini' : ''}"><canvas id="viz" width="960" height="${d.img ? 90 : 220}"></canvas><div class="vizlbl" id="vizlbl"></div></div>` : '') + karHTML(d);
     const own = q.owner && ent(q.owner) ? `<div class="qowner" style="--c:${ent(q.owner).color}">Отвечает только <b>${esc(entName(q.owner))}</b>${q.type === 'auction' ? ` · ставка ${fmt(q.stake)}` : ''}${G.x2[q.owner] ? ' · ×2' : ''}</div>` : '';
     const ring = G.set.atime ? '<div class="bz-t" id="anst"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" cx="50" cy="50" r="44"/></svg><b></b></div>' : '';
     const banner = q.stage === 'ans' && q.ans && ent(q.ans) ? `<div class="buzzer" id="buzzer" style="--c:${ent(q.ans).color}"><div class="bz-l">Отвечает</div><div class="bz-n">${esc(entName(q.ans))}</div>${G.x2[q.ans] ? '<div class="bz-x">×2</div>' : ''}${ring}</div>` : '';
-    const answer = q.stage === 'reveal' ? `<div class="answer"><div class="al">Правильный ответ</div><div class="at">${esc(d.a)}</div>${resultLine(q)}</div>` : '';
-    const fs = md ? Math.min(3, qSize(d.q)) : qSize(d.q);
-    return el(`<div class="qscreen st-${q.stage} ${md ? 'md md-' + md : ''}"><div class="qhead"><span class="qth">${esc(themeOf(q))}</span><span class="qpr">${fmt(q.stake || q.price)}</span>${badge(q)}</div>${own}${media}
+    const answer = q.stage === 'reveal' ? `<div class="answer"><div class="al">Правильный ответ</div><div class="at">${esc(d.a)}</div>${d.c ? `<div class="acom">${esc(d.c)}</div>` : ''}${resultLine(q)}</div>` : '';
+    const mp = q.mp && q.stage !== 'reveal' ? `<div class="mpart">Угадан один: <b>${esc((d.names || [])[q.mp.n - 1] || '№' + q.mp.n)}</b> · ${esc(entName(q.mp.who))} ${sgn(q.mp.val)} · кто назовёт второго?</div>` : '';
+    const pic = !!d.img, fs = pic || md ? Math.min(pic ? 2.6 : 3, qSize(d.q)) : qSize(d.q), mdl = qMedal(q);
+    return el(`<div class="qscreen st-${q.stage} ${md ? 'md md-' + md : ''} ${pic ? 'haspic' : ''} ${d.kar ? 'haskar' : ''}"><div class="qhead"><span class="qth">${esc(themeOf(q))}</span><span class="qpr ${mdl ? 'medal m' + mdl : ''}">${fmt(q.stake || q.price)}</span>${badge(q)}</div>${own}${media}${mp}
       <div class="qtext" style="font-size:${fs}rem">${esc(d.q)}</div><div class="timer" id="timer"><i></i><b></b></div><div class="qstatus" id="qstatus"></div>${banner}${answer}
       <div class="hostbar">${hostButtons(q)}</div></div>`);
   }
@@ -516,17 +674,33 @@
     const B = (a, label, cls, k) => `<button class="btn ${cls || ''}" data-act="${a}">${label}${k ? `<kbd>${k}</kbd>` : ''}</button>`;
     const J = B('ok', '✓ Верно', 'ok', 'Enter') + B('bad', '✗ Неверно', 'bad', '⌫'), d = curD();
     const M = isMediaQ(d) ? B('media', d.video ? '⏯ Видео' : '⏯ Музыка', '', 'P') : '';
-    if (q.stage === 'read') return B('timer', '▶ Старт', 'gold', 'Пробел') + (q.owner ? J : '') + M + B('reveal', '👁 Ответ', '', 'A');
-    if (q.stage === 'open') return B('timer', q.tr ? '⏸ Пауза' : '▶ Продолжить', '', 'Пробел') + (q.owner ? J : '') + M + B('reveal', '👁 Ответ', '', 'A');
-    if (q.stage === 'ans') return J + (G.set.atime ? B('atimer', '⏯ Время ответа', '', 'Пробел') : '') + M + B('reveal', '👁 Ответ', '', 'A');
-    if (q.stage === 'timeup') return J + M + B('reveal', '👁 Ответ', '', 'A');
+    const P = d.type === 'mashup' && !q.mp && (q.owner ? ['read', 'open', 'timeup'].includes(q.stage) : q.stage === 'ans') ? B('mp1', '¼ Угадан №1', 'half') + B('mp2', '¼ Угадан №2', 'half') : '';
+    if (q.stage === 'read') return B('timer', '▶ Старт', 'gold', 'Пробел') + (q.owner ? J + P : '') + M + B('reveal', '👁 Ответ', '', 'A');
+    if (q.stage === 'open') return B('timer', q.tr ? '⏸ Пауза' : '▶ Продолжить', '', 'Пробел') + (q.owner ? J + P : '') + M + B('reveal', '👁 Ответ', '', 'A');
+    if (q.stage === 'ans') return J + P + (G.set.atime ? B('atimer', '⏯ Время ответа', '', 'Пробел') : '') + M + B('reveal', '👁 Ответ', '', 'A');
+    if (q.stage === 'timeup') return J + P + M + B('reveal', '👁 Ответ', '', 'A');
     if (q.stage === 'reveal') return M + B('board', 'К табло ▶', 'gold', '→');
     return '';
   }
   function resultLine(q) {
-    const r = q.result;
-    if (!r) return `<div class="res none">${q.tried.length ? 'Верного ответа не было' : 'Никто не ответил'}</div>`;
-    return `<div class="res ${r.ok ? 'ok' : 'bad'}">${esc(entName(r.who))}: ${r.val ? sgn(r.ok ? r.val : -r.val) : '0'}${r.note ? ' ' + esc(r.note) : ''}</div>`;
+    const r = q.result, p = q.mp ? `<div class="res ok">${esc(entName(q.mp.who))}: ${sgn(q.mp.val)} (угадан один из двух)</div>` : '';
+    if (!r) return p + `<div class="res none">${q.tried.length ? (q.mp ? 'Второго так никто и не назвал' : 'Верного ответа не было') : 'Никто не ответил'}</div>`;
+    return p + `<div class="res ${r.ok ? 'ok' : 'bad'}">${esc(entName(r.who))}: ${r.val ? sgn(r.ok ? r.val : -r.val) : '0'}${r.note ? ' ' + esc(r.note) : ''}</div>`;
+  }
+  // мешап: назвали одного из двух — четверть цены, второго может добрать следующий
+  function mashPartial(n) {
+    const q = G.q, d = curD(); if (G.phase !== 'q' || !q || busy || d.type !== 'mashup' || q.mp) return;
+    const who = q.owner || (q.stage === 'ans' ? q.ans : null);
+    if (!who || !ent(who) || !['read', 'open', 'ans', 'timeup'].includes(q.stage)) return;
+    snap(); stopTimer(); stopAT();
+    const val = r10((q.stake || q.price) * 0.25);
+    addScore(who, val); q.mp = { who, n: +n === 2 ? 2 : 1, val }; Sound.play('partial'); flash('ok');
+    quip(`${entName(who)}: один есть! Кто назовёт второго — заберёт ${fmt(q.stake || q.price)}`, 'ok');
+    q.tried.push(who);
+    if (q.owner) return reveal(true);
+    q.ans = null; q.al = null; q.aup = false;
+    if (!G.ents.some(e => !q.tried.includes(e.id) && !G.fz[e.id])) return reveal(true);
+    q.stage = 'open'; changed(); setTimeout(() => { if (G.q === q && q.stage === 'open' && !q.tr) startTimer(); }, 700);
   }
   function qStatus(q) {
     if (q.stage === 'read') return q.owner ? '' : '<span class="mut">Приготовьтесь…</span>';
@@ -563,6 +737,7 @@
     t.querySelector('b').textContent = Math.ceil(h.tl);
     t.classList.toggle('warn', h.tl <= tot * 0.5 && h.tl > 5); t.classList.toggle('danger', h.tl <= 5); t.classList.toggle('paused', !h.tr);
     document.body.classList.toggle('danger', !!h.tr && h.tl <= 5);
+    if (G.phase === 'q') picState();
   }
 
   /* ----- таймер ----- */
@@ -611,7 +786,7 @@
     const q = G.q; if (!q) return;
     Sound.play('timeout');
     if (q.owner) { q.stage = 'timeup'; changed(); }
-    else if (q.stage === 'open') reveal(true);
+    else if (q.stage === 'open') { reveal(true); if (!q.mp) quip(joke('timeout'), 'mut'); }
   }
 
   /* ================= ход игры ================= */
@@ -624,16 +799,91 @@
     Object.assign(G, { started: true, resume: null, round: 0, played: {}, chooser: null, q: null, fin: null, fz: {}, x2: {}, sh: {}, bo: {}, phase: 'trans' });
     G.ents.forEach(e => { e.score = 0; });
     changed();
-    busy = true; await overlay('round', { title: R().name || 'Раунд 1', sub: 'Поехали!' }); busy = false;
+    busy = true;
+    try {
+      await flyby(PACK.rounds.map((r, i) => ({ label: r.name || `Раунд ${i + 1}`, themes: (r.themes || []).map(th => th.name) })).concat(finThemes().length ? [{ label: 'Финал', themes: ['???'] }] : []));
+      await overlay('round', { title: R().name || 'Раунд 1', sub: joke('start') || 'Поехали!' });
+    } finally { busy = false; }
     G.chooser = pick(G.ents).id; G.phase = 'board'; boardIntro = true; curSig = null; changed();
     toast(`Первым выбирает: ${entName(G.chooser)} ⭐`);
   }
   function toLobby() { if (!['board', 'end'].includes(G.phase)) return; G.resume = G.phase === 'end' ? null : G.phase; if (G.phase === 'end') G.started = false; G.phase = 'lobby'; curSig = null; changed(); }
-  async function nextRound() {
+  // раунд закончился — сначала промежуточные итоги, потом следующий раунд или финал
+  function nextRound() { showResults(); }
+  async function afterResults() {
+    if (G.phase !== 'results' || busy) return;
+    G.res = null;
     if (G.round + 1 >= PACK.rounds.length) return startFinal();
     G.round++; G.q = null; G.phase = 'trans'; changed();
-    busy = true; await overlay('round', { title: R().name || `Раунд ${G.round + 1}`, sub: 'Цены выросли!' }); busy = false;
+    busy = true;
+    try {
+      await overlay('round', { title: R().name || `Раунд ${G.round + 1}`, sub: 'Цены выросли!' });
+      await flyby([{ label: R().name || `Раунд ${G.round + 1}`, themes: R().themes.map(th => th.name) }]);
+    } finally { busy = false; }
     G.phase = 'board'; boardIntro = true; curSig = null; changed();
+  }
+
+  /* ----- промежуточные итоги раунда: кто ведёт, подколы и шанс на реабилитацию для отстающих ----- */
+  const REDEEM = ['Поздравь Старого как следует — с выражением и стоя', 'Скажи тост за Старого, в котором нет слов «здоровья» и «счастья»', 'Сделай Старому массаж плеч 30 секунд', 'Спой Старому «С днём рождения» голосом Шнура', 'Сделай Старому три комплимента подряд — без повторов', 'Изобрази, как Старый просыпается после своего дня рождения'];
+  function showResults() {
+    stopTimer(); stopAT(); conHalt(); mediaStop(); PIC = null;
+    const rank = G.ents.slice().sort((a, b) => b.score - a.score), lead = rank[0];
+    const nl = G.ents.length >= 7 ? 2 : G.ents.length >= 2 ? 1 : 0, losers = nl ? rank.slice(-nl).filter(e => e !== lead).map(e => e.id) : [];
+    const acts = {}, tj = {}; losers.forEach(id => { acts[id] = drawCard('redeem'); tj[id] = joke('loser', entName(id)); });
+    G.res = { r: G.round, lead: lead ? lead.id : null, lj: lead ? joke('leader', lead.name) : '', losers, acts, tj, done: {} };
+    G.q = null; G.phase = 'results'; curSig = null; changed();
+    Sound.play('drumroll'); setTimeout(() => { if (G.phase === 'results') { Sound.play('results'); FX.confetti(80); } }, 1600);
+  }
+  function vResults() {
+    const R0 = G.res, rank = G.ents.slice().sort((a, b) => b.score - a.score), max = Math.max(1, ...rank.map(e => Math.abs(e.score)));
+    const rn = (PACK.rounds[R0.r] || {}).name || `Раунд ${R0.r + 1}`, last = R0.r + 1 >= PACK.rounds.length, step = 100 * (R0.r + 1);
+    const bars = rank.map((e, i) => `<div class="rb ${e.id === R0.lead ? 'lead' : ''} ${R0.losers.includes(e.id) ? 'lose' : ''}" style="--c:${e.color};--w:${Math.max(3, Math.abs(e.score) / max * 100).toFixed(1)}%;animation-delay:${(0.25 + (rank.length - i) * 0.12).toFixed(2)}s">`
+      + `<span class="rp">${i + 1}</span><span class="rn">${e.id === R0.lead ? '👑 ' : ''}${esc(e.name)}</span><span class="rbar"><i></i></span><span class="rs ${e.score < 0 ? 'neg' : ''}">${fmt(e.score)}</span></div>`).join('');
+    const red = R0.losers.map(id => {
+      const e = ent(id); if (!e) return '';
+      const dn = R0.done[id];
+      return `<div class="redeem" style="--c:${e.color}"><div class="rd-h">🆘 Шанс на реабилитацию: <b>${esc(e.name)}</b></div><div class="rd-j">${esc(R0.tj[id] || '')}</div><div class="rd-t">${esc(R0.acts[id] || '')}</div>`
+        + (dn != null ? `<div class="rd-r ${dn > 0 ? 'ok' : ''}">${dn > 0 ? `Засчитано: ${sgn(dn)} 🎉` : 'Не засчитано 😐'}</div>`
+          : `<div class="rd-b">${[step, step * 2, step * 3].map(x => `<button class="btn ok" data-act="redeem" data-id="${esc(id)}" data-v="${x}">${sgn(x)}</button>`).join('')}<button class="btn bad" data-act="redeem" data-id="${esc(id)}" data-v="0">✗ Не засчитано</button><button class="btn" data-act="reroll" data-id="${esc(id)}">🎲 Другое задание</button></div>`)
+        + '</div>';
+    }).join('');
+    return el(`<div class="results"><div class="rs-sub">${esc(rn)} позади</div><div class="rs-title">${letters('Промежуточные итоги')}</div>
+      ${R0.lead && R0.lj ? `<div class="rs-lead">👑 ${esc(R0.lj)}</div>` : ''}<div class="rbars">${bars}</div>${red}
+      <div class="hostbar"><button class="btn gold" data-act="resnext">${last ? 'К финалу ▶' : 'Следующий раунд ▶'}<kbd>→</kbd></button></div></div>`);
+  }
+  function redeem(id, v) {
+    const R0 = G.res; if (G.phase !== 'results' || !R0 || !R0.losers.includes(id) || R0.done[id] != null) return;
+    snap(); const x = Math.max(0, +v || 0); R0.done[id] = x;
+    if (x) { addScore(id, x); Sound.play('applause'); FX.confetti(90); } else Sound.play('sad');
+    curSig = null; changed();
+  }
+  function reroll(id) { const R0 = G.res; if (!R0 || !R0.losers.includes(id) || R0.done[id] != null) return; R0.acts[id] = drawCard('redeem'); Sound.play('roll'); curSig = null; changed(); }
+
+  /* ----- пролёт тем: названия тем вылетают из глубины экрана ----- */
+  function flyby(groups) {
+    return new Promise(res => {
+      closeOverlay();
+      const ov = $('#overlay'); ov.className = 'show ov-flyby'; ov.innerHTML = '<div class="fly"><div class="fly-lbl"></div></div>';
+      const box = $('.fly', ov), lbl = $('.fly-lbl', ov), timers = []; let t = 250, n = 0;
+      groups.forEach(g => {
+        timers.push(setTimeout(() => { lbl.textContent = g.label; lbl.classList.remove('in'); void lbl.offsetWidth; lbl.classList.add('in'); Sound.play('whoosh'); }, t)); t += 700;
+        g.themes.forEach(name => {
+          const k = n++;
+          timers.push(setTimeout(() => {
+            const c = el(`<div class="fl">${esc(name)}</div>`), a = (k * 137.5) % 360 * Math.PI / 180, rr = 6 + (k % 3) * 5;
+            c.style.setProperty('--x', (Math.cos(a) * rr).toFixed(1) + 'rem'); c.style.setProperty('--y', (Math.sin(a) * rr * 0.55).toFixed(1) + 'rem'); c.style.setProperty('--r', ((k % 2 ? 1 : -1) * (3 + k % 5)) + 'deg');
+            box.appendChild(c); Sound.play('flyby'); setTimeout(() => c.remove(), 1500);
+          }, t)); t += 230;
+        });
+        t += 350;
+      });
+      let done = false;
+      const fin = () => {
+        if (done) return; done = true; timers.forEach(clearTimeout); if (ovResolve === fin) ovResolve = null;
+        ov.classList.add('hide'); setTimeout(() => { if (!ovResolve) { ov.className = ''; ov.innerHTML = ''; } }, 340); res();
+      };
+      ovResolve = fin; timers.push(setTimeout(fin, t + 1300));
+    });
   }
   function skipRound() { if (G.phase !== 'board') return; snap(); R().themes.forEach((th, t) => (th.questions || []).forEach((x, i) => { G.played[`${G.round}-${t}-${i}`] = true; })); nextRound(); }
 
@@ -655,7 +905,12 @@
       else if (type === 'auction') { await overlay('auction'); G.q.stage = 'auction'; G.q.auc = { bids: {}, passed: {}, allin: {} }; }
       else if (type === 'trap') { await overlay('trap'); G.q.stage = 'trap'; G.q.trap = { side: null, ev: null, step: 0 }; G.q.victim = G.chooser && ent(G.chooser) ? G.chooser : null; }
       else if (type === 'bonus') { await overlay('bonus'); conInit(G.q, d); }
-      else { if (d.audio) await overlay('music'); else if (d.video) await overlay('video'); G.q.stage = 'read'; }
+      else {
+        const mdl = medalOf(PACK.rounds[G.round], t, i);
+        if (mdl) await overlay('medal', { md: mdl });
+        if (d.type === 'mashup') await overlay('mashup'); else if (d.audio && !mdl) await overlay('music'); else if (d.video && !mdl) await overlay('video');
+        G.q.stage = 'read';
+      }
     } finally { busy = false; }
     changed();
     if (G.q && G.q.stage === 'read') autoOpen();
@@ -691,11 +946,11 @@
     if (ok) {
       if (G.x2[who]) { val *= 2; note = '(×2)'; delete G.x2[who]; } else if (G.bo[who]) { val *= 2; note = '(✨ ×2)'; delete G.bo[who]; }
       addScore(who, val); G.chooser = who; q.result = { who, ok: true, val, note };
-      Sound.play('correct'); flash('ok'); FX.confetti(150); if (val >= 1000) FX.fireworks(1600); reveal(true);
+      Sound.play('correct'); flash('ok'); FX.confetti(150); if (val >= 1000) FX.fireworks(1600); reveal(true); quip(joke('correct', entName(who)), 'ok');
     } else {
       if (G.sh[who]) { val = 0; note = '(🛡️ щит спас)'; delete G.sh[who]; delete G.x2[who]; toast(`🛡️ Щит спас ${entName(who)} от штрафа!`); }
       else if (G.x2[who]) { val *= 2; note = '(×2)'; delete G.x2[who]; }
-      addScore(who, -val); Sound.play('wrong'); flash('bad'); shake();
+      addScore(who, -val); Sound.play('wrong'); flash('bad'); shake(); quip(joke('wrong', entName(who)), 'bad');
       if (q.owner) { q.result = { who, ok: false, val, note }; reveal(true); }
       else {
         q.tried.push(who); q.ans = null; q.al = null; q.aup = false;
@@ -707,13 +962,15 @@
   function reveal(silent) {
     const q = G.q; if (G.phase !== 'q' || !q || !['read', 'open', 'ans', 'timeup'].includes(q.stage)) return;
     stopTimer(); stopAT(); q.stage = 'reveal'; if (silent !== true) Sound.play('flip'); changed();
-    if (MP && MP.started) mediaPlay(); // после ответа пусть доиграет
+    const d = curD();
+    if (MP && MP.el && MP.key === q.key && +d.aend > +d.end) { MP.stopAt = +d.aend; try { MP.el.currentTime = +d.end || 0; } catch (e) { /* ещё не загрузилось */ } mediaPlay(); } // песня продолжается — все слышат пропущенное
+    else if (MP && MP.started) mediaPlay(); // после ответа пусть доиграет
   }
   function backToBoard() {
     if (G.phase !== 'q' || !G.q || busy) return;
     snap(); stopTimer(); stopAT(); stopConvince(); conHalt(); mediaStop();
     Object.keys(G.fz).forEach(id => { G.fz[id]--; if (G.fz[id] <= 0) delete G.fz[id]; });
-    G.q = null; G.phase = 'board'; curSig = null;
+    G.q = null; G.phase = 'board'; curSig = null; PIC = null;
     if (roundDone()) { save(); nextRound(); } else changed();
   }
 
@@ -785,28 +1042,30 @@
   const taxMax = p => Math.min(1000, Math.max(100, p * 2));
   const jackMax = p => Math.min(2000, Math.max(200, Math.round(p * 1.5 / 50) * 50));
   const half = p => r10(p / 2);
+  // у всех событий равные шансы
   const ANGEL = [
-    { id: 'jackpot', w: 3, icon: '💰', name: 'Джекпот', desc: p => `Бесплатные очки! Крутим барабан: от 100 до ${fmt(jackMax(p))}.` },
-    { id: 'convince', w: 2, icon: '🗣️', name: 'Уговори судью', desc: () => '30 секунд, чтобы уговорить судью подкинуть очков. Сколько — решает судья.' },
-    { id: 'ltruth', w: 2, icon: '😇', name: 'Лёгкая правда', desc: p => `Честно ответь на вопрос — ${sgn(half(p))}. Отказ без штрафа.` },
-    { id: 'ldare', w: 2, icon: '🙂', name: 'Лёгкое задание', desc: p => `Выполни простое задание — ${sgn(half(p))}. Отказ без штрафа.` },
-    { id: 'shield', w: 2, icon: '🛡️', name: 'Щит', desc: () => 'Следующий неверный ответ — без штрафа.' },
-    { id: 'boost', w: 2, icon: '✨', name: 'Благословение', desc: () => 'Следующий верный ответ принесёт ×2.' },
-    { id: 'peek', w: 1, icon: '👀', name: 'Подсказка свыше', desc: () => 'Подсказка к этому вопросу бесплатно придёт на телефон.' },
-    { id: 'robin', w: 1, icon: '🏹', name: 'Робин Гуд', multi: true, desc: p => `Забираешь ${fmt(half(p))} очков у лидера.` },
+    { id: 'jackpot', icon: '💰', name: 'Джекпот', desc: p => `Бесплатные очки! Крутим барабан: от 100 до ${fmt(jackMax(p))}.` },
+    { id: 'convince', icon: '🗣️', name: 'Уговори судью', desc: () => 'Назови сумму (на телефоне) и уговаривай судью 30 секунд. Даст или не даст — решает судья.' },
+    { id: 'ltruth', icon: '😇', name: 'Лёгкая правда', desc: p => `Честно ответь на вопрос — ${sgn(half(p))}. Отказ без штрафа.` },
+    { id: 'ldare', icon: '🙂', name: 'Лёгкое задание', desc: p => `Выполни простое задание — ${sgn(half(p))}. Отказ без штрафа.` },
+    { id: 'shield', icon: '🛡️', name: 'Щит', desc: () => 'Следующий неверный ответ — без штрафа.' },
+    { id: 'boost', icon: '✨', name: 'Благословение', desc: () => 'Следующий верный ответ принесёт ×2.' },
+    { id: 'peek', icon: '👀', name: 'Подсказка свыше', desc: () => 'Подсказка к этому вопросу бесплатно придёт на телефон.' },
+    { id: 'robin', icon: '🏹', name: 'Робин Гуд', multi: true, desc: p => `Забираешь ${fmt(half(p))} очков у лидера.` },
   ];
   const DEVIL = [
-    { id: 'tax', w: 3, icon: '💸', name: 'Налоговая', desc: p => `Налоговая нашла лишние очки! Спишем от 50 до ${fmt(taxMax(p))}.` },
-    { id: 'btruth', w: 2, icon: '😈', name: 'Неудобная правда', desc: p => `Ответь честно — и штрафа не будет. Отказ: ${sgn(-p)}.` },
-    { id: 'bdare', w: 2, icon: '🔥', name: 'Смелое задание', desc: p => `Выполни — и штрафа не будет. Отказ: ${sgn(-p)}.` },
-    { id: 'dshot', w: 2, icon: '🥃', name: 'Штрафная стопка', need: 'drink', desc: p => `Выпей стопку до дна! Отказ: ${sgn(-p)}.` },
-    { id: 'dsing', w: 1, icon: '🎤', name: 'Спой!', need: 'sing', desc: p => `Остальные выбирают песню — ты поёшь куплет. Отказ: ${sgn(-p)}.` },
-    { id: 'ddance', w: 1, icon: '💃', name: 'Танец позора', need: 'dance', desc: p => `20 секунд танца под музыку в центре комнаты. Отказ: ${sgn(-p)}.` },
-    { id: 'freeze', w: 2, icon: '❄️', name: 'Заморозка', desc: () => 'Кнопка не работает в этом и следующем вопросе.' },
-    { id: 'casino', w: 2, icon: '🎰', name: 'Казино', desc: () => 'Ставка на монетку: удвоишь или потеряешь. Можно отказаться.' },
-    { id: 'give', w: 2, icon: '🎁', name: 'Щедрость поневоле', multi: true, desc: p => `Подари ${fmt(p)} очков любому игроку. Выбирай на телефоне.` },
-    { id: 'swap', w: 1, icon: '🔄', name: 'Рокировка', multi: true, desc: () => 'Меняешься очками со случайным игроком!' },
-    { id: 'x2', w: 2, icon: '✖️', name: 'Двойная ставка', desc: () => 'Следующий твой ответ считается ×2 — и плюс, и минус.' },
+    { id: 'tax', icon: '💸', name: 'Налоговая', desc: p => `Налоговая нашла лишние очки! Спишем от 50 до ${fmt(taxMax(p))}.` },
+    { id: 'btruth', icon: '😈', name: 'Неудобная правда', desc: p => `Ответь честно — и штрафа не будет. Отказ: ${sgn(-p)}.` },
+    { id: 'bdare', icon: '🔥', name: 'Смелое задание', desc: p => `Выполни — и штрафа не будет. Отказ: ${sgn(-p)}.` },
+    { id: 'poem', icon: '📜', name: 'Стих на табуретке', desc: p => `Встань на стул и с выражением зачитай поздравление Старому — текст на телефоне. Отказ: ${sgn(-p)}.` },
+    { id: 'dshot', icon: '🥃', name: 'Штрафная стопка', need: 'drink', desc: p => `Выпей стопку до дна! Отказ: ${sgn(-p)}.` },
+    { id: 'dsing', icon: '🎤', name: 'Спой!', need: 'sing', desc: p => `Остальные выбирают песню — ты поёшь без музыки 10 секунд. Отказ: ${sgn(-p)}.` },
+    { id: 'ddance', icon: '💃', name: 'Танец позора', need: 'dance', desc: p => `20 секунд танца под музыку в центре комнаты. Отказ: ${sgn(-p)}.` },
+    { id: 'freeze', icon: '❄️', name: 'Заморозка', desc: () => 'Кнопка не работает в этом и следующем вопросе.' },
+    { id: 'casino', icon: '🎰', name: 'Казино', desc: p => `Ставка на монетку: удвоишь или потеряешь. Струсил — штраф ${sgn(-p)}.` },
+    { id: 'give', icon: '🎁', name: 'Щедрость поневоле', multi: true, desc: p => `Подари ${fmt(p)} очков любому игроку. Выбирай на телефоне.` },
+    { id: 'swap', icon: '🔄', name: 'Рокировка', multi: true, desc: () => 'Меняешься очками со случайным игроком!' },
+    { id: 'x2', icon: '✖️', name: 'Двойная ставка', desc: () => 'Следующий твой ответ считается ×2 — и плюс, и минус.' },
   ];
   const EVX = Object.fromEntries(ANGEL.concat(DEVIL).map(e => [e.id, e]));
   const CARDS = {
@@ -814,6 +1073,8 @@
     ldare: () => PACK.angelDare || PACK.dare || ['Сделай комплимент имениннику.'],
     btruth: () => PACK.devilTruth || PACK.truth || ['Какой твой самый неловкий момент?'],
     bdare: () => PACK.devilDare || PACK.dare || ['Спой куплет любой песни.'],
+    redeem: () => PACK.redemption || REDEEM,
+    poem: () => PACK.poems || ['Старый, с днём рождения!\nТы не стареешь — ты выдерживаешься,\nкак сыр, вино и шутки про тебя.'],
     croc: () => PACK.croc || ['Вертолёт', 'Жираф', 'Пингвин', 'Холодильник', 'Свадьба', 'Рыбалка'],
   };
   function drawCard(kind) {
@@ -912,6 +1173,13 @@
     if (ev.id === 'swap') T.target = others.length ? pick(others).id : null;
     if (ev.id === 'robin') { const lead = others.length ? others.reduce((a, b) => (b.score > a.score ? b : a)) : null; T.target = lead && lead.score > ((ent(q.victim) || {}).score || 0) ? lead.id : null; }
     if (['ltruth', 'ldare', 'btruth', 'bdare'].includes(ev.id)) T.card = drawCard(ev.id);
+    if (ev.id === 'poem') { T.poem = drawCard('poem'); sendPrivate(q.victim, { k: q.key, poem: T.poem }); }
+  }
+  // уговори судью: игрок сам называет сумму (с телефона или ведущий вписывает)
+  function phoneAsk(eid, k, v) {
+    const q = G.q; if (G.phase !== 'q' || !q || q.key !== k || q.stage !== 'trapev' || q.victim !== eid || !q.trap || q.trap.ev !== 'convince' || q.trap.done) return;
+    const x = Math.floor(Math.abs(+v)); if (!(x > 0) || x > 1e6) return;
+    q.trap.ask = x; Sound.play('bid'); changed();
   }
   function vTrapEv(q) {
     const ev = EVX[q.trap.ev], v = ent(q.victim), A = q.trap.side === 'a';
@@ -927,7 +1195,12 @@
     const yesno = (y, n) => `<div class="hostbar">${btn('yes', y, 'ok')}${btn('no', n, 'bad')}</div>`;
     switch (ev.id) {
       case 'jackpot': return `<div class="slot" id="slot">???</div><div class="hostbar">${btn('jackpot', '🎰 Крутить барабан', 'gold')}</div>`;
-      case 'convince': return `<div class="bigclock" id="cvclock">30</div><div class="hostbar">${btn('cvgo', '⏱ Старт 30 сек')}${[0, half(p), p, p * 2].map(x => btn('cv', x ? sgn(x) : '0 очков', x ? 'ok' : 'bad', x)).join('')}${btn('cvc', '✎ Своя сумма', 'gold')}</div>`;
+      case 'convince': return `<div class="askrow"><div class="asklbl">${T.ask ? 'Просит у судьи' : hasPhone(v) ? '📱 Называй сумму на телефоне' : 'Сколько просишь?'}</div><div class="slot ${T.ask ? 'hit' : ''}" id="slot">${T.ask ? sgn(T.ask) : '???'}</div></div>`
+        + `<div class="bigclock" id="cvclock">30</div><div class="hostbar">${btn('cvgo', '⏱ Старт 30 сек')}${btn('cvc', '✎ Вписать сумму')}${T.ask ? btn('cvyes', `✓ Дать ${sgn(T.ask)}`, 'ok') : ''}${btn('cvno', '✗ Не давать', 'bad')}</div>`;
+      case 'poem': {
+        const own = hasPhone(v);
+        return `<div class="tdcard dare poem">${own ? `<div class="tdt">📜 Стих — на телефоне у <b>${esc(entName(v))}</b>.<br>Встаём на табуретку и зачитываем!</div>` : `<div class="tdt">${esc(T.poem || '')}</div>`}</div>` + yesno('✓ Зачитал · без штрафа', `✗ Отказался ${sgn(-p)}`);
+      }
       case 'ltruth': return card + yesno(`✓ Ответил ${sgn(half(p))}`, '✗ Отказался · 0');
       case 'ldare': return card + yesno(`✓ Выполнил ${sgn(half(p))}`, '✗ Отказался · 0');
       case 'shield': return `<div class="hostbar">${btn('shield', '🛡️ Получить щит', 'gold')}</div>`;
@@ -938,12 +1211,12 @@
       case 'btruth': return card + yesno('✓ Ответил · без штрафа', `✗ Отказался ${sgn(-p)}`);
       case 'bdare': return card + yesno('✓ Выполнил · без штрафа', `✗ Отказался ${sgn(-p)}`);
       case 'dshot': return task('🥃 Стопку — до дна!') + yesno('✓ Выпил · без штрафа', `✗ Отказался ${sgn(-p)}`);
-      case 'dsing': return task('🎤 Остальные выбирают песню — ты поёшь куплет!') + yesno('✓ Спел · без штрафа', `✗ Отказался ${sgn(-p)}`);
+      case 'dsing': return task('🎤 Остальные выбирают песню — поёшь без музыки!') + `<div class="bigclock" id="cvclock">10</div><div class="hostbar">${btn('sggo', '🎤 Старт 10 сек', 'gold')}</div>` + yesno('✓ Спел · без штрафа', `✗ Отказался ${sgn(-p)}`);
       case 'ddance': return `<div class="bigclock" id="cvclock">20</div><div class="hostbar">${btn('ddgo', '💃 Музыка! 20 секунд', 'gold')}</div>` + yesno('✓ Станцевал · без штрафа', `✗ Отказался ${sgn(-p)}`);
       case 'freeze': return `<div class="hostbar">${btn('freeze', '❄️ Заморозить', 'gold')}</div>`;
       case 'casino': {
         const cap = Math.max((ent(v) || {}).score || 0, p);
-        if (T.bet == null) return `<div class="hostbar">${[p, p * 2].filter(x => x < cap).map(x => btn('bet', 'Ставка ' + fmt(x), '', x)).join('')}${btn('bet', 'Ва-банк ' + fmt(cap), 'gold', cap)}${btn('nobet', 'Отказаться', 'bad')}</div>`;
+        if (T.bet == null) return `<div class="hostbar">${[p, p * 2].filter(x => x < cap).map(x => btn('bet', 'Ставка ' + fmt(x), '', x)).join('')}${btn('bet', 'Ва-банк ' + fmt(cap), 'gold', cap)}${btn('nobet', `Струсить ${sgn(-p)}`, 'bad')}</div>`;
         return `${coinHTML('casino')}<div class="hostbar">${btn('casflip', `Бросить монетку · ставка ${fmt(T.bet)}`, 'gold')}</div>`;
       }
       case 'give': return `<div class="sp-hint">${hasPhone(v) ? '📱 Выбирай на телефоне, кому подарить. Или здесь:' : 'Кому дарим?'}</div><div class="picker">${G.ents.filter(e => e.id !== v).map(e => `<button class="pk" style="--c:${e.color}" data-act="ev" data-v="give" data-id="${esc(e.id)}">${esc(e.name)}</button>`).join('')}</div>`;
@@ -973,13 +1246,15 @@
         lock(true); await spinSlot($('#slot'), () => '+' + fmt(50 * (2 + Math.floor(Math.random() * (jackMax(p) / 50 - 1)))), '+' + fmt(T.amt)); lock(false);
         snap(); addScore(vic, T.amt); FX.rain('💰', 30); return trapRes(`${ve.name}: +${fmt(T.amt)} 💰`, true);
       case 'cvgo': return startConvince(30, false);
-      case 'cv': { snap(); const x = +ds.x; addScore(vic, x); return trapRes(x ? `Судья растаял: ${sgn(x)} 🥹` : 'Судья непреклонен: 0 😐', x > 0 ? true : undefined); }
       case 'cvc': {
-        const s = await ask('Сколько очков даёт судья? (можно с минусом)', ''); if (s == null) return;
-        const x = parseInt(String(s).replace(/\s/g, '').replace('−', '-'), 10); if (!isFinite(x)) return toast('Нужно число');
+        const s = await ask(`Сколько просит ${ve.name}?`, T.ask || ''); if (s == null) return;
+        const x = Math.abs(parseInt(String(s).replace(/[\s−-]/g, ''), 10)); if (!(x > 0)) return toast('Нужно число больше нуля');
         if (G.q !== q || T.done) return;
-        snap(); addScore(vic, x); return trapRes(x ? `Судья решил: ${sgn(x)}` : 'Судья непреклонен: 0 😐', x > 0 ? true : x < 0 ? false : undefined);
+        T.ask = x; Sound.play('bid'); return changed();
       }
+      case 'cvyes': { if (!T.ask) return; snap(); addScore(vic, T.ask); Sound.play('tada'); return trapRes(`Судья растаял: ${sgn(T.ask)} 🥹`, true); }
+      case 'cvno': snap(); return trapRes(T.ask ? `Судья непреклонен: ${sgn(T.ask)} не будет 😐` : 'Судья непреклонен 😐');
+      case 'sggo': Sound.play('sing'); return startConvince(10, false);
       case 'yes':
         snap(); if (isAngelTask) { addScore(vic, half(p)); return trapRes(`Молодец! ${sgn(half(p))}`, true); }
         return trapRes('Смело! Штрафа нет 😎', true);
@@ -1004,7 +1279,7 @@
       case 'ddgo': discoStart(); return startConvince(20, true, () => discoOff());
       case 'freeze': snap(); G.fz[vic] = 2; Sound.play('freeze'); FX.rain('❄️', 45); return trapRes(`❄️ ${ve.name} заморожен на 2 вопроса`);
       case 'bet': T.bet = +ds.x; T.step++; return changed();
-      case 'nobet': return trapRes('Отказ от казино. Осторожно!');
+      case 'nobet': snap(); addScore(vic, -p); Sound.play('sad'); return trapRes(`Струсил в казино: ${sgn(-p)} 🐔`, false);
       case 'casflip': {
         lock(true); const win = Math.random() < 0.5; await coinAnim($('#evpanel'), win); lock(false); snap();
         if (win) { addScore(vic, T.bet); FX.rain('💰', 40); } else addScore(vic, -T.bet);
@@ -1043,14 +1318,14 @@
 
   /* ----- бонус-конкурсы (клетки «?») ----- */
   const CONTESTS = [
-    { id: 'rps', icon: '✊', name: 'Камень-ножницы-бумага', w: 3, stake: true, rules: 'Выбор — тайно на телефоне. Победитель получает ставку, проигравший теряет 300. Ничья — переигровка.' },
-    { id: 'dance', icon: '💃', name: 'Танцевальный баттл', w: 2, need: 'dance', pickWord: 'партнёра по баттлу', rules: '30 секунд танцуете вдвоём под музыку, потом остальные голосуют на телефонах. Победителю — по 100 очков за каждый голос.' },
-    { id: 'shot', icon: '🥃', name: 'Стопка без рук', w: 2, need: 'drink', stake: true, rules: 'Руки за спину! Выпить стопку, не касаясь её руками. Каждый, кто справился, получает ставку.' },
-    { id: 'sing', icon: '🎤', name: 'Караоке-баттл', w: 2, need: 'sing', pickWord: 'соперника по караоке', rules: 'Каждый поёт по 20 секунд на заданную тему, потом голосование. Победителю — по 100 очков за голос.' },
-    { id: 'tap', icon: '👆', name: 'Тап-баттл', w: 2, phone: true, stake: true, rules: '10 секунд жмите на кнопку телефона как можно быстрее. Кто больше нажал — получает ставку.' },
-    { id: 'react', icon: '⚡', name: 'Дуэль реакции', w: 2, phone: true, stake: true, rules: 'Экран телефона красный — ждём. Стал зелёным — жми! Кто быстрее, получает ставку. Нажал раньше времени — проиграл.' },
-    { id: 'croc', icon: '🐊', name: 'Крокодил', w: 2, needA: 'act', phoneA: true, solo: true, stake: true, rules: 'Слово пришло тебе на телефон. Покажи его без слов и звуков за 60 секунд! Ставку получат показывающий и тот, кто угадал первым.' },
-    { id: 'stare', icon: '👁️', name: 'Гляделки', w: 1, stake: true, rules: 'Смотрите друг другу в глаза. Кто первым моргнул, засмеялся или отвёл взгляд — проиграл. Победитель получает ставку.' },
+    { id: 'rps', icon: '✊', name: 'Камень-ножницы-бумага', stake: true, rules: 'Выбор — тайно на телефоне. Победитель получает ставку, проигравший теряет 300. Ничья — переигровка.' },
+    { id: 'dance', icon: '💃', name: 'Танцевальный баттл', need: 'dance', pickWord: 'партнёра по баттлу', rules: '30 секунд танцуете вдвоём под музыку, потом остальные голосуют на телефонах. Победителю — по 100 очков за каждый голос.' },
+    { id: 'shot', icon: '🥃', name: 'Стопка без рук', need: 'drink', stake: true, rules: 'Руки за спину! Выпить стопку, не касаясь её руками. Каждый, кто справился, получает ставку.' },
+    { id: 'sing', icon: '🎤', name: 'Караоке-баттл', need: 'sing', pickWord: 'соперника по караоке', rules: 'Каждый поёт по 20 секунд на заданную тему, потом голосование. Победителю — по 100 очков за голос.' },
+    { id: 'tap', icon: '👆', name: 'Тап-баттл', phone: true, stake: true, rules: '10 секунд жмите на кнопку телефона как можно быстрее. Кто больше нажал — получает ставку.' },
+    { id: 'react', icon: '⚡', name: 'Дуэль реакции', phone: true, stake: true, rules: 'Экран телефона красный — ждём. Стал зелёным — жми! Кто быстрее, получает ставку. Нажал раньше времени — проиграл.' },
+    { id: 'croc', icon: '🐊', name: 'Крокодил', needA: 'act', phoneA: true, solo: true, stake: true, rules: 'Слово пришло тебе на телефон. Покажи его без слов и звуков за 60 секунд! Ставку получат показывающий и тот, кто угадал первым.' },
+    { id: 'stare', icon: '👁️', name: 'Гляделки', stake: true, rules: 'Смотрите друг другу в глаза. Кто первым моргнул, засмеялся или отвёл взгляд — проиграл. Победитель получает ставку.' },
   ];
   const CX = Object.fromEntries(CONTESTS.map(c => [c.id, c]));
   const RPS = { r: ['✊', 'Камень'], s: ['✌️', 'Ножницы'], p: ['✋', 'Бумага'] };
@@ -1102,8 +1377,10 @@
     if (!list.length) { // никому не подходит ни один конкурс — просто дарим очки
       snap(); return conFinish({ [c.a]: q.price }, c.a, `Бонус для ${entName(c.a)}!`);
     }
-    const C = list.find(x => x.id === FORCE.con) || list.find(x => x.id === c.fixed) || pickW(list);
-    busy = true; snap(); c.id = C.id; publish();
+    // все конкурсы по кругу с равными шансами: сначала те, что ещё не выпадали, и никогда — тот же два раза подряд
+    const used = G.cu || [], fresh = list.filter(x => !used.includes(x.id)), notLast = list.filter(x => x.id !== used[used.length - 1]);
+    const C = list.find(x => x.id === FORCE.con) || list.find(x => x.id === c.fixed) || pick(fresh.length ? fresh : notLast.length ? notLast : list);
+    busy = true; snap(); c.id = C.id; G.cu = (fresh.length ? used : []).concat(C.id); publish();
     $$('#stage .hostbar button').forEach(b => { b.disabled = true; });
     try { const box = $('#roul'); if (box) await roulette(box, list, C, 'bonus'); } finally { busy = false; }
     if (G.q !== q) return;
@@ -1562,7 +1839,8 @@
     e.addEventListener('pause', () => { if (MP === m) mediaUI(); });
     const st = +d.start || 0, en = +d.end || 0;
     if (st) e.addEventListener('loadedmetadata', () => { try { e.currentTime = st; } catch (err) { /* ничего */ } }, { once: true });
-    if (en) e.addEventListener('timeupdate', () => { if (e.currentTime >= en) e.pause(); });
+    m.stopAt = en || 0;
+    e.addEventListener('timeupdate', () => { if (m.stopAt && e.currentTime >= m.stopAt) e.pause(); });
     e.src = url; m.el = e;
     if (kind === 'audio' && (url.startsWith('blob:') || /^https?:$/.test(location.protocol))) {
       try { const ctx = Sound.ctx(); if (ctx) { const s = ctx.createMediaElementSource(e), an = ctx.createAnalyser(); an.fftSize = 256; an.smoothingTimeConstant = 0.6; s.connect(an); an.connect(Sound.out()); m.src = s; m.an = an; m.buf = new Uint8Array(an.frequencyBinCount); } } catch (err) { m.an = null; }
@@ -1583,7 +1861,13 @@
     const lbl = $('#vizlbl'); if (lbl) lbl.innerHTML = msg || (m.el && !m.el.paused ? '' : m.started ? '⏸ пауза' : '🎵 музыка начнётся вместе с таймером');
     const slot = $('#vslot'); if (slot) { const w = $('.merr', slot); if (msg && !w) slot.appendChild(el(`<div class="merr">${msg}</div>`)); }
   }
-  function mediaPlay() { const m = MP; if (!m || !m.el || m.err || !G.q || G.q.key !== m.key) return; m.started = true; const p = m.el.play(); if (p && p.catch) p.catch(() => {}); }
+  function mediaPlay() {
+    const m = MP; if (!m || !m.el || m.err || !G.q || G.q.key !== m.key) return;
+    if (m.stopAt && m.el.currentTime >= m.stopAt - 0.05) { // дошли до места остановки — играем фрагмент заново
+      const d = curD(); try { m.el.currentTime = G.q.stage === 'reveal' && +d.aend > +d.end ? +d.end : (+d.start || 0); } catch (e) { /* ещё не загрузилось */ }
+    }
+    m.started = true; const p = m.el.play(); if (p && p.catch) p.catch(() => {});
+  }
   function mediaPause() { const m = MP; if (m && m.el && !m.el.paused) m.el.pause(); }
   function mediaToggle() { const m = MP; if (!m || !m.el) return; if (m.el.paused) mediaPlay(); else mediaPause(); }
   function mediaStop() {
@@ -1687,7 +1971,7 @@
       <div class="sp-hint">Первым вычёркивает тот, у кого меньше очков. Выбор — на телефоне или кликом здесь.</div></div>`);
     if (f.stage === 'theme') return el(`<div class="final"><div class="fin-title">Финал</div><div class="fin-theme">Тема: <b>${esc(t.theme)}</b></div><div class="sp-hint">В финале играют все, у кого счёт больше нуля</div><div class="fin-part" id="finpart"></div><div class="hostbar"><button class="btn gold big" data-act="finnext">Принять ставки ▶<kbd>→</kbd></button></div></div>`);
     if (f.stage === 'bet') return el(`<div class="final"><div class="fin-sub">Финал · ${esc(t.theme)}</div><div class="fin-title sm">Делайте ставки!</div><div class="sp-hint">Ставка — с телефона (тайно). Без телефона — кликни по игроку и впиши ставку.</div><div class="fin-part" id="finpart"></div><div class="hostbar"><button class="btn gold" data-act="finnext">Показать вопрос ▶<kbd>→</kbd></button></div></div>`);
-    if (f.stage === 'q') return el(`<div class="final"><div class="fin-sub">Финал · ${esc(t.theme)}</div><div class="qtext" style="font-size:${qSize(t.q)}rem">${esc(t.q)}</div><div class="timer" id="timer"><i></i><b></b></div><div class="sp-hint">Пишите ответ на телефоне</div><div class="fin-part" id="finpart"></div><div class="hostbar"><button class="btn" data-act="timer">⏯ Пауза<kbd>Пробел</kbd></button><button class="btn gold" data-act="finnext">Стоп — к ответам ▶<kbd>→</kbd></button></div></div>`);
+    if (f.stage === 'q') return el(`<div class="final"><div class="fin-sub">Финал · ${esc(t.theme)}</div>${t.img ? `<img class="fimg" src="${esc(t.img)}" alt="">` : ''}<div class="qtext" style="font-size:${t.img ? Math.min(3, qSize(t.q)) : qSize(t.q)}rem">${esc(t.q)}</div><div class="timer" id="timer"><i></i><b></b></div><div class="sp-hint">Пишите ответ на телефоне</div><div class="fin-part" id="finpart"></div><div class="hostbar"><button class="btn" data-act="timer">⏯ Пауза<kbd>Пробел</kbd></button><button class="btn gold" data-act="finnext">Стоп — к ответам ▶<kbd>→</kbd></button></div></div>`);
     return el(`<div class="final"><div class="fin-sub">Финал · ${esc(t.theme)}</div><div class="fin-q">${esc(t.q)}</div><div class="fin-cards" id="fincards"></div><div id="finans"></div><div class="hostbar"><button class="btn gold" data-act="finnext" id="finbtn"></button></div></div>`);
   }
   function updFinal() {
@@ -1726,18 +2010,19 @@
       }).join('');
       lastPop = null;
     }
-    const fa = $('#finans'); if (fa) fa.innerHTML = f.showA ? `<div class="answer"><div class="al">Правильный ответ</div><div class="at">${esc(finT().a)}</div></div>` : '';
+    const fa = $('#finans'); if (fa) fa.innerHTML = f.showA ? `<div class="answer"><div class="al">Правильный ответ</div><div class="at">${esc(finT().a)}</div>${finT().c ? `<div class="acom">${esc(finT().c)}</div>` : ''}</div>` : '';
     const fb = $('#finbtn'); if (fb) fb.innerHTML = (f.showA ? 'Итоги игры 🏆' : 'Показать правильный ответ') + '<kbd>→</kbd>';
   }
 
   /* ----- итоги ----- */
   function endGame() {
-    stopTimer(); stopAT(); conHalt(); mediaStop(); Sound.think(false); G.q = null; G.phase = 'end'; curSig = null; changed();
-    Sound.play('fanfare'); FX.fireworks(10000); setTimeout(() => FX.confetti(240), 1700);
+    stopTimer(); stopAT(); conHalt(); mediaStop(); Sound.think(false); G.q = null; G.phase = 'end'; curSig = null;
+    const w = G.ents.slice().sort((a, b) => b.score - a.score)[0]; G.wj = w ? joke('winner', w.name) : ''; changed();
+    Sound.play('fanfare'); setTimeout(() => Sound.play('applause'), 1200); FX.fireworks(10000); setTimeout(() => FX.confetti(240), 1700);
   }
   function vEnd() {
     const rank = G.ents.slice().sort((a, b) => b.score - a.score), top = rank.slice(0, 3), pos = [2, 1, 3], pod = [top[1], top[0], top[2]];
-    return el(`<div class="end"><div class="end-title">🏆 ${rank[0] ? esc(rank[0].name) + ' — победитель!' : 'Итоги'}</div><div class="podium">${pod.map((e, i) => e
+    return el(`<div class="end"><div class="end-title">🏆 ${rank[0] ? esc(rank[0].name) + ' — победитель!' : 'Итоги'}</div>${G.wj ? `<div class="end-sub">${esc(G.wj)}</div>` : ''}<div class="podium">${pod.map((e, i) => e
       ? `<div class="pd p${pos[i]}" style="--c:${e.color}"><div class="pd-name">${pos[i] === 1 ? '👑 ' : ''}${esc(e.name)}</div><div class="pd-score">${fmt(e.score)}</div><div class="pd-bar">${pos[i]}</div></div>`
       : '<div class="pd empty"></div>').join('')}</div><div class="rest">${rank.slice(3).map((e, i) => `<span>${i + 4}. ${esc(e.name)} — ${fmt(e.score)}</span>`).join('')}</div>
       <div class="hostbar"><button class="btn" data-act="fireworks">🎆 Ещё салют</button><button class="btn" data-act="newgame">↻ Новая игра</button></div></div>`);
@@ -1790,19 +2075,21 @@
   /* ================= оверлеи и эффекты ================= */
   const letters = s => Array.from(String(s)).map((ch, i) => (ch === ' ' ? ' ' : `<span style="animation-delay:${(i * 0.05).toFixed(2)}s">${esc(ch)}</span>`)).join('');
   const OV = {
-    cat: () => `<div class="ov-rays"></div><div class="ov-emoji bag">🎁</div><div class="ov-emoji cat">🐱</div><div class="ov-title">Кот в мешке!</div>`,
-    auction: () => `<div class="ov-rays"></div><div class="ov-emoji hammer">🔨</div><div class="ov-title">${letters('Аукцион!')}</div><div class="ov-sub">Торгуемся за вопрос</div>`,
-    trap: () => `<div class="ov-emoji">🚨</div><div class="ov-title">⚠ ЛОВУШКА ⚠</div><div class="ov-sub">Ангел или дьявол? Решит монетка…</div>`,
+    cat: () => `<div class="ov-rays"></div><div class="ov-emoji bag">🎁</div><div class="ov-emoji cat">🐱</div><div class="ov-title">Кот в мешке!</div><div class="ov-sub">${esc(joke('cat'))}</div>`,
+    auction: () => `<div class="ov-rays"></div><div class="ov-emoji hammer">🔨</div><div class="ov-title">${letters('Аукцион!')}</div><div class="ov-sub">${esc(joke('auction') || 'Торгуемся за вопрос')}</div>`,
+    trap: () => `<div class="ov-emoji">🚨</div><div class="ov-title">⚠ ЛОВУШКА ⚠</div><div class="ov-sub">Ангел или дьявол? Решит монетка…</div>${PACK.jokes && PACK.jokes.trap ? `<div class="ov-sub sm">${esc(joke('trap'))}</div>` : ''}`,
     angel: () => `<div class="ov-halo"></div><div class="ov-emoji angel">😇</div><div class="ov-title">${letters('АНГЕЛ')}</div><div class="ov-sub">Небеса сегодня добры</div>`,
     devil: () => `<div class="ov-flames"></div><div class="ov-emoji devil">😈</div><div class="ov-title">${letters('ДЬЯВОЛ')}</div><div class="ov-sub">Сейчас будет жарко…</div>`,
     bonus: () => `<div class="ov-rays bonus"></div><div class="ov-qs"><span>?</span><span>?</span><span>?</span></div><div class="ov-title">${letters('БОНУС!')}</div><div class="ov-sub">Вместо вопроса — конкурс</div>`,
     music: () => `<div class="ov-eq">${'<i></i>'.repeat(9)}</div><div class="ov-title">${letters('Угадай мелодию')}</div><div class="ov-sub">🎵 Слушаем внимательно</div>`,
     video: () => `<div class="ov-film"></div><div class="ov-emoji clap">🎬</div><div class="ov-title">${letters('Видеовопрос')}</div><div class="ov-sub">Смотрим внимательно!</div>`,
-    bribe: d => `<div class="ov-rays"></div><div class="ov-emoji">💰</div><div class="ov-title">${esc(d.name)}<br>подкупает судью!</div><div class="ov-sub">−${fmt(d.cost)} очков · ${d.hint ? 'подсказка ушла на телефон 🤫' : 'судья, шепни подсказку на ушко 🤫'}</div>`,
+    bribe: d => `<div class="ov-rays"></div><div class="ov-emoji">💰</div><div class="ov-title">${esc(d.name)}<br>подкупает судью!</div><div class="ov-sub">−${fmt(d.cost)} очков · ${d.hint ? 'подсказка ушла на телефон 🤫' : 'судья, шепни подсказку на ушко 🤫'}</div><div class="ov-sub sm">${esc(joke('bribe', d.name))}</div>`,
     round: d => `<div class="ov-rays"></div><div class="ov-title">${letters(d.title)}</div>${d.sub ? `<div class="ov-sub">${esc(d.sub)}</div>` : ''}`,
+    medal: d => `<div class="ov-rays medal m${d.md}"></div><div class="ov-medal m${d.md}"><span>${MEDALS[d.md][0]}</span></div><div class="ov-title medal m${d.md}">${letters(MEDALS[d.md][1] + '!')}</div><div class="ov-sub">${esc(joke('medal'))}</div>`,
+    mashup: () => `<div class="ov-mash"><span>🧑</span><span>👩</span></div><div class="ov-title">${letters('Мешап!')}</div><div class="ov-sub">Два лица в одном. Назови обоих!</div>`,
     final: () => { const FT = finThemes(); return `<div class="ov-title">${letters('ФИНАЛ')}</div><div class="ov-sub">${FT.length > 1 ? `${FT.length} тем — по очереди вычёркиваем, пока не останется одна` : 'Тема: ' + esc((FT[0] || {}).theme || '')}</div>`; },
   };
-  const OVDUR = { cat: 3400, auction: 3000, trap: 2600, angel: 2700, devil: 2700, bonus: 2600, music: 2100, video: 2000, bribe: 3000, round: 2600, final: 3400 };
+  const OVDUR = { cat: 3400, auction: 3000, trap: 2600, angel: 2700, devil: 2700, bonus: 2600, music: 2100, video: 2000, bribe: 3000, round: 2600, final: 3400, medal: 2600, mashup: 2200 };
   const OVFX = {
     cat: () => { Sound.play('whoosh'); setTimeout(() => { Sound.play('cat'); FX.burst(innerWidth / 2, innerHeight * 0.4, '#ffcc33', 70); }, 1050); },
     auction: () => { Sound.play('auction'); [0, 380, 760].forEach(d => setTimeout(() => FX.burst(innerWidth * 0.53, innerHeight * 0.38, '#ffcc33', 45), d + 260)); },
@@ -1814,6 +2101,8 @@
     video: () => Sound.play('whoosh'),
     bribe: () => { Sound.play('bribe'); FX.rain('💰', 40); FX.rain('💵', 18); },
     round: () => Sound.play('round'),
+    medal: d => { Sound.play('medal'); const col = { 1: '#e08a4c', 2: '#e6eefc', 3: '#ffd34d' }[d.md]; [0, 250, 500].forEach(t => setTimeout(() => FX.burst(innerWidth * (0.35 + t / 1700), innerHeight * 0.4, col, 55), t + 300)); },
+    mashup: () => { Sound.play('mashup'); FX.burst(innerWidth / 2, innerHeight * 0.4, '#36e2ff', 60); },
     final: () => { Sound.play('final'); FX.burst(innerWidth / 2, innerHeight * 0.45, '#ffcc33', 90); },
   };
   function overlay(type, d) {
@@ -1821,7 +2110,7 @@
     return new Promise(res => {
       closeOverlay();
       const ov = $('#overlay'); ov.className = 'show ov-' + type; ov.innerHTML = OV[type](d);
-      const rays = $('.ov-rays', ov); if (rays) rays.style.backgroundImage = `url(${raysImg(rays.classList.contains('bonus') ? 'bonus' : 'gold')})`;
+      const rays = $('.ov-rays', ov); if (rays) rays.style.backgroundImage = `url(${raysImg(rays.classList.contains('bonus') ? 'bonus' : rays.classList.contains('m2') ? 'silver' : rays.classList.contains('m1') ? 'bronze' : 'gold')})`;
       let done = false;
       const fin = () => {
         if (done) return; done = true; if (ovResolve === fin) ovResolve = null;
@@ -1839,7 +2128,7 @@
   function raysImg(kind) {
     if (RAYS[kind]) return RAYS[kind];
     const n = 1280, c = document.createElement('canvas'); c.width = c.height = n;
-    const g = c.getContext('2d'), col = kind === 'bonus' ? '220,150,255' : '255,204,51';
+    const g = c.getContext('2d'), col = { bonus: '220,150,255', silver: '220,232,255', bronze: '230,140,80' }[kind] || '255,204,51';
     g.translate(n / 2, n / 2);
     for (let i = 0; i < 24; i++) { g.rotate(Math.PI * 2 / 24); g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, n / 2, -0.07, 0.07); g.closePath(); g.fillStyle = `rgba(${col},.2)`; g.fill(); }
     g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'destination-in';
@@ -1942,6 +2231,7 @@
       if (st === 'bonus') return conNext();
     }
     if (G.phase === 'final') return finNext();
+    if (G.phase === 'results') return afterResults();
   }
   function escAction() {
     if (ovResolve) return closeOverlay();
@@ -1964,6 +2254,7 @@
       case 'ok': return judge(true);
       case 'bad': return judge(false);
       case 'reveal': return reveal();
+      case 'mp1': case 'mp2': return mashPartial(a === 'mp2' ? 2 : 1);
       case 'board': return backToBoard();
       case 'catgive': return catGive(ds.id);
       case 'bid': return placeBid(ds.id, ds.v, true);
@@ -1990,6 +2281,9 @@
       case 'cstare': return conStare(ds.v);
       case 'fstrike': return finStrike(null, ds.i, true);
       case 'aucclose': return aucClose();
+      case 'redeem': return redeem(ds.id, ds.v);
+      case 'reroll': return reroll(ds.id);
+      case 'resnext': return afterResults();
       case 'victim': return setVictim(ds.id);
       case 'flip': return trapFlip();
       case 'ev': return evAct(ds.v, ds);
@@ -2088,7 +2382,7 @@
       G = newState(); undo = []; save(); netStart();
     }
     Sound.init(); Sound.play('round');
-    s.classList.add('out'); setTimeout(() => s.remove(), 650);
+    s.classList.add('out'); setTimeout(() => { s.remove(); musicSync(); }, 650);
     curSig = null; render();
   }
 

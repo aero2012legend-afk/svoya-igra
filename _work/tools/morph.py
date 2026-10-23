@@ -52,6 +52,33 @@ RIGHT_EYE = [362, 263, 386, 374, 387, 373, 385, 380]
 _landmarker = None
 
 
+def ensure_egl():
+    """mediapipe грузит libEGL.so.1 даже на CPU. Если в системе её нет — подкладываем libEGL из
+    Chromium (Playwright) через симлинки и перезапускаемся с LD_LIBRARY_PATH."""
+    import ctypes
+    try:
+        ctypes.CDLL('libEGL.so.1'); ctypes.CDLL('libGLESv2.so.2')
+        return
+    except OSError:
+        pass
+    if os.environ.get('MORPH_REEXEC'):
+        return
+    import glob
+    cands = sorted(glob.glob('/opt/pw-browsers/chromium*/chrome-linux/libEGL.so'))
+    if not cands:
+        return
+    d = os.path.dirname(cands[0])
+    libdir = '/tmp/mashup/lib'
+    os.makedirs(libdir, exist_ok=True)
+    for src, dst in (('libEGL.so', 'libEGL.so.1'), ('libGLESv2.so', 'libGLESv2.so.2')):
+        p = os.path.join(libdir, dst)
+        if not os.path.exists(p):
+            os.symlink(os.path.join(d, src), p)
+    env = dict(os.environ, MORPH_REEXEC='1',
+               LD_LIBRARY_PATH=libdir + ':' + os.environ.get('LD_LIBRARY_PATH', ''))
+    os.execve(sys.executable, [sys.executable] + sys.argv, env)
+
+
 def landmarker():
     global _landmarker
     if _landmarker is None:
@@ -114,7 +141,7 @@ def align(img, pts, W, H, eye_y, eye_dist):
     d = eye_dist * W
     dst = [(W / 2 - d / 2, eye_y * H), (W / 2 + d / 2, eye_y * H)]
     M = similarity([l, r], dst)
-    out = cv2.warpAffine(img, M, (W, H), flags=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_REFLECT_101)
+    out = cv2.warpAffine(img, M, (W, H), flags=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_REPLICATE)
     p2 = np.hstack([pts, np.ones((len(pts), 1))]) @ M.T
     return out, p2, M
 
@@ -132,18 +159,6 @@ def halo_points(p, k):
     oval = p[FACE_OVAL]
     c = oval.mean(0)
     return c + (oval - c) * k
-
-
-def delaunay(pts, W, H):
-    sub = cv2.Subdiv2D((-2, -2, W + 4, H + 4))
-    for x, y in pts:
-        sub.insert((float(min(max(x, -1), W)), float(min(max(y, -1), H))))
-    tris = []
-    lookup = {}
-    for i, (x, y) in enumerate(pts):
-        lookup[(round(min(max(x, -1), W), 3), round(min(max(y, -1), H), 3))] = i
-    from scipy.spatial import cKDTree  # noqa  (может не быть)
-    return tris
 
 
 def triangulate(pts, W, H):
@@ -198,7 +213,7 @@ def piecewise_warp(img, src_pts, dst_pts, tris, W, H):
     mx = M[..., 0, 0] * xs + M[..., 0, 1] * ys + M[..., 0, 2]
     my = M[..., 1, 0] * xs + M[..., 1, 1] * ys + M[..., 1, 2]
     return cv2.remap(img, mx.astype(np.float32), my.astype(np.float32), cv2.INTER_CUBIC,
-                     borderMode=cv2.BORDER_REFLECT_101)
+                     borderMode=cv2.BORDER_REPLICATE)
 
 
 def face_mask(p, W, H, grow, feather_px):
@@ -233,13 +248,58 @@ def skin_color_match(base, target_face, mask):
     return cv2.cvtColor(np.clip(out, 0, 255).astype(np.uint8), cv2.COLOR_LAB2BGR)
 
 
+def cached_detect(path, flip, im):
+    """Точки лица с кешем в /tmp/mashup/cache (чтобы не грузить mediapipe при каждой пробе)."""
+    import hashlib
+    st = os.stat(path)
+    key = hashlib.md5(f'{os.path.abspath(path)}|{st.st_mtime}|{st.st_size}|{flip}'.encode()).hexdigest()
+    cp = f'/tmp/mashup/cache/{key}.npy'
+    if os.path.exists(cp):
+        return np.load(cp)
+    p = detect(im)
+    os.makedirs('/tmp/mashup/cache', exist_ok=True)
+    np.save(cp, p)
+    return p
+
+
+def fit_scale(img, pts, W, H, eye_y, eye_dist, margin=1.06):
+    """Во сколько раз надо сузить кадр (s<=1, вокруг глаз), чтобы он с запасом margin
+    целиком лежал внутри фото (иначе по краям будут полосы)."""
+    _, _, M = align(img, pts, W, H, eye_y, eye_dist)
+    h, w = img.shape[:2]
+    pad = int(0.1 * max(W, H))          # холст с полями — запас может выходить за кадр
+    M2 = M.copy(); M2[:, 2] += pad
+    valid = cv2.warpAffine(np.ones((h, w), np.uint8), M2, (W + 2 * pad, H + 2 * pad),
+                           flags=cv2.INTER_NEAREST, borderMode=cv2.BORDER_CONSTANT, borderValue=0)
+    valid = cv2.erode(valid, np.ones((5, 5), np.uint8))
+    cx, cy = W / 2 + pad, eye_y * H + pad
+
+    def ok(s):
+        s *= margin
+        x0, x1 = int(cx - s * W / 2), int(np.ceil(cx + s * W / 2))
+        y0, y1 = int(cy - s * eye_y * H), int(np.ceil(cy + s * (1 - eye_y) * H))
+        if x0 < 0 or y0 < 0 or x1 > valid.shape[1] or y1 > valid.shape[0]:
+            return False
+        return bool(valid[y0:y1, x0:x1].all())
+    if ok(1.0):
+        return 1.0
+    lo, hi = 0.2, 1.0
+    for _ in range(20):
+        mid = (lo + hi) / 2
+        if ok(mid):
+            lo = mid
+        else:
+            hi = mid
+    return lo
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('a'); ap.add_argument('b'); ap.add_argument('out')
     ap.add_argument('--alpha', type=float, default=0.5)
     ap.add_argument('--size', default='900x1125')
     ap.add_argument('--eye-y', type=float, default=0.42)
-    ap.add_argument('--eye-dist', type=float, default=0.25)
+    ap.add_argument('--eye-dist', type=float, default=0.27)
     ap.add_argument('--outside', default='mix', choices=['mix', 'a', 'b'])
     ap.add_argument('--face-grow', type=float, default=1.0)
     ap.add_argument('--feather', type=float, default=0.06)
@@ -249,18 +309,32 @@ def main():
     ap.add_argument('--flip-b', action='store_true')
     ap.add_argument('--quality', type=int, default=88)
     ap.add_argument('--debug', action='store_true')
+    ap.add_argument('--no-fit', action='store_true', help='не приближать кадр, края заполнить повтором')
     o = ap.parse_args()
     W, H = map(int, o.size.lower().split('x'))
 
-    imgs, pts = [], []
+    raw = []
     for path, flip in ((o.a, o.flip_a), (o.b, o.flip_b)):
         im = cv2.imread(path, cv2.IMREAD_COLOR)
         if im is None:
             raise SystemExit('не читается ' + path)
         if flip:
             im = cv2.flip(im, 1)
-        p = detect(im)
-        al, p2, _ = align(im, p, W, H, o.eye_y, o.eye_dist)
+        raw.append((im, cached_detect(path, flip, im)))
+    eye_dist = o.eye_dist
+    if not o.no_fit:
+        # если фото не покрывает кадр целиком — приближаем, пока не покроет (без полос по краям)
+        s = 1.0
+        for im, p in raw:
+            s = min(s, fit_scale(im, p, W, H, o.eye_y, eye_dist))
+        if s < 0.999:
+            eye_dist = eye_dist / s
+            print(f'кадр приближен: eye-dist {o.eye_dist:.3f} -> {eye_dist:.3f}', file=sys.stderr)
+    imgs, pts = [], []
+    for im, p in raw:
+        al, p2, M = align(im, p, W, H, o.eye_y, eye_dist)
+        if M[0, 0] ** 2 + M[1, 0] ** 2 > 1.44:
+            print(f'внимание: фото увеличено в {np.sqrt(M[0, 0] ** 2 + M[1, 0] ** 2):.1f} раза — может быть мыльным', file=sys.stderr)
         imgs.append(al); pts.append(p2)
     (A, B), (pa, pb) = imgs, pts
     n_face = len(pa)
@@ -305,4 +379,5 @@ def main():
 
 
 if __name__ == '__main__':
+    ensure_egl()
     main()

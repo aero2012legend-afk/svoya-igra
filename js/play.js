@@ -186,7 +186,7 @@
     if (S.phase === 'q' && q) {
       const c = q.con, a = [
         'q', q.k, q.st, q.an === eid ? 'me' : q.an, q.ow === eid ? 'own' : q.ow, (q.tr || []).length, (q.tr || []).includes(eid) ? 't' : '', fzMe(eid) ? 'f' : '',
-        (q.bb || []).includes(eid) ? 'b' : '', priv && priv.k === q.k ? 'h' + (priv.word || '') : '', q.side || '', q.ev ? q.ev.id : '', q.res || '', q.card || '', q.vic, q.at && q.at.up ? 'up' : '',
+        (q.bb || []).includes(eid) ? 'b' : '', priv && priv.k === q.k ? 'h' + (priv.word || '') + (priv.poem ? 'p' : '') : '', q.side || '', q.ev ? q.ev.id : '', q.res || '', q.card || '', q.vic, q.at && q.at.up ? 'up' : '', q.ask || '',
       ];
       if (c) a.push(c.st, c.id, c.a, c.b, c.stake, c.rnd, c.turn, c.go, c.cd, c.gid, (c.vd || []).includes(pid) ? 'v' : '', (c.el || []).join(','), c.ch ? c.ch.a + '' + c.ch.b : '', c.res || '');
       return a.join('|');
@@ -194,6 +194,7 @@
     if (S.phase === 'final' && f) return ['f', f.st, (f.pt || []).includes(eid) ? 'p' : 'n', f.turn, (f.left || []).join(','), f.th].join('|');
     if (S.phase === 'board') return 'b|' + (S.chooser === eid ? 'me' : S.chooser);
     if (S.phase === 'end') return 'end|' + S.ents.map(e => e.s).join(',');
+    if (S.phase === 'results') return 'res|' + JSON.stringify(S.res || {}) + '|' + S.ents.map(e => e.s).join(',');
     if (S.phase === 'lobby') return 'lobby|' + S.ents.length + '|' + JSON.stringify(myPrefs());
     return S.phase + '|' + S.ents.length;
   }
@@ -229,6 +230,11 @@
       }
       case 'final': return finalHTML(eid, me);
       case 'q': return S.q ? qHTML(eid, me) : '';
+      case 'results': {
+        const rank = S.ents.slice().sort((a, b) => b.s - a.s), pos = rank.findIndex(e => e.id === eid) + 1, R = S.res || {};
+        if ((R.lo || []).includes(eid)) return center('🆘', 'Шанс на реабилитацию!', `Ты в отстающих, но Старый добрый.<br>Задание: <b>${esc((R.a || {})[eid] || 'смотри на экран')}</b>`);
+        return center(pos === 1 ? '👑' : '📊', 'Промежуточные итоги', `Ты на <b>${pos}</b>-м месте из ${rank.length}<br>Счёт: ${fmt(me.s)}`);
+      }
     }
     return center('⏳', '…', '');
   }
@@ -251,6 +257,9 @@
       const ev = q.ev || {}, mine = q.vic === eid;
       let h = `<div class="center"><div class="big">${ev.i || '⚠️'}</div><div class="t">${esc(ev.n || '')}</div><div class="s">${esc(ev.d || '')}</div>`;
       if (q.card) h += `<div class="card">${esc(q.card)}</div>`;
+      if (ev.id === 'poem' && mine && priv && priv.k === q.k && priv.poem && !q.res) h += `<div class="poem">${esc(priv.poem)}</div><div class="s">📜 Встань на стул и читай с выражением!</div>`;
+      if (ev.id === 'convince' && !q.res) h += q.ask ? `<div class="askv">Просит: <b>${fmt(q.ask)}</b></div>` : '';
+      if (ev.id === 'convince' && mine && !q.res) h += `<div class="bidrow"><input id="askv" type="number" inputmode="numeric" placeholder="Сколько просишь?"><button id="askgo">Попросить</button></div>`;
       if (q.res) h += `<div class="res">${esc(q.res)}</div>`;
       else if (ev.id === 'give' && mine && q.el) h += `<div class="t sm">Кому подарить?</div>${picks(q.el, 'give')}`;
       h += `<div class="s">${mine ? 'Это про тебя! 👀' : `${q.side === 'a' ? '😇' : '😈'} ${entB(q.vic)}`}</div></div>`;
@@ -345,7 +354,7 @@
     }
   }
   function hintHTML(q) {
-    if (!priv || priv.k !== q.k || priv.word !== undefined) return '';
+    if (!priv || priv.k !== q.k || priv.word !== undefined || priv.poem !== undefined) return '';
     return `<div class="hint">🤫 ${priv.hint ? `Подсказка: <b>${esc(priv.hint)}</b>` : 'Подсказки нет — судья шепнёт её лично'}</div>`;
   }
   function bribeOK(eid) {
@@ -501,6 +510,7 @@
     const sk = t.closest('[data-strike]');
     if (sk && S && S.fin) { const key = 'strike' + (S.fin.left || []).length; if (done[key + 's']) return; done[key + 's'] = 1; send({ t: 'strike', v: +sk.dataset.strike }); vib(40); sk.disabled = true; sk.classList.add('gone'); return; }
     if (t.closest('#bidgo')) return bidCustom();
+    if (t.closest('#askgo') && q) { const inp = $('#askv'), v = Math.floor(Math.abs(+String((inp || {}).value || '').replace(/\s/g, ''))); if (!(v > 0)) { if (inp) inp.classList.add('err'); return; } send({ t: 'ask', k: q.k, v }); if (inp) { inp.value = ''; inp.blur(); } vib(30); return; }
     const b = t.closest('[data-bid]');
     if (b && q) { const v = b.dataset.bid; send({ t: 'bid', k: q.k, v: v === 'all' || v === 'pass' ? v : +v }); vib(25); return; }
     const qb = t.closest('[data-q]');
