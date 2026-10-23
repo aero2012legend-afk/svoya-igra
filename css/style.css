@@ -1,3 +1,5 @@
+@font-face { font-family: 'Russo One'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/russo-cyr.woff2) format('woff2'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: 'Russo One'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/russo-lat.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2212, U+2215, U+FEFF, U+FFFD; }
 /* ===== Экран ведущего (телевизор). Все размеры в rem: 1rem = 1/120 ширины экрана, поэтому в 4K всё просто становится чётче. ===== */
 :root {
   --bg0: #040822; --bg1: #0a1650; --cell1: #2550e6; --cell2: #0e2696;
@@ -497,3 +499,143 @@ body.lite .ov-devil::before { display: none; }
 .ftile:disabled { pointer-events: none; }
 .ftile.win { background: linear-gradient(180deg, #ffdf6e, #e59c00); color: #2b1900; transform: scale(1.12); z-index: 2; overflow: visible; box-shadow: 0 0 3rem rgba(255, 204, 51, .9); animation: winPulse .8s ease-in-out infinite alternate; }
 @keyframes winPulse { from { transform: scale(1.08); } to { transform: scale(1.16); } }
+
+
+/* ===== медали: последние три вопроса темы — бронза, серебро, золото ===== */
+:root { --medal: 'Russo One', var(--heavy); }
+.cell { position: relative; }
+.cell > i { position: absolute; top: .15rem; left: .35rem; font-style: normal; font-size: 1.15rem; line-height: 1; filter: drop-shadow(0 .1rem .2rem rgba(0, 0, 0, .5)); }
+.board.big .cell > i { font-size: .95rem; }
+.cell.medal { overflow: hidden; font-family: var(--medal); letter-spacing: .02em; border-width: .18rem; }
+.cell.medal span { position: relative; z-index: 1; }
+.cell.medal::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 45%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .7), transparent); transform: translateX(-160%) skewX(-22deg); animation: shine 3.6s ease-in-out infinite; pointer-events: none; }
+.cell.m1 { background: linear-gradient(160deg, #f4b07a 0%, #b5652e 38%, #7a3d14 62%, #d48a52 100%); border-color: #ffc89a; color: #fff3e6; text-shadow: 0 .18rem 0 #4a2207, 0 0 1rem rgba(255, 170, 110, .7); }
+.cell.m2 { background: linear-gradient(160deg, #ffffff 0%, #c9d3e3 35%, #8792a8 62%, #e6ecf6 100%); border-color: #f4f8ff; color: #23304d; text-shadow: 0 .14rem 0 rgba(255, 255, 255, .8), 0 0 .8rem rgba(255, 255, 255, .6); }
+.cell.m3 { background: linear-gradient(160deg, #fff6c2 0%, #ffd13b 32%, #c48a00 62%, #ffe27a 100%); border-color: #fff3b0; color: #4a2c00; text-shadow: 0 .14rem 0 rgba(255, 245, 200, .9), 0 0 1.2rem rgba(255, 240, 160, .9); box-shadow: 0 .4rem 1.4rem rgba(0, 0, 0, .45), 0 0 1.6rem rgba(255, 204, 51, .45), inset 0 .25rem 0 rgba(255, 255, 255, .5); }
+.cell.m2::after { animation-delay: .4s; } .cell.m3::after { animation-delay: .8s; }
+.cell.medal.played { background: rgba(12, 24, 86, .38); border-color: rgba(120, 150, 255, .1); }
+.cell.medal.played > i, .cell.medal.played::after { display: none; }
+.qpr.medal { font-family: var(--medal); background: linear-gradient(180deg, #fff, var(--mc) 55%, var(--md)); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; filter: drop-shadow(0 0 .8rem var(--mg)); font-size: 3.2rem; }
+.qpr.m1, .badge.m1 { --mc: #e8925a; --md: #8a4518; --mg: rgba(232, 146, 90, .7); }
+.qpr.m2, .badge.m2 { --mc: #c9d3e3; --md: #7d889e; --mg: rgba(220, 230, 255, .7); }
+.qpr.m3, .badge.m3 { --mc: #ffd13b; --md: #b07800; --mg: rgba(255, 210, 60, .85); }
+.badge.medal { font-family: var(--medal); background: linear-gradient(160deg, #fff, var(--mc) 40%, var(--md)); color: #1a1000; letter-spacing: .08em; }
+.ov-medal { width: 22rem; height: 22rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14rem; animation: medalSpin 1.6s cubic-bezier(.2, .9, .3, 1.15) both; filter: drop-shadow(0 0 3rem var(--mg)); }
+.ov-medal.m1 { --mg: rgba(232, 146, 90, .9); } .ov-medal.m2 { --mg: rgba(230, 240, 255, .9); } .ov-medal.m3 { --mg: rgba(255, 210, 60, 1); }
+@keyframes medalSpin { 0% { opacity: 0; transform: perspective(60rem) rotateY(-540deg) scale(.2); } 70% { opacity: 1; transform: perspective(60rem) rotateY(20deg) scale(1.15); } 100% { transform: none; } }
+.ov-title.medal { font-family: var(--medal); font-size: 10rem; margin-top: 1rem; }
+.ov-title.medal.m1 { color: #f0a06a; text-shadow: 0 0 2.4rem rgba(240, 160, 106, .8), 0 .45rem 0 #5a2a0a; }
+.ov-title.medal.m2 { color: #eef3ff; text-shadow: 0 0 2.4rem rgba(230, 240, 255, .8), 0 .45rem 0 #4a5470; }
+.ov-title.medal.m3 { color: #ffd84d; text-shadow: 0 0 3rem rgba(255, 210, 60, 1), 0 .45rem 0 #7a5200; }
+
+/* ===== картинка вопроса и эффекты ===== */
+.picslot { display: flex; justify-content: center; margin-top: .8rem; flex: none; }
+.qpic { position: relative; width: 48rem; height: 30rem; border-radius: 1.2rem; overflow: hidden; background: #000; box-shadow: 0 1rem 3rem rgba(0, 0, 0, .55), 0 0 0 .2rem rgba(170, 200, 255, .25); transition: width .7s cubic-bezier(.3, .8, .3, 1), height .7s cubic-bezier(.3, .8, .3, 1); animation: picIn .7s cubic-bezier(.2, .9, .3, 1.1) both; }
+@keyframes picIn { from { opacity: 0; transform: scale(.85) rotate(-1.5deg); } to { opacity: 1; transform: none; } }
+.qpic > img.pi { display: block; width: 100%; height: 100%; object-fit: contain; transition: filter 1.4s ease, transform 1.8s cubic-bezier(.6, 0, .2, 1), clip-path 1.6s cubic-bezier(.6, 0, .2, 1), opacity .8s; user-select: none; }
+.qpic.err::after { content: attr(data-err); position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 2rem; font-size: 1.6rem; color: var(--mut); text-align: center; }
+.qpic .pa { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; opacity: 0; transition: opacity 1.2s ease .6s; }
+.qpic.shown .pa { opacity: 1; }
+.fx-blur > img.pi { filter: blur(2.4rem); transform: scale(1.08); }
+.fx-deblur > img.pi { filter: blur(var(--blur, 2.6rem)); transform: scale(1.06); transition: filter .3s linear, transform 1.8s; }
+.fx-silhouette > img.pi { filter: brightness(0) drop-shadow(0 0 .1rem rgba(255, 255, 255, .4)); }
+.fx-silhouette { background: radial-gradient(circle, #f4f6ff, #aab6d8); }
+.fx-negative > img.pi { filter: invert(1) hue-rotate(180deg); }
+.fx-mirror > img.pi { transform: scaleX(-1); }
+.qpic.fx.shown > img.pi { filter: none; transform: none; clip-path: inset(0 0 0 0 round 0); }
+.fx-silhouette.shown { background: #000; transition: background 1s; }
+.qpic .tiles { position: absolute; inset: 0; }
+.qpic .tiles i { position: absolute; display: block; box-shadow: inset 0 0 0 .08rem rgba(0, 0, 0, .7); transition: left .9s cubic-bezier(.6, 0, .2, 1), top .9s cubic-bezier(.6, 0, .2, 1); }
+.fx-tiles > img.pi { visibility: hidden; }
+.qpic.shown .tiles i { box-shadow: none; }
+.qpic .pix { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; transition: opacity 1.2s ease; }
+.fx-pixel > img.pi { opacity: 0; } .fx-pixel.shown > img.pi { opacity: 1; } .qpic.shown .pix { opacity: 0; }
+.qscreen.haspic { justify-content: flex-start; padding-top: .2rem; }
+.qscreen.haspic .qtext { margin: 1rem 0 1rem; }
+.qscreen.haspic .buzzer { top: auto; bottom: 7rem; }
+
+/* мешап: при ответе из смешанного лица разлетаются две настоящие фотографии */
+.qpic.mash { overflow: visible; background: transparent; box-shadow: none; }
+.qpic.mash > img.pi { position: relative; z-index: 2; border-radius: 1.2rem; box-shadow: 0 1rem 3rem rgba(0, 0, 0, .55), 0 0 0 .25rem rgba(54, 226, 255, .55), 0 0 3rem rgba(54, 226, 255, .35); object-fit: cover; transition: transform 1.2s cubic-bezier(.2, .9, .3, 1.2), opacity 1s; }
+.qpic.mash .mp { position: absolute; inset: 0; z-index: 1; opacity: 0; transform: scale(.85); transition: transform 1.3s cubic-bezier(.2, 1.1, .3, 1.15), opacity .6s; }
+.qpic.mash .mp img { width: 100%; height: 100%; object-fit: cover; border-radius: 1.2rem; box-shadow: 0 1rem 3rem rgba(0, 0, 0, .6), 0 0 0 .25rem #fff; }
+.qpic.mash .mp b { position: absolute; left: 50%; bottom: -1.2rem; transform: translateX(-50%); white-space: nowrap; padding: .4rem 1.4rem; border-radius: 1rem; background: var(--gold); color: #2b1900; font-family: var(--heavy); font-size: 1.9rem; box-shadow: 0 .4rem 1.2rem rgba(0, 0, 0, .5); opacity: 0; transition: opacity .5s .9s; }
+.qpic.mash.out-a .mp.a { opacity: 1; transform: translateX(-108%) rotate(-7deg) scale(.92); }
+.qpic.mash.out-b .mp.b { opacity: 1; transform: translateX(108%) rotate(7deg) scale(.92); }
+.qpic.mash.out-a .mp.a b, .qpic.mash.out-b .mp.b b { opacity: 1; }
+.qpic.mash.done > img.pi { transform: scale(.82); }
+.mpart { margin-top: 1rem; font-size: 1.8rem; font-weight: 800; padding: .5rem 1.6rem; border-radius: 1rem; background: rgba(46, 229, 157, .14); border: .15rem solid rgba(46, 229, 157, .6); }
+.mpart b { color: var(--gold); }
+.btn.half { background: linear-gradient(180deg, #2bb5d6, #13708a); }
+.ov-mash { display: flex; gap: 0; font-size: 12rem; line-height: 1; }
+.ov-mash span { display: inline-block; animation: mashA 1.4s cubic-bezier(.3, .8, .3, 1) both; }
+.ov-mash span + span { animation-name: mashB; margin-left: -6rem; mix-blend-mode: screen; }
+@keyframes mashA { from { transform: translateX(-30rem) rotate(-20deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes mashB { from { transform: translateX(30rem) rotate(20deg); opacity: 0; } to { transform: none; opacity: .85; } }
+
+/* караоке */
+.kar { width: 100rem; margin-top: .8rem; display: flex; flex-direction: column; align-items: center; gap: .3rem; }
+.kar .kl { min-height: 2rem; font-weight: 800; line-height: 1.2; transition: opacity .3s; }
+.kar .k0 { font-size: 1.7rem; opacity: .35; }
+.kar .k1 { font-size: 3.2rem; color: rgba(255, 255, 255, .45); background: linear-gradient(90deg, var(--gold) var(--k, 0%), rgba(255, 255, 255, .45) var(--k, 0%)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 .2rem .6rem rgba(0, 0, 0, .6)); }
+.kar .k2 { font-size: 2rem; opacity: .6; }
+.kar .kl.hid { color: var(--pink) !important; -webkit-text-fill-color: var(--pink); background: none; letter-spacing: .3em; animation: pulse .8s infinite alternate; }
+.qscreen.haskar .qtext { margin: .6rem 0 .8rem; }
+.viz.mini { width: 60rem; height: 5rem; margin-top: .4rem; }
+
+/* комментарий к ответу и шутки */
+.answer .acom { margin-top: .4rem; font-size: 1.6rem; font-weight: 700; font-style: italic; color: #d9e2ff; max-width: 90rem; }
+#quip { position: fixed; left: 50%; top: 5.2rem; transform: translateX(-50%); z-index: 34; pointer-events: none; width: max-content; max-width: 90rem; }
+#quip .qp { padding: .8rem 2.2rem; border-radius: 1.4rem; background: linear-gradient(180deg, rgba(20, 30, 110, .96), rgba(8, 14, 56, .96)); border: .18rem solid var(--gold); box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, .5), 0 0 1.6rem rgba(255, 204, 51, .35); font-size: 2rem; font-weight: 800; font-style: italic; text-align: center; animation: quipIn .55s cubic-bezier(.2, 1.4, .4, 1) both; }
+#quip .qp.ok { border-color: var(--green); } #quip .qp.bad { border-color: var(--red); } #quip .qp.mut { border-color: var(--mut); }
+#quip .qp.out { animation: quipOut .5s both; }
+@keyframes quipIn { from { opacity: 0; transform: translateY(-3rem) scale(.8) rotate(-2deg); } to { opacity: 1; transform: none; } }
+@keyframes quipOut { to { opacity: 0; transform: translateY(-2rem) scale(.9); } }
+.ov-sub.sm { font-size: 2rem; font-style: italic; color: #d9e2ff; animation-delay: .9s; }
+
+/* уговори судью, стих */
+.askrow { display: flex; flex-direction: column; align-items: center; gap: .3rem; }
+.asklbl { font-size: 1.6rem; color: var(--mut); font-weight: 700; }
+.tdcard.poem .tdt { font-size: 2rem; white-space: pre-line; line-height: 1.4; max-height: 28rem; overflow: auto; }
+
+/* финал: картинка и подписи */
+.fimg { max-height: 22rem; max-width: 60rem; border-radius: 1rem; box-shadow: 0 1rem 3rem rgba(0, 0, 0, .5); margin: .6rem 0 0; }
+.end-sub { font-size: 2.4rem; font-weight: 800; font-style: italic; color: #d9e2ff; margin-top: .4rem; animation: fadeUp .6s 1s both; }
+
+/* ===== промежуточные итоги раунда ===== */
+.results { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: .8rem 4rem 1rem; gap: .7rem; animation: fadeIn .4s both; overflow: hidden; }
+.rs-sub { font-size: 1.6rem; color: var(--mut); text-transform: uppercase; letter-spacing: .2em; font-weight: 800; }
+.rs-title { font-family: var(--heavy); font-size: 5rem; color: var(--gold); line-height: 1; text-shadow: 0 0 2rem rgba(255, 204, 51, .6), 0 .3rem 0 #8a5a00; }
+.rs-title span { display: inline-block; animation: drop .8s cubic-bezier(.2, 1.6, .4, 1) both; }
+.rs-lead { font-size: 2rem; font-weight: 800; font-style: italic; color: var(--gold2); animation: fadeUp .6s 1.2s both; }
+.rbars { width: 90rem; display: flex; flex-direction: column; gap: .35rem; }
+.rb { display: grid; grid-template-columns: 3rem 18rem 1fr 9rem; align-items: center; gap: 1rem; font-size: 1.7rem; font-weight: 800; animation: fadeUp .5s both; }
+.rb .rp { color: var(--mut); text-align: right; } .rb .rn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rb .rbar { height: 1.7rem; border-radius: 1rem; background: rgba(255, 255, 255, .07); overflow: hidden; }
+.rb .rbar i { display: block; height: 100%; width: var(--w); background: linear-gradient(90deg, var(--c), color-mix(in srgb, var(--c) 60%, #fff)); border-radius: 1rem; box-shadow: 0 0 1rem var(--c); animation: barGrow 1.4s cubic-bezier(.2, .9, .3, 1) both; animation-delay: inherit; transform-origin: 0 50%; }
+@keyframes barGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.rb .rs { text-align: right; font-family: var(--heavy); color: var(--gold); } .rb .rs.neg { color: var(--red); }
+.rb.lead { font-size: 2.1rem; } .rb.lead .rn { color: var(--gold); }
+.rb.lose .rn { color: #ffb3bb; }
+.redeem { width: 90rem; padding: .9rem 1.6rem 1rem; border-radius: 1.2rem; background: rgba(255, 77, 94, .1); border: .18rem solid rgba(255, 77, 94, .55); border-left: .6rem solid var(--c); animation: fadeUp .6s 1.8s both; }
+.rd-h { font-size: 1.8rem; font-weight: 800; } .rd-h b { color: var(--gold); }
+.rd-j { font-size: 1.4rem; font-style: italic; color: var(--mut); margin-top: .1rem; }
+.rd-t { font-size: 2.1rem; font-weight: 800; margin: .4rem 0 .5rem; color: #fff; }
+.rd-b { display: flex; gap: .6rem; flex-wrap: wrap; } .rd-b .btn { font-size: 1.2rem; padding: .45rem 1rem; }
+.rd-r { font-size: 1.8rem; font-weight: 800; color: var(--mut); } .rd-r.ok { color: var(--green); }
+
+/* ===== пролёт тем перед игрой ===== */
+#overlay.ov-flyby { background: radial-gradient(ellipse at center, rgba(28, 50, 150, .95), rgba(3, 6, 28, .98) 70%); perspective: 60rem; overflow: hidden; }
+.fly { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; transform-style: preserve-3d; }
+.fly-lbl { position: absolute; top: 7%; left: 0; right: 0; text-align: center; font-family: var(--heavy); font-size: 5rem; color: var(--gold); text-shadow: 0 0 2rem rgba(255, 204, 51, .7), 0 .3rem 0 #8a5a00; opacity: 0; }
+.fly-lbl.in { animation: lblIn .6s cubic-bezier(.2, 1.4, .4, 1) both; }
+@keyframes lblIn { from { opacity: 0; transform: scale(2.2); letter-spacing: .4em; } to { opacity: 1; transform: none; } }
+.fl { position: absolute; padding: 1.2rem 3rem; border-radius: 1.2rem; background: linear-gradient(180deg, var(--cell1), var(--cell2)); border: .2rem solid rgba(170, 200, 255, .55); box-shadow: 0 0 3rem rgba(54, 226, 255, .45); font-weight: 900; font-size: 4rem; text-transform: uppercase; white-space: nowrap; color: #fff; text-shadow: 0 .2rem .8rem rgba(0, 0, 0, .6); animation: flyTheme 1.45s cubic-bezier(.4, .1, .6, 1) both; }
+@keyframes flyTheme {
+  0% { opacity: 0; transform: translate3d(calc(var(--x) * 3), calc(var(--y) * 3), -90rem) rotate(var(--r)) scale(.4); }
+  25% { opacity: 1; }
+  55% { opacity: 1; transform: translate3d(var(--x), var(--y), 0) rotate(0deg) scale(1); }
+  100% { opacity: 0; transform: translate3d(calc(var(--x) * -2.5), calc(var(--y) * -2.5), 50rem) rotate(calc(var(--r) * -1)) scale(1.6); }
+}
+body.lite .cell.medal::after { display: none; }
+body.lite .fl { animation-duration: 1s; box-shadow: none; }
