@@ -11,6 +11,15 @@ w = int(sys.argv[4]) if len(sys.argv) > 4 else 512
 h = int(sys.argv[5]) if len(sys.argv) > 5 else 512
 seed = int(sys.argv[6]) if len(sys.argv) > 6 and sys.argv[6] != 'random' else random.randint(1, 10**8)
 steps = int(sys.argv[7]) if len(sys.argv) > 7 else 2
+# сервер мог не пережить перезапуск контейнера — поднимаем его сами (один на всех)
+import subprocess, fcntl
+os.makedirs('/opt/sdq/jobs', exist_ok=True)
+with open('/opt/sdq/start.lock', 'w') as lk:
+    fcntl.flock(lk, fcntl.LOCK_EX)
+    if subprocess.run(['pgrep', '-f', 'sd_server.py'], stdout=subprocess.DEVNULL).returncode != 0:
+        here = os.path.dirname(os.path.abspath(__file__))
+        subprocess.Popen(['nohup', '/opt/aienv/bin/python', os.path.join(here, 'sd_server.py')], stdout=open('/tmp/sd_server.log', 'a'), stderr=subprocess.STDOUT, start_new_session=True)
+        time.sleep(3)
 jid = '/opt/sdq/jobs/%d_%s' % (int(time.time() * 1000), uuid.uuid4().hex[:6])
 json.dump({'prompt': prompt, 'out': out, 'n': n, 'w': w, 'h': h, 'seed': seed, 'steps': steps}, open(jid + '.json.tmp', 'w'))
 os.rename(jid + '.json.tmp', jid + '.json')

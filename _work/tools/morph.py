@@ -302,7 +302,7 @@ def main():
     ap.add_argument('--eye-dist', type=float, default=0.27)
     ap.add_argument('--outside', default='mix', choices=['mix', 'a', 'b'])
     ap.add_argument('--face-grow', type=float, default=1.0)
-    ap.add_argument('--feather', type=float, default=0.06)
+    ap.add_argument('--feather', type=float, default=0.08)
     ap.add_argument('--halo', type=float, default=0.0)
     ap.add_argument('--colormatch', action='store_true')
     ap.add_argument('--flip-a', action='store_true')
@@ -321,21 +321,27 @@ def main():
         if flip:
             im = cv2.flip(im, 1)
         raw.append((im, cached_detect(path, flip, im)))
-    eye_dist = o.eye_dist
-    if not o.no_fit:
-        # если фото не покрывает кадр целиком — приближаем, пока не покроет (без полос по краям)
-        s = 1.0
-        for im, p in raw:
-            s = min(s, fit_scale(im, p, W, H, o.eye_y, eye_dist))
-        if s < 0.999:
-            eye_dist = eye_dist / s
-            print(f'кадр приближен: eye-dist {o.eye_dist:.3f} -> {eye_dist:.3f}', file=sys.stderr)
-    imgs, pts = [], []
-    for im, p in raw:
+    # подгонка кадра: фото, из которого берутся волосы/фон (--outside), должно покрывать кадр целиком;
+    # второе нужно только в зоне лица. Для портретов pics каждое фото подгоняется само.
+    s_each = [1.0, 1.0] if o.no_fit else [fit_scale(im, p, W, H, o.eye_y, o.eye_dist) for im, p in raw]
+    base = {'a': [0], 'b': [1], 'mix': [0, 1]}[o.outside]
+    s = min(s_each[i] for i in base)
+    eye_dist = o.eye_dist / s
+    if s < 0.999:
+        print(f'кадр приближен: eye-dist {o.eye_dist:.3f} -> {eye_dist:.3f}', file=sys.stderr)
+    imgs, pts, pics = [], [], []
+    for i, (im, p) in enumerate(raw):
         al, p2, M = align(im, p, W, H, o.eye_y, eye_dist)
-        if M[0, 0] ** 2 + M[1, 0] ** 2 > 1.44:
-            print(f'внимание: фото увеличено в {np.sqrt(M[0, 0] ** 2 + M[1, 0] ** 2):.1f} раза — может быть мыльным', file=sys.stderr)
+        zoom = np.sqrt(M[0, 0] ** 2 + M[1, 0] ** 2)
+        if zoom > 1.25:
+            print(f'внимание: фото {"AB"[i]} увеличено в {zoom:.1f} раза — может быть мыльным', file=sys.stderr)
+        h, w = im.shape[:2]
+        oval = p[FACE_OVAL]; c = oval.mean(0); oval = c + (oval - c) * 1.1
+        if oval[:, 0].min() < 0 or oval[:, 1].min() < 0 or oval[:, 0].max() > w or oval[:, 1].max() > h:
+            print(f'внимание: лицо {"AB"[i]} обрезано краем фото', file=sys.stderr)
         imgs.append(al); pts.append(p2)
+        ed_i = max(eye_dist, o.eye_dist / s_each[i])
+        pics.append(al if abs(ed_i - eye_dist) < 1e-6 else align(im, p, W, H, o.eye_y, ed_i)[0])
     (A, B), (pa, pb) = imgs, pts
     n_face = len(pa)
     extra_a, extra_b = [], []
@@ -369,10 +375,10 @@ def main():
 
     q = [cv2.IMWRITE_JPEG_QUALITY, o.quality]
     cv2.imwrite(o.out + '_mix.jpg', out, q)
-    cv2.imwrite(o.out + '_a.jpg', A, q)
-    cv2.imwrite(o.out + '_b.jpg', B, q)
+    cv2.imwrite(o.out + '_a.jpg', pics[0], q)
+    cv2.imwrite(o.out + '_b.jpg', pics[1], q)
     if o.debug:
-        sheet = np.hstack([A, out, B])
+        sheet = np.hstack([pics[0], out, pics[1]])
         sheet = cv2.resize(sheet, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
         cv2.imwrite(o.out + '_dbg.jpg', sheet, [cv2.IMWRITE_JPEG_QUALITY, 85])
     print(o.out + '_mix.jpg', f'{W}x{H}', 'triangles', len(tris))
