@@ -534,7 +534,11 @@
       P.fx = FXS.includes(d.fx) ? d.fx : '';
       if (P.fx === 'zoom' || P.fx === 'crop') P.area = picRect(d.area);
       P.node = el(`<div class="qpic ${P.fx ? 'fx fx-' + P.fx : ''}"><img class="pi" alt="" draggable="false">${d.aimg ? '<img class="pa" alt="" draggable="false">' : ''}</div>`);
-      if (d.aimg) { const pa = $('.pa', P.node); setSrc(pa, d.aimg); pa.addEventListener('error', () => pa.remove()); } // нет картинки-ответа — остаётся исходная
+      if (d.aimg) { // картинка-ответ: к ответу кадр принимает её пропорции; нет файла — остаётся исходная
+        const pa = $('.pa', P.node); setSrc(pa, d.aimg);
+        pa.addEventListener('load', () => { P.aw = pa.naturalWidth; P.ah = pa.naturalHeight; picFit(); }, { once: true });
+        pa.addEventListener('error', () => pa.remove());
+      }
     }
     // вылет картинки — один раз, а не при каждой перерисовке экрана
     P.node.addEventListener('animationend', e => { if (e.target === P.node) P.node.classList.add('in'); });
@@ -614,14 +618,14 @@
     }
     const maxH = Math.max(9, Math.min(P.mash ? 31 : 36, (qs.clientHeight - used) / rem)), maxW = P.mash ? 34 : 78; // у мешапа по бокам разлетаются фото — им нужно место
     const fit = ar => { const h = Math.min(maxH, maxW / ar); return [h * ar, h]; }, rm = v => v.toFixed(2) + 'rem';
-    const img = $('.pi', n); let [W, H] = fit(P.w / P.h);
+    const img = $('.pi', n); let [W, H] = fit(rv && P.aw && P.ah ? P.aw / P.ah : P.w / P.h); // при ответе кадр подгоняется под картинку-ответ
     if (instant) { n.style.transition = 'none'; img.style.transition = 'none'; }
     if (P.fx === 'zoom' && P.area) {
       const [x, y, w, h] = P.area;
-      if (rv) Object.assign(img.style, { width: rm(W), height: rm(H), left: '0rem', top: '0rem' });
+      if (rv) Object.assign(img.style, { width: rm(W), height: rm(H), left: '0rem', top: '0rem', objectFit: 'contain' });
       else { // до ответа кадр имеет форму области, а картинка внутри увеличена так, что область занимает весь кадр; при ответе кадр и картинка плавно становятся обычными
         [W, H] = fit((w * P.w) / (h * P.h));
-        Object.assign(img.style, { width: rm(100 * W / w), height: rm(100 * H / h), left: rm(-x * W / w), top: rm(-y * H / h) });
+        Object.assign(img.style, { width: rm(100 * W / w), height: rm(100 * H / h), left: rm(-x * W / w), top: rm(-y * H / h), objectFit: 'fill' });
       }
     }
     slot.style.height = rm(H); // место под кадр отдаём сразу, а сам кадр меняет размер плавно — остальной экран не прыгает

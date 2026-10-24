@@ -574,6 +574,7 @@ body.lite .ov-devil::before { display: none; }
 .qpic.mash.out-a .mp.a { opacity: 1; transform: translateX(-108%) rotate(-7deg) scale(.92); }
 .qpic.mash.out-b .mp.b { opacity: 1; transform: translateX(108%) rotate(7deg) scale(.92); }
 .qpic.mash.out-a .mp.a b, .qpic.mash.out-b .mp.b b { opacity: 1; }
+.qpic.mash .mp b:empty { display: none; } /* имя не указано — пустая золотая плашка не нужна */
 .qpic.mash.done > img.pi { transform: scale(.82); }
 .mpart { margin-top: 1rem; font-size: 1.8rem; font-weight: 800; padding: .5rem 1.6rem; border-radius: 1rem; background: rgba(46, 229, 157, .14); border: .15rem solid rgba(46, 229, 157, .6); }
 .mpart b { color: var(--gold); }
