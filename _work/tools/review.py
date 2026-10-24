@@ -8,7 +8,8 @@ out = sys.argv[3] if len(sys.argv) > 3 else '/tmp/review_' + os.path.basename(sy
 ths = d.get('themes', []); ths = ths if sel == 'all' else [ths[int(sel)]]
 try: F = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 18)
 except Exception: F = ImageFont.load_default()
-cells = []
+cells = []; qmap = {}
+key_of = lambda lbl: lbl.split(' ')[1] if ' ' in lbl else ''
 for th in ths:
     print(f"== Р{th.get('round')} {th.get('name')} ({len(th.get('questions', []))})")
     for q in th.get('questions', []):
@@ -20,7 +21,8 @@ for th in ths:
             for v in vals:
                 if not v: continue
                 p = v if os.path.exists(v) else None
-                cells.append((f"{th.get('round')}/{q.get('price')} {key}{' ' + q['fx'] if key == 'img' and q.get('fx') else ''}", p, v))
+                lbl = f"{th.get('round')}/{q.get('price')} {key}{' ' + q['fx'] if key == 'img' and q.get('fx') else ''}"
+                cells.append((lbl, p, v)); qmap[(lbl, v)] = q
 if cells:
     W, H, cols = 300, 230, 6
     rows = (len(cells) + cols - 1) // cols
@@ -29,7 +31,17 @@ if cells:
         x, y = (i % cols) * W, (i // cols) * H
         if p:
             try:
-                im = Image.open(p).convert('RGB'); im.thumbnail((W - 10, H - 34)); sheet.paste(im, (x + 5, y + 28))
+                im = Image.open(p).convert('RGB')
+                q = qmap.get((lbl, v))
+                if q and key_of(lbl) == 'img' and q.get('fx') in ('zoom', 'crop') and isinstance(q.get('area'), list) and len(q['area']) >= 4:
+                    ax, ay, aw, ah = [float(t) for t in q['area'][:4]]; Wd, Hd = im.size
+                    if q['fx'] == 'crop': box = (ax, ay, ax + aw, ay + ah)
+                    else:  # как в игре: окно в пропорциях картинки, сторона max(w,h)%
+                        sc = max(1, min(14, min(100 / max(1, aw), 100 / max(1, ah)))); win = 100 / sc
+                        cx, cy = ax + aw / 2, ay + ah / 2; x0 = min(max(cx - win / 2, 0), 100 - win); y0 = min(max(cy - win / 2, 0), 100 - win)
+                        box = (x0, y0, x0 + win, y0 + win)
+                    im = im.crop((int(box[0] * Wd / 100), int(box[1] * Hd / 100), int(box[2] * Wd / 100), int(box[3] * Hd / 100)))
+                im.thumbnail((W - 10, H - 34)); sheet.paste(im, (x + 5, y + 28))
             except Exception as e: dr.text((x + 5, y + 60), 'ERR ' + str(e)[:30], fill=(255, 80, 80), font=F)
         else: dr.text((x + 5, y + 60), 'НЕТ ФАЙЛА', fill=(255, 80, 80), font=F)
         dr.text((x + 5, y + 4), lbl, fill=(255, 220, 0), font=F)

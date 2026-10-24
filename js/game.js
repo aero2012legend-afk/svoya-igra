@@ -350,7 +350,7 @@
     if (G.phase === 'board') return 'board:' + G.round;
     if (G.phase === 'q') {
       const q = G.q, c = q.con || {};
-      return ['q', q.key, q.stage, q.ans, q.owner, q.victim, q.trap ? q.trap.step + (q.trap.side || '') : '', c.step, c.id, c.b, c.rnd, c.turn].join(':');
+      return ['q', q.key, q.stage, q.ans, q.owner, q.victim, q.trap ? q.trap.step + (q.trap.side || '') + '/' + (q.trap.ask || '') : '', c.step, c.id, c.b, c.rnd, c.turn].join(':');
     }
     if (G.phase === 'final') return 'fin:' + G.fin.stage + ':' + (G.fin.showA ? 1 : 0);
     if (G.phase === 'results') return 'res:' + G.round;
@@ -358,7 +358,7 @@
   }
   function renderStage() {
     const st = $('#stage'), sig = stageSig();
-    if (sig !== curSig) { curSig = sig; st.innerHTML = ''; const v = build(); if (v) st.appendChild(v); if (G.phase === 'q') { mediaAttach(); picAttach(); karLoop(); } }
+    if (sig !== curSig) { curSig = sig; st.innerHTML = ''; const v = build(); if (v) st.appendChild(v); if (G.phase === 'q') { mediaAttach(); picAttach(); karLoop(); fitQ(); } else if (G.phase === 'board') fitThemes(); }
     if (G.phase === 'lobby') updLobby();
     else if (G.phase === 'board') updBoard();
     else if (G.phase === 'q') updQ();
@@ -485,6 +485,14 @@
     g.innerHTML = html.join('');
     return b;
   }
+  // названия тем на плотном табло: как можно крупнее, но так, чтобы каждое влезло в свою плашку (длинные ужимаются)
+  function fitThemes() {
+    if (!$('#stage .board.big')) return;
+    $$('#stage .theme').forEach(t => {
+      let fs = 1.55; t.style.fontSize = fs + 'rem';
+      for (let k = 0; k < 16 && fs > 0.95 && (t.scrollHeight > t.clientHeight + 1 || t.scrollWidth > t.clientWidth + 1); k++) { fs -= 0.05; t.style.fontSize = fs.toFixed(2) + 'rem'; }
+    });
+  }
   function updBoard() { $$('.cell[data-t]').forEach(c => c.classList.toggle('played', !!G.played[`${G.round}-${c.dataset.t}-${c.dataset.i}`])); }
   async function flipCell(cell) {
     if (!cell) return;
@@ -509,37 +517,44 @@
   /* ----- картинка вопроса с эффектами: размытие, кусочек, пазл, силуэт… При ответе эффект снимается ----- */
   const FXS = ['blur', 'deblur', 'pixel', 'zoom', 'crop', 'tiles', 'silhouette', 'negative', 'mirror'];
   let PIC = null; // картинка текущего вопроса живёт между перерисовками, чтобы эффекты снимались плавно
+  function picDrop() { if (PIC && PIC.ro) PIC.ro.disconnect(); PIC = null; }
+  // область [x, y, w, h] в процентах от картинки; приводим к безопасному виду
+  function picRect(a) {
+    if (!Array.isArray(a) || a.length < 4 || a.slice(0, 4).some(v => !isFinite(+v))) a = [35, 35, 30, 30];
+    const c = (v, lo, hi) => Math.max(lo, Math.min(hi, v)), w = c(+a[2], 4, 100), h = c(+a[3], 4, 100);
+    return [c(+a[0], 0, 100 - w), c(+a[1], 0, 100 - h), w, h];
+  }
   function picBuild(d, q) {
-    const P = { key: q.key, w: 4, h: 3, ok: false, mash: d.type === 'mashup' && Array.isArray(d.pics) };
+    const P = { key: q.key, w: 4, h: 3, ok: false, fitted: false, area: null, clip: '', mash: d.type === 'mashup' && Array.isArray(d.pics) };
     if (P.mash) {
       const nm = Array.isArray(d.names) ? d.names : [];
       P.node = el(`<div class="qpic mash"><div class="mp a"><img alt="" draggable="false"><b>${esc(nm[0] || '')}</b></div><div class="mp b"><img alt="" draggable="false"><b>${esc(nm[1] || '')}</b></div><img class="pi" alt="" draggable="false"></div>`);
       const ims = $$('.mp img', P.node); setSrc(ims[0], d.pics[0]); setSrc(ims[1], d.pics[1]);
     } else {
       P.fx = FXS.includes(d.fx) ? d.fx : '';
+      if (P.fx === 'zoom' || P.fx === 'crop') P.area = picRect(d.area);
       P.node = el(`<div class="qpic ${P.fx ? 'fx fx-' + P.fx : ''}"><img class="pi" alt="" draggable="false">${d.aimg ? '<img class="pa" alt="" draggable="false">' : ''}</div>`);
       if (d.aimg) setSrc($('.pa', P.node), d.aimg);
     }
+    // вылет картинки — один раз, а не при каждой перерисовке экрана
+    P.node.addEventListener('animationend', e => { if (e.target === P.node) P.node.classList.add('in'); });
     const img = $('.pi', P.node);
     img.addEventListener('load', () => {
       P.w = img.naturalWidth || 4; P.h = img.naturalHeight || 3; P.ok = true;
-      if (P.fx === 'zoom' || P.fx === 'crop') picArea(P, img, d.area);
+      if (P.fx === 'crop') picCrop(P, img);
       if (P.fx === 'tiles') picTiles(P, img, Math.max(2, Math.min(8, +d.tiles || 4)));
       if (P.fx === 'pixel') picPixel(P, img, Math.max(8, Math.min(80, +d.px || 28)));
-      picFit(); picState();
+      P.node.classList.add('ok'); picFit(true); picState();
     }, { once: true });
     img.addEventListener('error', () => { P.node.classList.add('err'); P.node.setAttribute('data-err', '⚠ Нет картинки: ' + d.img); });
     setSrc(img, d.img);
     return P;
   }
   function setSrc(node, path) { mediaUrl(path).then(u => { node.src = u || path; }); }
-  function picArea(P, img, a) {
-    if (!Array.isArray(a) || a.length < 4) a = [35, 35, 30, 30];
-    const [x, y, w, h] = a.map(Number), clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-    if (P.fx === 'crop') { img.style.clipPath = `inset(${y}% ${clamp(100 - x - w, 0, 100)}% ${clamp(100 - y - h, 0, 100)}% ${x}% round 1rem)`; return; }
-    const s = clamp(Math.min(100 / Math.max(1, w), 100 / Math.max(1, h)), 1, 14), cx = x + w / 2, cy = y + h / 2;
-    const tx = clamp(50 - s * cx, 100 - 100 * s, 0), ty = clamp(50 - s * cy, 100 - 100 * s, 0);
-    img.style.transformOrigin = '0 0'; img.style.transform = `translate(${tx}%, ${ty}%) scale(${s})`;
+  // crop: видно только окошко, остальное чёрное
+  function picCrop(P, img) {
+    const [x, y, w, h] = P.area;
+    P.clip = img.style.clipPath = `inset(${y}% ${100 - x - w}% ${100 - y - h}% ${x}% round 1rem)`;
   }
   function picTiles(P, img, n) {
     let seed = 0; for (const ch of P.key) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0;
@@ -553,7 +568,7 @@
       const t = el('<i></i>');
       Object.assign(t.style, { width: 100 / n + '%', height: 100 / n + '%', left: sc * 100 / n + '%', top: sr * 100 / n + '%', backgroundImage: `url("${u}")`,
         backgroundSize: `${n * 100}% ${n * 100}%`, backgroundPosition: `${n > 1 ? c / (n - 1) * 100 : 0}% ${n > 1 ? r / (n - 1) * 100 : 0}%`, transitionDelay: (i * 0.03).toFixed(2) + 's' });
-      t.dataset.l = c * 100 / n; t.dataset.t = r * 100 / n; wrap.appendChild(t);
+      t.dataset.l = c * 100 / n; t.dataset.t = r * 100 / n; t.dataset.sl = sc * 100 / n; t.dataset.st = sr * 100 / n; wrap.appendChild(t);
     }
     P.node.appendChild(wrap);
   }
@@ -566,27 +581,59 @@
   function picAttach() {
     const q = G.q, slot = $('#picslot'); if (!slot || !q) return;
     const d = curD(); if (!d.img) return;
-    if (!PIC || PIC.key !== q.key) PIC = picBuild(d, q);
-    if (PIC.node.parentNode !== slot) slot.appendChild(PIC.node);
-    picFit(); picState();
+    if (!PIC || PIC.key !== q.key) { picDrop(); PIC = picBuild(d, q); }
+    if (PIC.node.parentNode !== slot) { slot.appendChild(PIC.node); void PIC.node.offsetWidth; } // прежние размеры «закрепляем» — тогда смена размера при ответе пойдёт плавно
+    if (PIC.ro) PIC.ro.disconnect();
+    if (window.ResizeObserver) { // свободное место меняется (строки статуса, кнопки, окно) — картинка подстраивается сама
+      const qs = slot.parentNode; PIC.ro = new ResizeObserver(() => picFit());
+      PIC.ro.observe(qs); Array.from(qs.children).forEach(c => { if (c !== slot) PIC.ro.observe(c); });
+    }
+    picFit(!PIC.ok); picState();
   }
-  // размер картинки — в rem, чтобы на 4K всё просто становилось чётче; к ответу картинка чуть уменьшается
-  function picFit() {
+  // кадр занимает всё свободное место экрана вопроса: высоту считаем по остальным блокам; размеры — в rem, чтобы на 4K всё просто становилось чётче
+  function picFit(instant) {
     const P = PIC, q = G.q; if (!P || !q || !P.node.isConnected) return;
-    const d = curD(), rv = q.stage === 'reveal', long = String(d.q || '').length > 90;
-    const maxH = P.mash ? (rv ? 25 : 31) : (rv ? 24 : long ? 29 : 33), maxW = P.mash ? 44 : 78;
-    const s = Math.min(maxW / P.w, maxH / P.h);
-    P.node.style.width = (P.w * s).toFixed(2) + 'rem'; P.node.style.height = (P.h * s).toFixed(2) + 'rem';
+    const n = P.node, slot = n.parentNode, qs = slot && slot.parentNode; if (!qs) return;
+    const rv = q.stage === 'reveal', rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16, px = (e, k) => parseFloat(getComputedStyle(e)[k]) || 0;
+    let used = px(qs, 'paddingTop') + px(qs, 'paddingBottom') + px(slot, 'marginTop') + px(slot, 'marginBottom');
+    for (const c of qs.children) {
+      if (c === slot) continue;
+      const s = getComputedStyle(c); if (s.position === 'absolute' || s.display === 'none') continue;
+      used += c.offsetHeight + (parseFloat(s.marginTop) || 0) + (parseFloat(s.marginBottom) || 0);
+    }
+    const maxH = Math.max(9, Math.min(P.mash ? 31 : 36, (qs.clientHeight - used) / rem)), maxW = P.mash ? 34 : 78; // у мешапа по бокам разлетаются фото — им нужно место
+    const fit = ar => { const h = Math.min(maxH, maxW / ar); return [h * ar, h]; }, rm = v => v.toFixed(2) + 'rem';
+    const img = $('.pi', n); let [W, H] = fit(P.w / P.h);
+    if (instant) { n.style.transition = 'none'; img.style.transition = 'none'; }
+    if (P.fx === 'zoom' && P.area) {
+      const [x, y, w, h] = P.area;
+      if (rv) Object.assign(img.style, { width: rm(W), height: rm(H), left: '0rem', top: '0rem' });
+      else { // до ответа кадр имеет форму области, а картинка внутри увеличена так, что область занимает весь кадр; при ответе кадр и картинка плавно становятся обычными
+        [W, H] = fit((w * P.w) / (h * P.h));
+        Object.assign(img.style, { width: rm(100 * W / w), height: rm(100 * H / h), left: rm(-x * W / w), top: rm(-y * H / h) });
+      }
+    }
+    slot.style.height = rm(H); // место под кадр отдаём сразу, а сам кадр меняет размер плавно — остальной экран не прыгает
+    n.style.width = rm(W); n.style.height = rm(H);
+    if (instant) { void n.offsetWidth; n.style.transition = ''; img.style.transition = ''; }
   }
   function picState() {
     const P = PIC, q = G.q; if (!P || !q || !P.ok) return;
     const n = P.node, rv = q.stage === 'reveal';
     if (P.mash) { const m = q.mp ? q.mp.n : 0; n.classList.toggle('out-a', rv || m === 1); n.classList.toggle('out-b', rv || m === 2); n.classList.toggle('done', rv); return; }
     if (P.fx === 'deblur') { const tot = q.tot || G.set.timer, k = rv ? 0 : ['open', 'ans', 'timeup'].includes(q.stage) ? Math.max(0, Math.min(1, q.tl / tot)) : 1; n.style.setProperty('--blur', (k * 2.6).toFixed(3) + 'rem'); }
-    if (rv && !n.classList.contains('shown')) requestAnimationFrame(() => requestAnimationFrame(() => {
+    const on = n.classList.contains('shown'), im = $('.pi', n);
+    if (rv && !on) requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (PIC !== P || G.q !== q || q.stage !== 'reveal') return;
       n.classList.add('shown');
+      if (P.fx === 'crop' && im) im.style.clipPath = ''; // инлайн-стиль сильнее класса — снимаем его, чтобы окошко плавно раскрылось
       $$('.tiles i', n).forEach(t => { t.style.left = t.dataset.l + '%'; t.style.top = t.dataset.t + '%'; });
     }));
+    else if (!rv && on) { // ответ отменили (Ctrl+Z) — прячем картинку обратно
+      n.classList.remove('shown');
+      if (P.fx === 'crop' && im) im.style.clipPath = P.clip;
+      $$('.tiles i', n).forEach(t => { t.style.left = t.dataset.sl + '%'; t.style.top = t.dataset.st + '%'; });
+    }
   }
 
   /* ----- караоке: строчки текста синхронно с музыкой; что после остановки — прячем до ответа ----- */
@@ -597,6 +644,7 @@
     const box = $('#kar'), q = G.q, d = curD(); if (!box || !q || !Array.isArray(d.kar)) return;
     karRaf = requestAnimationFrame(karLoop);
     const L = d.kar.filter(x => Array.isArray(x) && x.length >= 2), m = MP && MP.key === q.key ? MP : null;
+    if (!L.length) return; // строчки записаны неверно — не падаем
     const t = m && m.el ? m.el.currentTime : 0, rv = q.stage === 'reveal', cut = +d.end || 0;
     let i = -1; for (let k = 0; k < L.length; k++) if (t + 0.05 >= +L[k][0]) i = k;
     const hide = k => !rv && cut && +L[k][0] >= cut - 0.05;
@@ -618,7 +666,7 @@
     timeout: ['Тишина… Слышно, как думает Старый.', 'Никто не знает? Значит, вопрос был отличный.', 'Мозги загружаются… 3%…'],
     bribe: ['Коррупция на марше!', 'Судья делает вид, что не видел.'],
     medal: ['Дорогой вопрос — дорогие нервы.', 'Сейчас станет жарко.', 'Это вопрос для настоящих олдов.'],
-    leader: ['{name} рвёт всех. Проверьте у {name} телефон.', '{name} лидирует. Остальные — на позитиве.'],
+    leader: ['{name} рвёт всех. Подозрительно — телефон на шпаргалки проверили?', '{name} лидирует. Остальные — на позитиве.'],
     loser: ['{name}, главное — не победа, а участие. Так говорят те, кто проиграл.', '{name}, дно ещё не пробито — копай аккуратнее.'],
     winner: ['{name} — легенда вечера!', 'Поздравляем, {name}! Теперь с тебя тост.'],
   };
@@ -665,10 +713,17 @@
     const banner = q.stage === 'ans' && q.ans && ent(q.ans) ? `<div class="buzzer" id="buzzer" style="--c:${ent(q.ans).color}"><div class="bz-l">Отвечает</div><div class="bz-n">${esc(entName(q.ans))}</div>${G.x2[q.ans] ? '<div class="bz-x">×2</div>' : ''}${ring}</div>` : '';
     const answer = q.stage === 'reveal' ? `<div class="answer"><div class="al">Правильный ответ</div><div class="at">${esc(d.a)}</div>${d.c ? `<div class="acom">${esc(d.c)}</div>` : ''}${resultLine(q)}</div>` : '';
     const mp = q.mp && q.stage !== 'reveal' ? `<div class="mpart">Угадан один: <b>${esc((d.names || [])[q.mp.n - 1] || '№' + q.mp.n)}</b> · ${esc(entName(q.mp.who))} ${sgn(q.mp.val)} · кто назовёт второго?</div>` : '';
-    const pic = !!d.img, fs = pic || md ? Math.min(pic ? 2.6 : 3, qSize(d.q)) : qSize(d.q), mdl = qMedal(q);
+    const pic = !!d.img, fs = pic || md ? Math.min(pic ? (q.stage === 'reveal' ? 2.2 : 2.6) : 3, qSize(d.q)) : qSize(d.q), mdl = qMedal(q);
     return el(`<div class="qscreen st-${q.stage} ${md ? 'md md-' + md : ''} ${pic ? 'haspic' : ''} ${d.kar ? 'haskar' : ''}"><div class="qhead"><span class="qth">${esc(themeOf(q))}</span><span class="qpr ${mdl ? 'medal m' + mdl : ''}">${fmt(q.stake || q.price)}</span>${badge(q)}</div>${own}${media}${mp}
       <div class="qtext" style="font-size:${fs}rem">${esc(d.q)}</div><div class="timer" id="timer"><i></i><b></b></div><div class="qstatus" id="qstatus"></div>${banner}${answer}
       <div class="hostbar">${hostButtons(q)}</div></div>`);
+  }
+  // длинный вопрос + длинный ответ с комментарием не помещаются на экран — ужимаем текст вопроса, пока кнопки ведущего не окажутся на виду
+  function fitQ() {
+    const qs = $('#stage .qscreen'), qt = qs && $('.qtext', qs), hb = qs && $('.hostbar', qs); if (!qt || !hb) return;
+    const pb = parseFloat(getComputedStyle(qs).paddingBottom) || 0, over = () => hb.offsetTop + hb.offsetHeight + pb - qs.clientHeight;
+    let fs = parseFloat(qt.style.fontSize) || 3;
+    for (let k = 0; k < 10 && over() > 1 && fs > 1.7; k++) { fs = Math.max(1.7, fs * 0.92); qt.style.fontSize = fs.toFixed(2) + 'rem'; }
   }
   function hostButtons(q) {
     const B = (a, label, cls, k) => `<button class="btn ${cls || ''}" data-act="${a}">${label}${k ? `<kbd>${k}</kbd>` : ''}</button>`;
@@ -826,7 +881,7 @@
   /* ----- промежуточные итоги раунда: кто ведёт, подколы и шанс на реабилитацию для отстающих ----- */
   const REDEEM = ['Поздравь Старого как следует — с выражением и стоя', 'Скажи тост за Старого, в котором нет слов «здоровья» и «счастья»', 'Сделай Старому массаж плеч 30 секунд', 'Спой Старому «С днём рождения» голосом Шнура', 'Сделай Старому три комплимента подряд — без повторов', 'Изобрази, как Старый просыпается после своего дня рождения'];
   function showResults() {
-    stopTimer(); stopAT(); conHalt(); mediaStop(); PIC = null;
+    stopTimer(); stopAT(); conHalt(); mediaStop(); picDrop();
     const rank = G.ents.slice().sort((a, b) => b.score - a.score), lead = rank[0];
     const nl = G.ents.length >= 7 ? 2 : G.ents.length >= 2 ? 1 : 0, losers = nl ? rank.slice(-nl).filter(e => e !== lead).map(e => e.id) : [];
     const acts = {}, tj = {}; losers.forEach(id => { acts[id] = drawCard('redeem'); tj[id] = joke('loser', entName(id)); });
@@ -847,8 +902,10 @@
           : `<div class="rd-b">${[step, step * 2, step * 3].map(x => `<button class="btn ok" data-act="redeem" data-id="${esc(id)}" data-v="${x}">${sgn(x)}</button>`).join('')}<button class="btn bad" data-act="redeem" data-id="${esc(id)}" data-v="0">✗ Не засчитано</button><button class="btn" data-act="reroll" data-id="${esc(id)}">🎲 Другое задание</button></div>`)
         + '</div>';
     }).join('');
-    return el(`<div class="results"><div class="rs-sub">${esc(rn)} позади</div><div class="rs-title">${letters('Промежуточные итоги')}</div>
-      ${R0.lead && R0.lj ? `<div class="rs-lead">👑 ${esc(R0.lj)}</div>` : ''}<div class="rbars">${bars}</div>${red}
+    // чем больше игроков, тем мельче строки; с 7 игроков рейтинг и задания для отстающих встают в две колонки — всё помещается на экран
+    const n = rank.length, two = n >= 7, f = n <= 4 ? 2.6 : n <= 5 ? 2.4 : n <= 6 ? 2.2 : n <= 8 ? 2.4 : n <= 10 ? 2.1 : n <= 12 ? 1.9 : 1.5;
+    return el(`<div class="results ${two ? 'two' : ''}"><div class="rs-sub">${esc(rn)} позади</div><div class="rs-title">${letters('Промежуточные итоги')}</div>
+      ${R0.lead && R0.lj ? `<div class="rs-lead">👑 ${esc(R0.lj)}</div>` : ''}<div class="rs-body"><div class="rbars" style="--f:${f}rem">${bars}</div>${red ? `<div class="rs-side">${red}</div>` : ''}</div>
       <div class="hostbar"><button class="btn gold" data-act="resnext">${last ? 'К финалу ▶' : 'Следующий раунд ▶'}<kbd>→</kbd></button></div></div>`);
   }
   function redeem(id, v) {
@@ -875,7 +932,7 @@
             box.appendChild(c); Sound.play('flyby'); setTimeout(() => c.remove(), 1500);
           }, t)); t += 230;
         });
-        t += 350;
+        t += 900; // слова прошлой группы ещё пролетают — не наезжаем названием следующего раунда
       });
       let done = false;
       const fin = () => {
@@ -970,7 +1027,7 @@
     if (G.phase !== 'q' || !G.q || busy) return;
     snap(); stopTimer(); stopAT(); stopConvince(); conHalt(); mediaStop();
     Object.keys(G.fz).forEach(id => { G.fz[id]--; if (G.fz[id] <= 0) delete G.fz[id]; });
-    G.q = null; G.phase = 'board'; curSig = null; PIC = null;
+    G.q = null; G.phase = 'board'; curSig = null; picDrop();
     if (roundDone()) { save(); nextRound(); } else changed();
   }
 
@@ -1199,7 +1256,7 @@
         + `<div class="bigclock" id="cvclock">30</div><div class="hostbar">${btn('cvgo', '⏱ Старт 30 сек')}${btn('cvc', '✎ Вписать сумму')}${T.ask ? btn('cvyes', `✓ Дать ${sgn(T.ask)}`, 'ok') : ''}${btn('cvno', '✗ Не давать', 'bad')}</div>`;
       case 'poem': {
         const own = hasPhone(v);
-        return `<div class="tdcard dare poem">${own ? `<div class="tdt">📜 Стих — на телефоне у <b>${esc(entName(v))}</b>.<br>Встаём на табуретку и зачитываем!</div>` : `<div class="tdt">${esc(T.poem || '')}</div>`}</div>` + yesno('✓ Зачитал · без штрафа', `✗ Отказался ${sgn(-p)}`);
+        return `<div class="tdcard dare poem">${own ? `<div class="tdt">📜 Стих — на телефоне.<br><b>${esc(entName(v))}</b>, встаём на табуретку и зачитываем!</div>` : `<div class="tdt">${esc(T.poem || '')}</div>`}</div>` + yesno('✓ Зачитал · без штрафа', `✗ Отказался ${sgn(-p)}`);
       }
       case 'ltruth': return card + yesno(`✓ Ответил ${sgn(half(p))}`, '✗ Отказался · 0');
       case 'ldare': return card + yesno(`✓ Выполнил ${sgn(half(p))}`, '✗ Отказался · 0');
@@ -1867,11 +1924,21 @@
       const d = curD(); try { m.el.currentTime = G.q.stage === 'reveal' && +d.aend > +d.end ? +d.end : (+d.start || 0); } catch (e) { /* ещё не загрузилось */ }
     }
     m.started = true; const p = m.el.play(); if (p && p.catch) p.catch(() => {});
+    mediaWatch(m);
+  }
+  // точная остановка на отметке end/aend: событие timeupdate приходит раз в 0.25 с, и первый звук пропущенного слова успел бы вылететь
+  function mediaWatch(m) {
+    clearInterval(m.wt);
+    if (!m.stopAt) return;
+    m.wt = setInterval(() => {
+      if (MP !== m || !m.el || m.el.paused || !m.stopAt) { clearInterval(m.wt); return; }
+      if (m.el.currentTime >= m.stopAt - 0.04) { m.el.pause(); try { m.el.currentTime = m.stopAt; } catch (e) { /* ещё не загрузилось */ } clearInterval(m.wt); }
+    }, 15);
   }
   function mediaPause() { const m = MP; if (m && m.el && !m.el.paused) m.el.pause(); }
   function mediaToggle() { const m = MP; if (!m || !m.el) return; if (m.el.paused) mediaPlay(); else mediaPause(); }
   function mediaStop() {
-    const m = MP; if (!m) return; MP = null; cancelAnimationFrame(m.raf);
+    const m = MP; if (!m) return; MP = null; cancelAnimationFrame(m.raf); clearInterval(m.wt);
     try { if (m.src) m.src.disconnect(); if (m.an) m.an.disconnect(); } catch (e) { /* уже отключено */ }
     if (m.el) { try { m.el.pause(); m.el.removeAttribute('src'); m.el.load(); } catch (e) { /* ничего */ } if (m.el.parentNode) m.el.remove(); }
   }
@@ -2085,7 +2152,7 @@
     video: () => `<div class="ov-film"></div><div class="ov-emoji clap">🎬</div><div class="ov-title">${letters('Видеовопрос')}</div><div class="ov-sub">Смотрим внимательно!</div>`,
     bribe: d => `<div class="ov-rays"></div><div class="ov-emoji">💰</div><div class="ov-title">${esc(d.name)}<br>подкупает судью!</div><div class="ov-sub">−${fmt(d.cost)} очков · ${d.hint ? 'подсказка ушла на телефон 🤫' : 'судья, шепни подсказку на ушко 🤫'}</div><div class="ov-sub sm">${esc(joke('bribe', d.name))}</div>`,
     round: d => `<div class="ov-rays"></div><div class="ov-title">${letters(d.title)}</div>${d.sub ? `<div class="ov-sub">${esc(d.sub)}</div>` : ''}`,
-    medal: d => `<div class="ov-rays medal m${d.md}"></div><div class="ov-medal m${d.md}"><span>${MEDALS[d.md][0]}</span></div><div class="ov-title medal m${d.md}">${letters(MEDALS[d.md][1] + '!')}</div><div class="ov-sub">${esc(joke('medal'))}</div>`,
+    medal: d => `<div class="ov-rays medal m${d.md}"></div><div class="ov-medalbox m${d.md}"><span>${MEDALS[d.md][0]}</span></div><div class="ov-title medal m${d.md}">${letters(MEDALS[d.md][1] + '!')}</div><div class="ov-sub">${esc(joke('medal'))}</div>`,
     mashup: () => `<div class="ov-mash"><span>🧑</span><span>👩</span></div><div class="ov-title">${letters('Мешап!')}</div><div class="ov-sub">Два лица в одном. Назови обоих!</div>`,
     final: () => { const FT = finThemes(); return `<div class="ov-title">${letters('ФИНАЛ')}</div><div class="ov-sub">${FT.length > 1 ? `${FT.length} тем — по очереди вычёркиваем, пока не останется одна` : 'Тема: ' + esc((FT[0] || {}).theme || '')}</div>`; },
   };

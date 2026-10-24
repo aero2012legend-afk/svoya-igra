@@ -310,7 +310,7 @@ body.danger::after { content: ""; position: fixed; inset: 0; pointer-events: non
 
 /* табло 10×10 */
 .board.big { gap: .42rem; }
-.board.big .theme { font-size: 1.12rem; padding: .2rem .6rem; border-radius: .7rem; letter-spacing: .01em; }
+.board.big .theme { min-height: 0; overflow: hidden; font-size: 1.12rem; padding: .2rem .6rem; border-radius: .7rem; letter-spacing: .01em; }
 .board.big .cell { font-size: 2.25rem; border-radius: .7rem; box-shadow: 0 .25rem .7rem rgba(0, 0, 0, .4), inset 0 .18rem 0 rgba(255, 255, 255, .2), inset 0 -.25rem 0 rgba(0, 0, 30, .3); }
 .cell.bonus { position: relative; overflow: hidden; background: linear-gradient(135deg, #6a26e0, #b23cf5 55%, #ff3fa4); color: #fff; text-shadow: 0 0 1rem rgba(255, 255, 255, .85), 0 .2rem 0 #4a0f80; }
 .cell.bonus span { display: inline-block; animation: qbob 1.8s ease-in-out infinite; }
@@ -347,7 +347,7 @@ body.danger::after { content: ""; position: fixed; inset: 0; pointer-events: non
 /* ловушка: ангел и дьявол */
 .badge.trap.angel { background: linear-gradient(90deg, #ffd86b, #fff3b0); color: #5a3d00; }
 .trapc { position: relative; isolation: isolate; }
-.trapc::before { content: ""; position: absolute; inset: -3rem -3rem 0; z-index: -1; pointer-events: none; animation: glowp 2.4s ease-in-out infinite alternate; }
+.trapc::before { content: ""; position: absolute; inset: -3rem 0 0; z-index: -1; pointer-events: none; animation: glowp 2.4s ease-in-out infinite alternate; }
 .trapc.angel::before { background: radial-gradient(ellipse at 50% 15%, rgba(255, 236, 170, .35), transparent 60%); }
 .trapc.devil::before { background: radial-gradient(ellipse at 50% 110%, rgba(255, 50, 30, .45), transparent 60%); }
 @keyframes glowp { from { opacity: .45; } to { opacity: 1; } }
@@ -520,8 +520,8 @@ body.lite .ov-devil::before { display: none; }
 .qpr.m2, .badge.m2 { --mc: #c9d3e3; --md: #7d889e; --mg: rgba(220, 230, 255, .7); }
 .qpr.m3, .badge.m3 { --mc: #ffd13b; --md: #b07800; --mg: rgba(255, 210, 60, .85); }
 .badge.medal { font-family: var(--medal); background: linear-gradient(160deg, #fff, var(--mc) 40%, var(--md)); color: #1a1000; letter-spacing: .08em; }
-.ov-medal { width: 22rem; height: 22rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14rem; animation: medalSpin 1.6s cubic-bezier(.2, .9, .3, 1.15) both; filter: drop-shadow(0 0 3rem var(--mg)); }
-.ov-medal.m1 { --mg: rgba(232, 146, 90, .9); } .ov-medal.m2 { --mg: rgba(230, 240, 255, .9); } .ov-medal.m3 { --mg: rgba(255, 210, 60, 1); }
+.ov-medalbox { width: 22rem; height: 22rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14rem; animation: medalSpin 1.6s cubic-bezier(.2, .9, .3, 1.15) both; filter: drop-shadow(0 0 3rem var(--mg)); }
+.ov-medalbox.m1 { --mg: rgba(232, 146, 90, .9); } .ov-medalbox.m2 { --mg: rgba(230, 240, 255, .9); } .ov-medalbox.m3 { --mg: rgba(255, 210, 60, 1); }
 @keyframes medalSpin { 0% { opacity: 0; transform: perspective(60rem) rotateY(-540deg) scale(.2); } 70% { opacity: 1; transform: perspective(60rem) rotateY(20deg) scale(1.15); } 100% { transform: none; } }
 .ov-title.medal { font-family: var(--medal); font-size: 10rem; margin-top: 1rem; }
 .ov-title.medal.m1 { color: #f0a06a; text-shadow: 0 0 2.4rem rgba(240, 160, 106, .8), 0 .45rem 0 #5a2a0a; }
@@ -529,8 +529,10 @@ body.lite .ov-devil::before { display: none; }
 .ov-title.medal.m3 { color: #ffd84d; text-shadow: 0 0 3rem rgba(255, 210, 60, 1), 0 .45rem 0 #7a5200; }
 
 /* ===== картинка вопроса и эффекты ===== */
-.picslot { display: flex; justify-content: center; margin-top: .8rem; flex: none; }
-.qpic { position: relative; width: 48rem; height: 30rem; border-radius: 1.2rem; overflow: hidden; background: #000; box-shadow: 0 1rem 3rem rgba(0, 0, 0, .55), 0 0 0 .2rem rgba(170, 200, 255, .25); transition: width .7s cubic-bezier(.3, .8, .3, 1), height .7s cubic-bezier(.3, .8, .3, 1); animation: picIn .7s cubic-bezier(.2, .9, .3, 1.1) both; }
+.picslot { display: flex; justify-content: center; align-items: flex-start; margin-top: .8rem; flex: none; }
+.qpic { position: relative; width: 48rem; height: 30rem; border-radius: 1.2rem; overflow: hidden; background: #000; box-shadow: 0 1rem 3rem rgba(0, 0, 0, .55), 0 0 0 .2rem rgba(170, 200, 255, .25); transition: width .7s cubic-bezier(.3, .8, .3, 1), height .7s cubic-bezier(.3, .8, .3, 1); visibility: hidden; }
+.qpic.ok, .qpic.err { visibility: visible; }
+.qpic.ok:not(.in) { animation: picIn .7s cubic-bezier(.2, .9, .3, 1.1) both; } /* вылет — один раз, а не при каждой перерисовке */
 @keyframes picIn { from { opacity: 0; transform: scale(.85) rotate(-1.5deg); } to { opacity: 1; transform: none; } }
 .qpic > img.pi { display: block; width: 100%; height: 100%; object-fit: contain; transition: filter 1.4s ease, transform 1.8s cubic-bezier(.6, 0, .2, 1), clip-path 1.6s cubic-bezier(.6, 0, .2, 1), opacity .8s; user-select: none; }
 .qpic.err::after { content: attr(data-err); position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 2rem; font-size: 1.6rem; color: var(--mut); text-align: center; }
@@ -543,6 +545,8 @@ body.lite .ov-devil::before { display: none; }
 .fx-negative > img.pi { filter: invert(1) hue-rotate(180deg); }
 .fx-mirror > img.pi { transform: scaleX(-1); }
 .qpic.fx.shown > img.pi { filter: none; transform: none; clip-path: inset(0 0 0 0 round 0); }
+.qpic.fx-zoom { --zt: 1.3s cubic-bezier(.5, 0, .2, 1); transition: width var(--zt), height var(--zt); }
+.qpic.fx-zoom > img.pi { position: absolute; max-width: none; object-fit: fill; transition: width var(--zt), height var(--zt), left var(--zt), top var(--zt); }
 .fx-silhouette.shown { background: #000; transition: background 1s; }
 .qpic .tiles { position: absolute; inset: 0; }
 .qpic .tiles i { position: absolute; display: block; box-shadow: inset 0 0 0 .08rem rgba(0, 0, 0, .7); transition: left .9s cubic-bezier(.6, 0, .2, 1), top .9s cubic-bezier(.6, 0, .2, 1); }
@@ -552,7 +556,13 @@ body.lite .ov-devil::before { display: none; }
 .fx-pixel > img.pi { opacity: 0; } .fx-pixel.shown > img.pi { opacity: 1; } .qpic.shown .pix { opacity: 0; }
 .qscreen.haspic { justify-content: flex-start; padding-top: .2rem; }
 .qscreen.haspic .qtext { margin: 1rem 0 1rem; }
-.qscreen.haspic .buzzer { top: auto; bottom: 7rem; }
+/* с картинкой плашка «Отвечает» встаёт в строку под вопросом (картинка чуть ужимается), а не закрывает текст */
+.qscreen.haspic .buzzer { position: relative; top: auto; left: auto; transform: none; margin-top: .6rem; padding: .4rem 2.6rem .6rem; border-width: .25rem; border-radius: 1.4rem; box-shadow: 0 0 2.4rem var(--c), 0 .8rem 1.6rem rgba(0, 0, 0, .5); animation: slamIn .5s cubic-bezier(.2, 1.4, .4, 1) both; }
+.qscreen.haspic .bz-l { font-size: 1.2rem; } .qscreen.haspic .bz-n { font-size: 3.4rem; }
+.qscreen.haspic .bz-t { width: 5.4rem; height: 5.4rem; margin-top: -2.7rem; margin-left: 1rem; } .qscreen.haspic .bz-t b { font-size: 2.2rem; }
+.qscreen.haspic.st-ans .qstatus { display: none; }
+@keyframes slamIn { from { opacity: 0; transform: scale(1.9) rotate(-5deg); } to { opacity: 1; transform: none; } }
+.qscreen.haspic.st-reveal .timer, .qscreen.haspic.st-reveal .qstatus { display: none; }
 
 /* мешап: при ответе из смешанного лица разлетаются две настоящие фотографии */
 .qpic.mash { overflow: visible; background: transparent; box-shadow: none; }
@@ -608,15 +618,22 @@ body.lite .ov-devil::before { display: none; }
 .rs-title { font-family: var(--heavy); font-size: 5rem; color: var(--gold); line-height: 1; text-shadow: 0 0 2rem rgba(255, 204, 51, .6), 0 .3rem 0 #8a5a00; }
 .rs-title span { display: inline-block; animation: drop .8s cubic-bezier(.2, 1.6, .4, 1) both; }
 .rs-lead { font-size: 2rem; font-weight: 800; font-style: italic; color: var(--gold2); animation: fadeUp .6s 1.2s both; }
-.rbars { width: 90rem; display: flex; flex-direction: column; gap: .35rem; }
-.rb { display: grid; grid-template-columns: 3rem 18rem 1fr 9rem; align-items: center; gap: 1rem; font-size: 1.7rem; font-weight: 800; animation: fadeUp .5s both; }
+.rs-body { display: flex; flex-direction: column; align-items: center; gap: .8rem; width: 100%; }
+.rs-side { display: flex; flex-direction: column; gap: .8rem; align-items: center; }
+/* размер строк рейтинга задаёт --f (зависит от числа игроков); при 7+ игроках рейтинг и «реабилитация» встают в две колонки */
+.rbars { --f: 1.7rem; width: 90rem; display: flex; flex-direction: column; gap: calc(var(--f) * .22); }
+.rb { display: grid; grid-template-columns: calc(var(--f) * 1.7) calc(var(--f) * 8) 1fr calc(var(--f) * 4.6); align-items: center; gap: calc(var(--f) * .55); font-size: var(--f); font-weight: 800; animation: fadeUp .5s both; }
 .rb .rp { color: var(--mut); text-align: right; } .rb .rn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.rb .rbar { height: 1.7rem; border-radius: 1rem; background: rgba(255, 255, 255, .07); overflow: hidden; }
+.rb .rbar { height: calc(var(--f) * .85); border-radius: 1rem; background: rgba(255, 255, 255, .07); overflow: hidden; }
 .rb .rbar i { display: block; height: 100%; width: var(--w); background: linear-gradient(90deg, var(--c), color-mix(in srgb, var(--c) 60%, #fff)); border-radius: 1rem; box-shadow: 0 0 1rem var(--c); animation: barGrow 1.4s cubic-bezier(.2, .9, .3, 1) both; animation-delay: inherit; transform-origin: 0 50%; }
 @keyframes barGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .rb .rs { text-align: right; font-family: var(--heavy); color: var(--gold); } .rb .rs.neg { color: var(--red); }
-.rb.lead { font-size: 2.1rem; } .rb.lead .rn { color: var(--gold); }
+.rb.lead { font-size: calc(var(--f) * 1.12); } .rb.lead .rn { color: var(--gold); }
 .rb.lose .rn { color: #ffb3bb; }
+.results.two .rs-title { font-size: 3.8rem; } .results.two { gap: .5rem; }
+.results.two .rs-body { flex-direction: row; align-items: flex-start; justify-content: center; gap: 3rem; width: 112rem; }
+.results.two .rbars { width: 62rem; flex: none; } .results.two .rs-side { width: 46rem; flex: none; }
+.results.two .redeem { width: 100%; }
 .redeem { width: 90rem; padding: .9rem 1.6rem 1rem; border-radius: 1.2rem; background: rgba(255, 77, 94, .1); border: .18rem solid rgba(255, 77, 94, .55); border-left: .6rem solid var(--c); animation: fadeUp .6s 1.8s both; }
 .rd-h { font-size: 1.8rem; font-weight: 800; } .rd-h b { color: var(--gold); }
 .rd-j { font-size: 1.4rem; font-style: italic; color: var(--mut); margin-top: .1rem; }
