@@ -534,7 +534,7 @@
       P.fx = FXS.includes(d.fx) ? d.fx : '';
       if (P.fx === 'zoom' || P.fx === 'crop') P.area = picRect(d.area);
       P.node = el(`<div class="qpic ${P.fx ? 'fx fx-' + P.fx : ''}"><img class="pi" alt="" draggable="false">${d.aimg ? '<img class="pa" alt="" draggable="false">' : ''}</div>`);
-      if (d.aimg) setSrc($('.pa', P.node), d.aimg);
+      if (d.aimg) { const pa = $('.pa', P.node); setSrc(pa, d.aimg); pa.addEventListener('error', () => pa.remove()); } // нет картинки-ответа — остаётся исходная
     }
     // вылет картинки — один раз, а не при каждой перерисовке экрана
     P.node.addEventListener('animationend', e => { if (e.target === P.node) P.node.classList.add('in'); });
@@ -544,6 +544,7 @@
       if (P.fx === 'crop') picCrop(P, img);
       if (P.fx === 'tiles') picTiles(P, img, Math.max(2, Math.min(8, +d.tiles || 4)));
       if (P.fx === 'pixel') picPixel(P, img, Math.max(8, Math.min(80, +d.px || 28)));
+      if (P.fx === 'silhouette' && picOpaque(img)) P.node.classList.add('opaque');
       P.node.classList.add('ok'); picFit(true); picState();
     }, { once: true });
     img.addEventListener('error', () => { P.node.classList.add('err'); P.node.setAttribute('data-err', '⚠ Нет картинки: ' + d.img); });
@@ -571,6 +572,16 @@
       t.dataset.l = c * 100 / n; t.dataset.t = r * 100 / n; t.dataset.sl = sc * 100 / n; t.dataset.st = sr * 100 / n; wrap.appendChild(t);
     }
     P.node.appendChild(wrap);
+  }
+  // силуэт делается из прозрачного фона; если картинка сплошная (без прозрачности), чёрный квадрат бесполезен — тогда картинка просто сильно затемняется
+  function picOpaque(img) {
+    try {
+      const c = document.createElement('canvas'); c.width = c.height = 24;
+      const g = c.getContext('2d'); g.drawImage(img, 0, 0, 24, 24);
+      const d = g.getImageData(0, 0, 24, 24).data;
+      for (let i = 3; i < d.length; i += 4) if (d[i] < 250) return false;
+      return true;
+    } catch (e) { return false; } // файл открыт с диска (file://) — пиксели прочитать нельзя
   }
   function picPixel(P, img, px) {
     const cv = document.createElement('canvas'); cv.className = 'pix';
