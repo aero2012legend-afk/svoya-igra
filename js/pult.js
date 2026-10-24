@@ -60,7 +60,8 @@
         h += `<div class="qq">🎁 ${esc(c.n)}${c.a ? ` · ${esc(c.a)}${c.b ? ' против ' + esc(c.b) : ''}` : ''}${c.stake ? ` · ставка ${esc(c.stake)}` : ''}</div>`;
         if (c.word) h += `<div class="qa">🐊 Слово: ${esc(c.word)}</div>`;
       } else {
-        h += `<div class="qq">${esc(q.text)}</div><div class="qa">${esc(q.a)}</div>` + (q.hint ? `<div class="qh">💡 ${esc(q.hint)}</div>` : '');
+        h += `<div class="qq">${esc(q.text)}</div><div class="qa">${esc(q.a)}</div>` + (q.names ? `<div class="qh">🧬 №1 — <b>${esc(q.names[0] || '')}</b>, №2 — <b>${esc(q.names[1] || '')}</b>${q.mp ? ` · уже угадан №${esc(q.mp)}` : ''}</div>` : '')
+          + (q.hint ? `<div class="qh">💡 ${esc(q.hint)}</div>` : '') + (q.c ? `<div class="qh">😄 ${esc(q.c)}</div>` : '');
       }
       h += (q.ans ? `<div class="who">Отвечает: <b>${esc(q.ans)}</b></div>` : q.ow ? `<div class="who">Отвечает: <b>${esc(q.ow)}</b>${q.stake ? ' · ставка ' + esc(q.stake) : ''}</div>` : '')
         + (q.ev ? `<div class="who">Ловушка (${esc(q.vic)}): <b>${esc(q.ev)}</b></div>` : '')
@@ -71,11 +72,12 @@
       else h += `<div class="qth">Финал · ${esc(f.th)}</div><div class="qq">${esc(f.q)}</div><div class="qa">${esc(f.a)}</div>`
         + (f.answers || []).map(a => `<div class="br">${esc(a.n)}: «${esc(a.v)}» · ставка ${a.b == null ? '—' : esc(a.b)}</div>`).join('');
     } else {
-      const ph = { lobby: 'Лобби — ждём игроков', board: 'Табло — выбирают вопрос', end: 'Игра окончена 🏆', trans: '…' };
+      const ph = { lobby: 'Лобби — ждём игроков', board: 'Табло — выбирают вопрос', end: 'Игра окончена 🏆', trans: '…', results: 'Промежуточные итоги — отстающим даём шанс на реабилитацию (кнопки на экране)' };
       h += `<div class="qq">${cur ? (ph[cur.phase] || '') : 'Ждём, когда откроется игра на телевизоре…'}</div>`;
     }
     h += '<div class="ctl"><button class="ok" data-c="ok">✓ Верно</button><button class="bad" data-c="bad">✗ Неверно</button><button data-c="ans">👁 Ответ</button><button data-c="space">⏯ Таймер / старт</button>'
-      + (cur && cur.q && cur.q.md ? '<button data-c="media">⏯ Музыка / видео</button>' : '') + '<button class="wide" data-c="next">→ Дальше</button></div>';
+      + (cur && cur.q && cur.q.md ? '<button data-c="media">⏯ Музыка / видео</button>' : '')
+      + (cur && cur.q && cur.q.names && !cur.q.mp ? '<button data-c="mp1">¼ Угадан №1</button><button data-c="mp2">¼ Угадан №2</button>' : '') + '<button class="wide" data-c="next">→ Дальше</button></div>';
     box.innerHTML = h;
   }
   function renderList() {
@@ -92,7 +94,7 @@
           const tag = (TAG[x.type] ? ` <span class="tag">${TAG[x.type]}${x.type === 'cat' && x.catTheme ? ': ' + esc(x.catTheme) : ''}</span>` : '') + (MD[x.md] ? ` <span class="tag md">${MD[x.md]}</span>` : '');
           h += x.type === 'bonus'
             ? `<div class="it ${played ? 'pl' : ''} ${k === curKey ? 'cu' : ''}"><div class="ip"><b>${esc(x.price)}</b>${tag}</div><div class="iq">Конкурс выберет рулетка</div></div>`
-            : `<div class="it ${played ? 'pl' : ''} ${k === curKey ? 'cu' : ''}"><div class="ip"><b>${esc(x.price)}</b>${tag}</div><div class="iq">${esc(x.q)}</div><div class="ia">${esc(x.a)}</div>${x.hint ? `<div class="ih">💡 ${esc(x.hint)}</div>` : ''}</div>`;
+            : `<div class="it ${played ? 'pl' : ''} ${k === curKey ? 'cu' : ''}"><div class="ip"><b>${esc(x.price)}</b>${tag}</div><div class="iq">${esc(x.q)}</div><div class="ia">${esc(x.a)}</div>${x.hint ? `<div class="ih">💡 ${esc(x.hint)}</div>` : ''}${x.c ? `<div class="ih">😄 ${esc(x.c)}</div>` : ''}</div>`;
         });
       });
     });

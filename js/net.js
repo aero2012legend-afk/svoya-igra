@@ -222,11 +222,11 @@
   function stripPack(P) {
     P = P || {};
     return {
-      title: P.title || '', final: finThemes(P).map(function (x) { return { theme: x.theme || '', q: x.q || '', a: x.a || '' }; }),
+      title: P.title || '', final: finThemes(P).map(function (x) { return { theme: x.theme || '', q: x.q || '', a: x.a || '', c: x.c || '' }; }),
       rounds: (P.rounds || []).map(function (r) {
         return { name: r.name || '', themes: (r.themes || []).map(function (th) {
           return { name: th.name || '', questions: (th.questions || []).map(function (x) {
-            return { price: x.price || 0, q: x.q || '', a: x.a || '', hint: x.hint || '', type: x.type || '', catTheme: x.catTheme || '', md: x.audio ? 'a' : x.video ? 'v' : '' };
+            return { price: x.price || 0, q: x.q || '', a: x.a || '', hint: x.hint || '', c: x.c || '', type: x.type || '', catTheme: x.catTheme || '', md: x.audio ? 'a' : x.video ? 'v' : '' };
           }) };
         }) };
       }),
