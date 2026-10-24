@@ -555,7 +555,7 @@
     setSrc(img, d.img);
     return P;
   }
-  function setSrc(node, path) { mediaUrl(path).then(u => { node.src = u || path; }); }
+  function setSrc(node, path) { if (!path) return; mediaUrl(path).then(u => { node.src = u || path; }); } // путь не указан — ничего не грузим
   // crop: видно только окошко, остальное чёрное
   function picCrop(P, img) {
     const [x, y, w, h] = P.area;
