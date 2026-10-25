@@ -4,7 +4,8 @@
              Порядок: свой файл из GAME.sounds → файл из media/sfx → встроенный синтез (если файла нет — ошибок нет).
              По http(s) звуки декодируются в AudioBuffer (мгновенный старт), на file:// играют через <audio>.
    МУЗЫКА    Sound.music('lobby'|'board'|'results'|'end'|null) — плавный кроссфейд ~1.5 с; null — тишина.
-             Файлы media/bgm/*.mp3 — бесшовные петли (Kevin MacLeod, CC BY 4.0). Свои: GAME.music = { lobby: 'media/a.mp3',
+             Файлы media/bgm/*.mp3 — бесшовные петли (Kevin MacLeod, CC BY 4.0). По http(s) играют через AudioBuffer (стык без паузы),
+             на file:// — через <audio loop> (на стыке петли браузер делает паузу ≈10 мс). Свои: GAME.music = { lobby: 'media/a.mp3',
              board: ['media/b1.mp3', 'media/b2.mp3'], results: false } (строка | массив — треки чередуются | функция | false — без музыки).
              Режим 'think' — музыка финального раунда; Sound.think(true/false) включает её (нет файла или think: false — синтез).
    ГРОМКОСТЬ Sound.setVolume(0..1) / Sound.volume — общая (хранится в localStorage 'svoyaigra.vol');
