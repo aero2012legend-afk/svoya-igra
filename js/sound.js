@@ -347,7 +347,7 @@
   /* ======================= танцевальный бит (как раньше) ======================= */
   var beatT = null;
   function beat(on) {
-    clearInterval(beatT); beatT = null; if (!on) return; init(); if (!ctx) return;
+    clearInterval(beatT); beatT = null; applyMusicGain(); kick(); if (!on) return; init(); if (!ctx) return;
     var step = 0, dt = 60 / 124 / 4, next = ctx.currentTime + 0.06;
     var BASS = [45, 41, 48, 43], PADS = [[57, 60, 64], [53, 57, 60], [55, 60, 64], [55, 59, 62]];
     beatT = setInterval(function () {
@@ -362,6 +362,7 @@
         next += dt; step++;
       }
     }, 60);
+    applyMusicGain(); kick();
   }
 
   /* ======================= фоновая музыка =======================
@@ -387,7 +388,7 @@
     if (v !== undefined) return (Array.isArray(v) ? v : [v]).filter(Boolean).map(function (x) { return { src: x, g: 1 }; });
     return (TRACKS[m] || []).map(function (x) { return { src: BGM_DIR + x[0], g: x[1] }; });
   }
-  function duckTarget() { return Math.min(duckOn ? DUCK_MANUAL : 1, nowMs() < autoUntil ? DUCK_AUTO : 1); }
+  function duckTarget() { return Math.min(duckOn ? DUCK_MANUAL : 1, nowMs() < autoUntil ? DUCK_AUTO : 1, beatT ? 0.04 : 1); }   // во время танцевального бита музыка почти затихает
   function applyMusicGain() {       // громкость шины AudioBuffer-музыки: общая × музыкальная × приглушение
     if (!musicGain || !ctx) return;
     var tgt = (muted ? 0 : musicVol * vol) * duckTarget();
