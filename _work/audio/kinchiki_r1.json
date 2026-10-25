@@ -1,0 +1,62 @@
+[
+ {
+  "file": "media/music/kinchiki/r1_300_lotr.mp3",
+  "source": "https://soundcloud.com/fedor-kazakevich/ty-ne-proydesh-gendalf-padaet-v-propast-begite-gluptsy-vlastelin-kolets-bra",
+  "title": "«Властелин колец: Братство Кольца», русский дубляж: Гэндальф на мосту Казад-Дума («Тёмный огонь не поможет тебе…» → «Возвращайся во мрак!» → «Ты не пройдёшь!»)",
+  "cut": [
+   64.0,
+   92.6
+  ],
+  "gain_db": 4.4,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=27.4:d=1.2,volume=4.4dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в игре: end=22.2 (музыка обрывается за 0.4 с до крика «Ты не пройдёшь!»), aend=27.3 (после ответа крик звучит до конца)"
+ },
+ {
+  "file": "media/music/kinchiki/r1_400_pirates.mp3",
+  "source": "https://soundcloud.com/klausbadelt/8m67v5-6-18",
+  "title": "«Пираты Карибского моря: Проклятие «Чёрной жемчужины»» — «He's a Pirate», Клаус Бадельт (официальная загрузка композитора)",
+  "cut": [
+   5.4,
+   27.0
+  ],
+  "gain_db": 5.1,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=20.4:d=1.2,volume=5.1dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "с момента вступления остинато (в исходнике ~6 с)"
+ },
+ {
+  "file": "media/music/kinchiki/r1_600_brat2.mp3",
+  "source": "https://soundcloud.com/user-102040547/brat-2-vot-skazhi-mne-amerikanets-v-chyom-sila",
+  "title": "«Брат 2»: монолог Данилы Багрова «…Вот ты обманул кого-то, денег нажил, и чего, ты сильнее стал?.. А тот, кого обманул, за ним правда. Значит, он сильнее. Да?»",
+  "cut": [
+   14.3,
+   29.8
+  ],
+  "gain_db": -1.0,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=14.3:d=1.2,volume=-1.0dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в игре: end=11.3 (пауза перед «Значит, он сильнее»), aend=13.5 (с «Да?»)"
+ },
+ {
+  "file": "media/music/kinchiki/r1_800_bumer.mp3",
+  "source": "https://soundcloud.com/user857032020/ost-2004",
+  "title": "«Бумер» (2003) — Сергей Шнуров, «Никого не жалко» (OST «Бумер»), припев ×2 (со слов «Никого не жалко, никого…»)",
+  "cut": [
+   36.5,
+   57.0
+  ],
+  "gain_db": -4.0,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=19.3:d=1.2,volume=-4.0dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "слов «бумер» в тексте нет"
+ },
+ {
+  "file": "media/music/kinchiki/r1_1000_requiem.mp3",
+  "source": "https://soundcloud.com/nonesuchrecords/kronos-quartet-clint-mansell",
+  "title": "«Реквием по мечте» — «Lux Aeterna», Клинт Мэнселл / Kronos Quartet (официальная загрузка Nonesuch Records; вступление главной темы)",
+  "cut": [
+   22.5,
+   44.5
+  ],
+  "gain_db": 2.3,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=20.8:d=1.2,volume=2.3dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "оригинал 3:54; вырезано вступление главной темы (в исходнике ~24 с)"
+ }
+]
