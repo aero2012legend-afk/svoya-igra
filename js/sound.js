@@ -48,7 +48,7 @@
   var TRACKS = {
     lobby: [['lobby-carefree.mp3', 1]],
     board: [['board-easy-lemon.mp3', 1], ['board-miami-viceroy.mp3', 1]],
-    results: [['results-funky-chunk.mp3', 1]],
+    results: [['results-funky-chunk.mp3', 1], ['results-enter-the-party.mp3', 1]],
     end: [['end-disco-con-tutti.mp3', 1]],
     think: [['think-thinking-music.mp3', 1.4]]
   };
@@ -61,6 +61,8 @@
     // файлы уже выровнены по громкости (пик ≤ −1 дБ), поэтому компрессор — лишь страховка от перегруза при наложении звуков
     var comp = ctx.createDynamicsCompressor(); comp.threshold.value = -3; comp.knee.value = 6; comp.ratio.value = 10; comp.attack.value = 0.002; comp.release.value = 0.15;
     master.connect(comp); comp.connect(ctx.destination);
+    // шина музыки (AudioBuffer-треки) идёт мимо компрессора: музыка тихая, а громкие эффекты не должны её «качать»
+    musicGain = ctx.createGain(); lastGain = (muted ? 0 : musicVol * vol) * duckTarget(); musicGain.gain.value = lastGain; musicGain.connect(ctx.destination);
     var map = (window.GAME && window.GAME.sounds) || {};
     Object.keys(map).forEach(function (k) {
       var v = map[k]; if (!v) return;
@@ -303,12 +305,12 @@
   function playBuf(n, b) {
     var s = ctx.createBufferSource(); s.buffer = b; s.connect(master); s.start(ctx.currentTime + 0.005);
   }
-  function autoDuck(n) { var d = DUCK_SEC[n]; if (d) autoUntil = Math.max(autoUntil, nowMs() + d * 1000); kick(); }
+  function autoDuck(n) { var d = DUCK_SEC[n]; if (!d) return; autoUntil = Math.max(autoUntil, nowMs() + d * 1000); applyMusicGain(); kick(); }
 
   function play(name) {
     if (muted) return; init();
     // пока пользователь не нажал ничего на странице, контекст «спит»: не копим звуки, чтобы они не выстрелили пачкой после первого клика
-    if (ctx && ctx.state === 'suspended') { try { var ua = navigator.userActivation; if (ua && !ua.isActive) return; } catch (e) { /* старый браузер */ } }
+    if (ctx && ctx.state === 'suspended') { try { var ua = navigator.userActivation; if (ua && !ua.hasBeenActive) return; } catch (e) { /* старый браузер */ } }
     // 1) свой файл из GAME.sounds
     var c = custom[name];
     if (c) {
@@ -361,14 +363,21 @@
     }, 60);
   }
 
-  /* ======================= фоновая музыка ======================= */
-  var tracks = [];                  // играющие и затухающие треки
+  /* ======================= фоновая музыка =======================
+     Два способа играть трек:
+     1) по http(s) (GitHub Pages) — AudioBuffer с loop=true: петля строго без пауз и щелчков;
+     2) <audio loop> — на file://, для чужих адресов без CORS и если декодирование не удалось.
+        Работает везде, но на стыке петли Chrome перематывает <audio>, и там слышна пауза ≈10 мс. */
+  var tracks = [];                  // <audio>-треки: {el, url, g, f, ft, fd}
+  var btracks = [];                 // треки на AudioBuffer: {src, tg, url, g, f0, f1, fT0, fd, off, t0, dur}
   var elCache = {};                 // url -> <audio> (на паузе хранит позицию)
-  var bad = {};                     // url -> true, если файл не открылся
+  var bad = {}, bufFail = {};       // url -> true: <audio> не открылся / AudioBuffer не получился
+  var bufCache = {}, bgmRaw = {}, bufWait = {}, bufPos = {};   // декодированные буферы (не больше 3), mp3-байты, ожидающие, позиции
   var mode = null;                  // запрошенный режим музыки
   var rot = {};                     // режим -> индекс последнего трека
   var think_ = null;                // трек «think» (отдельный слой)
-  var duckOn = false, duckF = 1, autoUntil = 0, loopT = null, lastT = 0, armed = false, genId = 0;
+  var musicGain = null, lastGain = -1;
+  var duckOn = false, duckF = 1, autoUntil = 0, autoT = null, loopT = null, lastT = 0, armed = false, genId = 0, prefT = null;
   function nowMs() { return (window.performance && performance.now) ? performance.now() : Date.now(); }
 
   function modeList(m) {            // -> [{src: url|function, g}]
@@ -377,6 +386,23 @@
     if (v !== undefined) return (Array.isArray(v) ? v : [v]).filter(Boolean).map(function (x) { return { src: x, g: 1 }; });
     return (TRACKS[m] || []).map(function (x) { return { src: BGM_DIR + x[0], g: x[1] }; });
   }
+  function duckTarget() { return Math.min(duckOn ? DUCK_MANUAL : 1, nowMs() < autoUntil ? DUCK_AUTO : 1); }
+  function applyMusicGain() {       // громкость шины AudioBuffer-музыки: общая × музыкальная × приглушение
+    if (!musicGain || !ctx) return;
+    var tgt = (muted ? 0 : musicVol * vol) * duckTarget();
+    try { musicGain.gain.setTargetAtTime(tgt, ctx.currentTime, muted ? 0.01 : tgt < lastGain ? 0.06 : 0.3); } catch (e) { musicGain.gain.value = tgt; }
+    lastGain = tgt;
+    clearTimeout(autoT);
+    var left = autoUntil - nowMs();
+    if (left > 0) autoT = setTimeout(function () { applyMusicGain(); kick(); }, left + 40);
+  }
+  function resolve(src, cb) {       // строка | функция (может вернуть промис) -> url
+    if (typeof src === 'function') {
+      try { var r = src(); if (r && r.then) r.then(cb, noop); else cb(r); } catch (e) { /* ничего */ }
+    } else cb(src);
+  }
+
+  /* ---- <audio>-треки ---- */
   function getEl(url) {
     var el = elCache[url];
     if (el) return el;
@@ -388,7 +414,7 @@
   function onBad(url) {             // файл не открылся: убираем трек; если нужен — пробуем следующий из списка
     var wasCur = false;
     tracks = tracks.filter(function (t) { if (t.url === url) { if (t.ft > 0) wasCur = true; return false; } return true; });
-    if (think_ && think_.url === url) { think_ = null; if (thinkT_wanted()) thinkSynth(); }
+    if (think_ && think_.url === url) { think_ = null; if (thinkWanted && !muted) thinkSynth(); }
     if (wasCur && mode) { var m = mode; mode = null; music(m, true); }
   }
   function playTrackEl(t) {
@@ -408,7 +434,7 @@
   function kick() { if (!loopT && tracks.length) { lastT = nowMs(); loopT = setInterval(tick, 40); } }
   function tick() {
     var now = nowMs(), dt = Math.min(0.3, (now - lastT) / 1000); lastT = now;
-    var target = Math.min(duckOn ? DUCK_MANUAL : 1, now < autoUntil ? DUCK_AUTO : 1);
+    var target = duckTarget();
     duckF += (target - duckF) * (1 - Math.exp(-dt / (target < duckF ? 0.12 : 0.45)));
     tracks = tracks.filter(function (t) {
       if (t.f < t.ft) t.f = Math.min(t.ft, t.f + dt / t.fd); else if (t.f > t.ft) t.f = Math.max(t.ft, t.f - dt / t.fd);
@@ -424,7 +450,7 @@
     if (t) { t.ft = 1; t.fd = fd; t.g = g; }
     else {
       if (fromStart) { try { el.currentTime = 0; } catch (e) { /* ещё не загружен */ } }
-      t = { el: el, url: url, g: g, f: 0, ft: 1, fd: fd };
+      t = { kind: 'el', el: el, url: url, g: g, f: 0, ft: 1, fd: fd };
       tracks.push(t);
     }
     el.loop = true; el.muted = muted; el.volume = trackVol(t);
@@ -433,11 +459,98 @@
     return t;
   }
   function fadeOut(t, fd) { t.ft = 0; t.fd = fd || XFADE; kick(); }
-  function resolve(src, cb) {       // строка | функция (может вернуть промис) -> url
-    if (typeof src === 'function') {
-      try { var r = src(); if (r && r.then) r.then(cb, noop); else cb(r); } catch (e) { /* ничего */ }
-    } else cb(src);
+
+  /* ---- AudioBuffer-треки (http/https) ---- */
+  function getRaw(url, cb) {        // mp3-байты; свои большие файлы в памяти не держим
+    if (bgmRaw[url]) return cb(bgmRaw[url]);
+    try {
+      fetch(url).then(function (r) { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+        .then(function (ab) { if (url.indexOf(BGM_DIR) === 0) bgmRaw[url] = ab; cb(ab); }, function () { cb(null); });
+    } catch (e) { cb(null); }
   }
+  function getBuffer(url, cb) {     // cb(AudioBuffer | null)
+    var c = bufCache[url]; if (c) { c.t = nowMs(); return cb(c.buf); }
+    var w = bufWait[url] = bufWait[url] || []; w.push(cb);
+    if (w.length > 1) return;
+    var done = function (buf) {
+      var list = bufWait[url]; bufWait[url] = null;
+      if (buf) { bufCache[url] = { buf: buf, t: nowMs() }; evictBufs(); } else bufFail[url] = true;
+      (list || []).forEach(function (f) { try { f(buf); } catch (e) { /* ничего */ } });
+    };
+    getRaw(url, function (ab) {
+      if (!ab) return done(null);
+      var fin = false, ok = function (b) { if (!fin) { fin = true; done(b); } }, ko = function () { if (!fin) { fin = true; done(null); } };
+      try { var p = ctx.decodeAudioData(ab.slice(0), ok, ko); if (p && p.then) p.then(ok, ko); } catch (e) { ko(); }
+    });
+  }
+  function evictBufs() {            // в памяти не больше трёх распакованных треков (≈40 МБ каждый)
+    var keys = Object.keys(bufCache); if (keys.length <= 3) return;
+    var used = {}; btracks.forEach(function (t) { used[t.url] = 1; });
+    keys.filter(function (k) { return !used[k]; }).sort(function (a, b) { return bufCache[a].t - bufCache[b].t; })
+      .slice(0, keys.length - 3).forEach(function (k) { delete bufCache[k]; });
+  }
+  function prefetch() {             // докачиваем остальные треки в фоне, пока играет первый
+    if (prefT || !canFetch()) return;
+    var g = (window.GAME && window.GAME.music) || {}, q = [];
+    Object.keys(TRACKS).forEach(function (m) { if (g[m] === undefined) TRACKS[m].forEach(function (x) { q.push(BGM_DIR + x[0]); }); });
+    var step = function () { var u = q.shift(); if (!u) return; getRaw(u, function () { prefT = setTimeout(step, 400); }); };
+    prefT = setTimeout(step, 2500);
+  }
+  function fNow(t) { var k = t.fd > 0 ? clamp((ctx.currentTime - t.fT0) / t.fd, 0, 1) : 1; return t.f0 + (t.f1 - t.f0) * k; }
+  function bufFade(t, to, fd) {     // равномощный переход от текущего уровня к 0 или 1
+    var now = ctx.currentTime, f0 = fNow(t), n = 40, curve = new Float32Array(n), gp = t.tg.gain;
+    t.f0 = f0; t.f1 = to; t.fT0 = now; t.fd = fd;
+    for (var i = 0; i < n; i++) curve[i] = t.g * Math.sin((f0 + (to - f0) * i / (n - 1)) * Math.PI / 2);
+    try { gp.cancelScheduledValues(now); gp.setValueAtTime(curve[0], now); gp.setValueCurveAtTime(curve, now, Math.max(fd, 0.05)); }
+    catch (e) { try { gp.value = curve[n - 1]; } catch (e2) { /* ничего */ } }
+  }
+  function bufPosNow(t) { return t.dur > 0 ? (t.off + Math.max(0, ctx.currentTime - t.t0)) % t.dur : 0; }
+  function bufOut(t, fd) {
+    if (t.f1 === 0) return;
+    bufPos[t.url] = (bufPosNow(t) + fd) % t.dur;          // при возврате продолжим с этого места
+    bufFade(t, 0, fd);
+    clearTimeout(t.killT);
+    t.killT = setTimeout(function () { killBuf(t); }, (fd + 0.25) * 1000);
+  }
+  function killBuf(t) {
+    if (t.f1 !== 0) return;
+    try { t.src.stop(); } catch (e) { /* уже остановлен */ }
+    try { t.src.disconnect(); t.tg.disconnect(); } catch (e) { /* ничего */ }
+    btracks = btracks.filter(function (x) { return x !== t; });
+    if (think_ === t) think_ = null;
+  }
+  function revive(url, g, fd) {
+    for (var i = 0; i < btracks.length; i++) if (btracks[i].url === url) {
+      var t = btracks[i]; clearTimeout(t.killT); t.g = g; bufFade(t, 1, fd); return t;
+    }
+    return null;
+  }
+  function startBuf(url, g, fd, fromStart, wanted, done) {   // done(track | null — не вышло | false — уже не нужен)
+    var r = revive(url, g, fd); if (r) return done(r);
+    getBuffer(url, function (buf) {
+      if (!wanted()) return done(false);
+      if (!buf) return done(null);
+      var r2 = revive(url, g, fd); if (r2) return done(r2);
+      var src = ctx.createBufferSource(), tg = ctx.createGain();
+      src.buffer = buf; src.loop = true; src.loopStart = 0; src.loopEnd = buf.duration;
+      tg.gain.value = 0; src.connect(tg); tg.connect(musicGain);
+      var off = fromStart ? 0 : (bufPos[url] || 0) % buf.duration;
+      var tr = { kind: 'buf', url: url, g: g, src: src, tg: tg, f0: 0, f1: 1, fT0: ctx.currentTime, fd: fd, off: off, t0: ctx.currentTime, dur: buf.duration };
+      try { src.start(0, off); } catch (e) { return done(null); }
+      btracks.push(tr); bufFade(tr, 1, fd);
+      if (ctx.state === 'suspended') arm();                  // звук начнётся после первого клика, сразу с плавного нарастания
+      done(tr);
+    });
+  }
+  function startAny(url, g, fd, fromStart, wanted, done) {   // done(track | false)
+    if (canFetch() && ctx && musicGain && !bufFail[url]) {
+      startBuf(url, g, fd, fromStart, wanted, function (t) {
+        if (t === false) return done(false);
+        done(t || addTrack(url, g, fd, fromStart));          // AudioBuffer не вышел (404, CORS, формат) — играем через <audio>
+      });
+    } else done(wanted() ? addTrack(url, g, fd, fromStart) : false);
+  }
+  function fadeAny(t, fd) { if (t.kind === 'buf') bufOut(t, fd || XFADE); else fadeOut(t, fd); }
 
   function music(m, retry) {
     if (m === undefined) m = null;
@@ -445,30 +558,30 @@
     var id = ++genId;
     mode = m || null;
     tracks.forEach(function (t) { if (t !== think_ && t.ft > 0) fadeOut(t); });
+    btracks.forEach(function (t) { if (t !== think_ && t.f1 > 0) bufOut(t, XFADE); });
     if (!mode) return;
     init();
     var list = modeList(mode).filter(function (x) { return typeof x.src === 'function' || !bad[x.src]; });
     if (!list.length) return;
     var i = rot[mode] === undefined ? (Math.random() * list.length) | 0 : (rot[mode] + 1) % list.length;
-    if (retry && rot[mode] !== undefined) i = (rot[mode] + 1) % list.length;
     rot[mode] = i;
     var pick = list[i];
     resolve(pick.src, function (url) {
       if (!url || id !== genId || mode === null) return;
-      addTrack(url, pick.g, XFADE, false);
+      startAny(url, pick.g, XFADE, false, function () { return id === genId && mode !== null; }, noop);
+      prefetch();
     });
   }
-  function setMusicVolume(v) { musicVol = clamp(num(v, musicVol), 0, 1); lsSet('svoyaigra.mvol', musicVol); kick(); tick(); return musicVol; }
+  function setMusicVolume(v) { musicVol = clamp(num(v, musicVol), 0, 1); lsSet('svoyaigra.mvol', musicVol); applyMusicGain(); kick(); tick(); return musicVol; }
   function setVolume(v) {
     vol = clamp(num(v, vol), 0, 1); lsSet('svoyaigra.vol', vol);
     if (master) master.gain.value = muted ? 0 : vol * REF;
-    kick(); tick(); return vol;
+    applyMusicGain(); kick(); tick(); return vol;
   }
-  function duck(on) { duckOn = !!on; kick(); }
+  function duck(on) { duckOn = !!on; applyMusicGain(); kick(); }
 
   /* ======================= «думай!» — музыка финала ======================= */
-  var thinkT = null, thinkWanted = false;
-  function thinkT_wanted() { return thinkWanted && !muted; }
+  var thinkT = null, thinkWanted = false, thinkGen = 0;
   function thinkSynth() {
     clearInterval(thinkT); thinkT = null; init(); if (!ctx) return;
     var seq = [60, 64, 67, 71, 72, 71, 67, 64], i = 0;
@@ -481,15 +594,16 @@
   }
   function think(on) {
     clearInterval(thinkT); thinkT = null; thinkWanted = !!on;
-    if (think_) { fadeOut(think_, 0.5); think_ = null; }
+    var gen = ++thinkGen;
+    if (think_) { fadeAny(think_, 0.5); think_ = null; }
     if (!on || muted) return;
     init();
     var list = modeList('think').filter(function (x) { return typeof x.src === 'function' || !bad[x.src]; });
     if (!list.length) return thinkSynth();
     var pick = list[(Math.random() * list.length) | 0];
     resolve(pick.src, function (url) {
-      if (!url || !thinkWanted) return;
-      var tr = addTrack(url, pick.g, 0.6, true); think_ = tr;
+      if (!url || gen !== thinkGen || !thinkWanted) return;
+      startAny(url, pick.g, 0.6, true, function () { return gen === thinkGen && thinkWanted; }, function (t) { if (t) think_ = t; });
     });
   }
 
@@ -499,6 +613,7 @@
       muted = !muted; if (muted) { clearInterval(thinkT); thinkT = null; }
       if (master) master.gain.value = muted ? 0 : vol * REF;
       tracks.forEach(function (t) { try { t.el.muted = muted; } catch (e) { /* ничего */ } });
+      applyMusicGain();
       if (!muted && thinkWanted && !think_ && !thinkT) think(true);
       return muted;
     },

@@ -35,7 +35,7 @@
 
 Музыка: Kevin MacLeod (incompetech.com)
 Лицензия: Creative Commons: By Attribution 4.0 — http://creativecommons.org/licenses/by/4.0/
-Треки перемонтированы в бесшовные петли (фрагмент вырезан по сетке тактов, хвост подмешан в начало), выровнены по громкости (≈ −19 LUFS), mp3 128 кбит/с. Общий размер ≈ 9,5 МБ.
+Треки перемонтированы в бесшовные петли (фрагмент вырезан по сетке тактов, хвост подмешан в начало), выровнены по громкости (≈ −19 LUFS), mp3 128 кбит/с. Общий размер ≈ 10,8 МБ.
 В файлах прописаны ID3-теги с автором и лицензией.
 
 | Файл | Режим | Трек | Ссылка |
@@ -44,14 +44,15 @@
 | `board-easy-lemon.mp3` | board (табло) | «Easy Lemon» | https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1200076 |
 | `board-miami-viceroy.mp3` | board (табло) | «Miami Viceroy» | https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1700019 |
 | `results-funky-chunk.mp3` | results (итоги раунда) | «Funky Chunk» | https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1500054 |
+| `results-enter-the-party.mp3` | results (итоги раунда) | «Enter the Party» | https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100240 |
 | `end-disco-con-tutti.mp3` | end (победитель) | «Disco con Tutti» | https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1200091 |
 | `think-thinking-music.mp3` | think (финальный раунд) | «Thinking Music» | https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1600060 |
 
-Два трека для табло чередуются при каждом возвращении на табло и продолжаются с того места, где остановились.
+Если для режима несколько треков (табло, итоги), они чередуются при каждом новом входе в режим и продолжаются с того места, где остановились.
 
 ## Тексты для титров (если показываете авторов)
 
-> Музыка: «Carefree», «Easy Lemon», «Miami Viceroy», «Funky Chunk», «Disco con Tutti», «Thinking Music» — Kevin MacLeod (incompetech.com).
+> Музыка: «Carefree», «Easy Lemon», «Miami Viceroy», «Funky Chunk», «Enter the Party», «Disco con Tutti», «Thinking Music» — Kevin MacLeod (incompetech.com).
 > Licensed under Creative Commons: By Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
 
 > Звук «Sad Trombone» — Joe Lamb (soundbible.com). Licensed under Creative Commons: By Attribution 3.0 — https://creativecommons.org/licenses/by/3.0/
