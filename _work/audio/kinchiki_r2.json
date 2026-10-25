@@ -1,0 +1,62 @@
+[
+ {
+  "file": "media/music/kinchiki/r2_400_t2.mp3",
+  "source": "https://rutube.ru/video/4c9f3cd526ddd6311d2fdc90f9178c88/",
+  "title": "«Терминатор 2: Судный день», русский дубляж: Т-800 в байкерском баре («Совпадение…» → «Мне нужна твоя одежда, ботинки и твой мотоцикл» → «Ты забыл сказать «пожалуйста»»), клип Rutube «Мне нужна твоя одежда, ботинки и мотоцикл!»",
+  "cut": [
+   44.5,
+   67.0
+  ],
+  "gain_db": 9.8,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=21.3:d=1.2,volume=9.8dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в игре: end=9.05 (запись обрывается сразу после «…и твой», слово «мотоцикл» начинается на ~9.15 с), aend=21.4 (после ответа звучат «мотоцикл» и реплика байкера)"
+ },
+ {
+  "file": "media/music/kinchiki/r2_800_bttf.mp3",
+  "source": "https://soundcloud.com/user5139758/03-alan-silvestri-back-to-the",
+  "title": "«Назад в будущее» (1985) — главная тема, Алан Сильвестри (трек «Back To The Future» с саундтрека, 3:20; та же запись в загрузке Graham Boag — https://soundcloud.com/graham-boag/back-to-the-future-main-theme)",
+  "cut": [
+   4.5,
+   27.5
+  ],
+  "gain_db": 4.1,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=21.8:d=1.2,volume=4.1dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "с нарастания перед фанфарой (в исходнике фанфара ~7 с); две подачи темы"
+ },
+ {
+  "file": "media/music/kinchiki/r2_1000_gladiator.mp3",
+  "source": "https://rutube.ru/video/bf633f4ba8fb8eb22f5646f90e344252/",
+  "title": "«Гладиатор» (2000), русский дубляж: Максимус в Колизее («…командующий северными армиями, генерал испанских легионов, верный слуга истинного императора Марка Аврелия, отец убитого сына и муж убитой жены. В этой или следующей жизни я отомщу за них»), клип Rutube «Гладиатор - Максимус Деций Меридий»",
+  "cut": [
+   113.0,
+   133.7
+  ],
+  "gain_db": 4.4,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=19.5:d=1.2,volume=4.4dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "начато после имени героя (чтобы не выдавать название); в игре: end=14.7 (пауза перед «В этой или следующей жизни…», которое начинается на ~15.2 с), aend=19.3"
+ },
+ {
+  "file": "media/music/kinchiki/r2_1400_interstellar.mp3",
+  "source": "https://soundcloud.com/bardia-rassouli/zimmer-cornfield-chase",
+  "title": "«Интерстеллар» (2014) — «Cornfield Chase», Ханс Циммер (оригинальная запись, 2:08; официальная загрузка Hans Zimmer на SoundCloud защищена DRM)",
+  "cut": [
+   42.8,
+   65.8
+  ],
+  "gain_db": 5.7,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=21.8:d=1.2,volume=5.7dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "тихая подводка и первое мощное вступление органа/струнных (в исходнике ~44.3 с)"
+ },
+ {
+  "file": "media/music/kinchiki/r2_2000_drive.mp3",
+  "source": "https://soundcloud.com/recordmakers/11-kavinsky-nightcall-1",
+  "title": "«Драйв» (2011) — Kavinsky, «Nightcall» (загрузка Record Makers), нарастание + бит + первая строка «I'm giving you a night call, tell you how I feel»",
+  "cut": [
+   9.0,
+   40.0
+  ],
+  "gain_db": -6.7,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=29.8:d=1.2,volume=-6.7dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "обрезано до слов «I want to drive you…» (в исходнике «drive» на ~42.9 с), чтобы слово не выдало название фильма"
+ }
+]
