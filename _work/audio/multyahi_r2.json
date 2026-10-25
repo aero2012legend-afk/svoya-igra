@@ -1,0 +1,68 @@
+[
+ {
+  "file": "media/music/multyahi/r2_400_karlson.mp3",
+  "source": "https://archive.org/download/1982-1_202606/1968-1970%20%D0%9C%D0%B0%D0%BB%D1%8B%D1%88%20%D0%B8%20%28%D0%9A%D0%B0%D1%80%D0%BB%D1%81%D0%BE%D0%BD%20%D0%B2%D0%B5%D1%80%D0%BD%D1%83%D0%BB%D1%81%D1%8F%29%20%5Bviju%20TV1000%20HD%5D.mp4",
+  "title": "«Малыш и Карлсон» (1968), Василий Ливанов (Карлсон): «Я мужчина хоть куда, в полном расцвете сил» (архив.org: «Союзмультфильм. Золотая коллекция HD», файл «Малыш и (Карлсон вернулся)»)",
+  "cut": [
+   [
+    312.3,
+    316.1
+   ],
+   [
+    317.55,
+    323.35
+   ]
+  ],
+  "gain_db": 13.9,
+  "ffmpeg": "склейка двух кусков (atrim 312.30–316.10 и 317.55–323.35, стыки по 20 мс fade) → afade=t=in:d=0.04,afade=t=out:st=9.30:d=0.3,volume=13.9dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в игре: end=7.40 (пауза после «Я мужчина, хоть куда», ~0.8 с тишины), aend=9.30 (после ответа звучит «в полном расцвете сил»). Из середины вырезана тишина 316.1–317.55 исходника (пауза Карлсона перед ответом)."
+ },
+ {
+  "file": "media/music/multyahi/r2_800_prostokvashino.mp3",
+  "source": "https://archive.org/download/1982-1_202606/1978-1984%20%D0%A2%D1%80%D0%BE%D0%B5%20%D0%B8%D0%B7%20%D0%9F%D1%80%D0%BE%D1%81%D1%82%D0%BE%D0%BA%D0%B2%D0%B0%D1%88%D0%B8%D0%BD%D0%BE%20%283%20%D0%B2%D1%8B%D0%BF%D1%83%D1%81%D0%BA%D0%B0%29%20%5Bviju%20TV1000%20HD%5D.mp4",
+  "title": "«Трое из Простоквашино» (1978), Борис Новиков (Печкин): «Извините. Я почему вредный был? — Потому что у меня велосипеда не было» (финал первого фильма; архив.org: «Союзмультфильм. Золотая коллекция HD»)",
+  "cut": [
+   1066.35,
+   1075.28
+  ],
+  "gain_db": 10.2,
+  "ffmpeg": "afade=t=in:d=0.04,afade=t=out:st=8.63:d=0.3,volume=10.2dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в игре: end=5.23 (пауза после вопроса «Я почему вредный был?», ~0.8 с тишины), aend=8.63 (после ответа звучит «Потому что у меня велосипеда не было»)"
+ },
+ {
+  "file": "media/music/multyahi/r2_1000_popugai.mp3",
+  "source": "https://archive.org/download/1982-1_202606/1984-1988%20%D0%92%D0%BE%D0%B7%D0%B2%D1%80%D0%B0%D1%89%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%B1%D0%BB%D1%83%D0%B4%D0%BD%D0%BE%D0%B3%D0%BE%20%D0%BF%D0%BE%D0%BF%D1%83%D0%B3%D0%B0%D1%8F%20%281-3%20%D0%B2%D1%8B%D0%BF%D1%83%D1%81%D0%BA%29%20%5Bviju%20TV1000%20HD%5D.mp4",
+  "title": "«Возвращение блудного попугая» (1984): Кеша (Геннадий Хазанов) рассказывает про Таити, Кот отвечает: «Не были мы ни в какой Таити. Нас и здесь неплохо кормят» (первый выпуск; архив.org: «Союзмультфильм. Золотая коллекция HD»)",
+  "cut": [
+   414.34,
+   427.6
+  ],
+  "gain_db": 12.3,
+  "ffmpeg": "afade=t=in:d=0.04,afade=t=out:st=12.96:d=0.3,volume=12.3dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в игре: end=12.40 (пауза ~0.15 с перед «кормят»; проверено Whisper: до end — «…нас и здесь неплохо», после — «кормят»), aend=12.96"
+ },
+ {
+  "file": "media/music/multyahi/r2_1600_futurama.mp3",
+  "source": "https://soundcloud.com/christophertyng/futurama-main-theme-from",
+  "title": "«Футурама» — заглавная тема (Futurama Main Theme, TV Version), Кристофер Тинг (официальная загрузка композитора на SoundCloud, 30-секундный фрагмент)",
+  "cut": [
+   0.0,
+   20.0
+  ],
+  "gain_db": -6.0,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=18.80:d=1.2,volume=-6.0dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "без слов (Whisper речи не находит); в игре играет целиком"
+ },
+ {
+  "file": "media/music/multyahi/r2_2000_gravityfalls.mp3",
+  "source": "https://soundcloud.com/bradbreeck/gravity-falls-theme-song",
+  "title": "«Гравити Фолз» — заглавная тема (Gravity Falls Theme Song), Брэд Брик (официальная загрузка композитора на SoundCloud, 40 с)",
+  "cut": [
+   0.0,
+   22.0
+  ],
+  "gain_db": -4.2,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=20.80:d=1.2,volume=-4.2dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "без слов (Whisper речи не находит); в игре играет целиком"
+ }
+]
