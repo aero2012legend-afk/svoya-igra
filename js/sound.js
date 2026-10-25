@@ -50,7 +50,7 @@
     board: [['board-easy-lemon.mp3', 1], ['board-miami-viceroy.mp3', 1]],
     results: [['results-funky-chunk.mp3', 1]],
     end: [['end-disco-con-tutti.mp3', 1]],
-    think: [['think-thinking-music.mp3', 1]]
+    think: [['think-thinking-music.mp3', 1.4]]
   };
 
   function init() {
@@ -58,7 +58,8 @@
     var AC = window.AudioContext || window.webkitAudioContext; if (!AC) { resumeMusic(); return; }
     try { ctx = new AC(); } catch (e) { ctx = null; resumeMusic(); return; }
     master = ctx.createGain(); master.gain.value = muted ? 0 : vol * REF;
-    var comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4;
+    // файлы уже выровнены по громкости (пик ≤ −1 дБ), поэтому компрессор — лишь страховка от перегруза при наложении звуков
+    var comp = ctx.createDynamicsCompressor(); comp.threshold.value = -3; comp.knee.value = 6; comp.ratio.value = 10; comp.attack.value = 0.002; comp.release.value = 0.15;
     master.connect(comp); comp.connect(ctx.destination);
     var map = (window.GAME && window.GAME.sounds) || {};
     Object.keys(map).forEach(function (k) {
@@ -306,6 +307,8 @@
 
   function play(name) {
     if (muted) return; init();
+    // пока пользователь не нажал ничего на странице, контекст «спит»: не копим звуки, чтобы они не выстрелили пачкой после первого клика
+    if (ctx && ctx.state === 'suspended') { try { var ua = navigator.userActivation; if (ua && !ua.isActive) return; } catch (e) { /* старый браузер */ } }
     // 1) свой файл из GAME.sounds
     var c = custom[name];
     if (c) {
@@ -390,7 +393,7 @@
   }
   function playTrackEl(t) {
     var pr; try { pr = t.el.play(); } catch (e) { pr = null; }
-    if (pr && pr.catch) pr.catch(function (e) { if (e && e.name === 'NotAllowedError') arm(); });
+    if (pr && pr.catch) pr.catch(function (e) { if (e && e.name === 'NotAllowedError') { t.blocked = true; arm(); } });
   }
   function arm() {                  // автозапуск звука запрещён — повторим после первого действия пользователя
     if (armed) return; armed = true;
@@ -398,7 +401,9 @@
     var h = function () { ev.forEach(function (e) { document.removeEventListener(e, h, true); }); armed = false; init(); resumeMusic(); };
     ev.forEach(function (e) { document.addEventListener(e, h, true); });
   }
-  function resumeMusic() { tracks.forEach(function (t) { if (t.ft > 0 && t.el.paused) playTrackEl(t); }); }
+  function resumeMusic() {
+    tracks.forEach(function (t) { if (t.ft > 0 && t.el.paused) { if (t.blocked) { t.blocked = false; t.f = 0; } playTrackEl(t); } });
+  }
   function trackVol(t) { return clamp(musicVol * vol * duckF * t.g * Math.sin(clamp(t.f, 0, 1) * Math.PI / 2), 0, 1); }
   function kick() { if (!loopT && tracks.length) { lastT = nowMs(); loopT = setInterval(tick, 40); } }
   function tick() {
