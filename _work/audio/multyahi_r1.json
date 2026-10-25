@@ -1,0 +1,62 @@
+[
+ {
+  "file": "media/music/multyahi/r1_100_nupogodi.mp3",
+  "source": "https://archive.org/download/1982-1_202606/1969-1986%20%D0%9D%D1%83%2C%20%D0%BF%D0%BE%D0%B3%D0%BE%D0%B4%D0%B8%21%20%D0%B2%D1%8B%D0%BF%D1%83%D1%81%D0%BA%D0%B8%201-6%20%5Bviju%20TV1000%20HD%5D.mp4",
+  "title": "«Ну, погоди!», выпуск 2 (финал): Заяц «Слышу, слышу!» ×2 и Волк «Ну, заяц, погоди!» (архив.org: «Союзмультфильм. Золотая коллекция HD», файл «Ну, погоди! выпуски 1-6»)",
+  "cut": [
+   1129.6,
+   1137.0
+  ],
+  "gain_db": 14.0,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=7.10:d=0.3,volume=14.0dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в игре: end=5.5 (пауза после «Ну, заяц,»), aend=7.1 (после ответа доигрывает «погоди!»)"
+ },
+ {
+  "file": "media/music/multyahi/r1_400_simpsons.mp3",
+  "source": "https://www.dailymotion.com/video/x4xgl6",
+  "title": "«Симпсоны» — заглавная тема Дэнни Эльфмана (запись заставки с ТВ, Dailymotion «Theme des simpsons !»)",
+  "cut": [
+   0.9,
+   21.4
+  ],
+  "gain_db": 4.9,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=19.30:d=1.2,volume=4.9dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "без слов; в игре играет целиком"
+ },
+ {
+  "file": "media/music/multyahi/r1_600_pooh.mp3",
+  "source": "https://archive.org/download/1982-1_202606/1969-1972%20%D0%92%D0%B8%D0%BD%D0%BD%D0%B8-%D0%9F%D1%83%D1%85%20%5Bviju%20TV1000%20%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%BE%D0%B5%20HD%5D.mp4",
+  "title": "«Винни-Пух» (1969), Евгений Леонов: «Это ж-ж-ж неспроста…» (архив.org: «Союзмультфильм. Золотая коллекция HD»)",
+  "cut": [
+   129.0,
+   134.8
+  ],
+  "gain_db": 12.8,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=5.30:d=0.5,volume=12.8dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в игре: end=3.65 (пауза перед «неспроста»), aend=5.0"
+ },
+ {
+  "file": "media/music/multyahi/r1_800_popugai.mp3",
+  "source": "https://archive.org/download/1982-1_202606/1976%2038%20%D0%BF%D0%BE%D0%BF%D1%83%D0%B3%D0%B0%D0%B5%D0%B2%20%5Bviju%20TV1000%20%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%BE%D0%B5%20HD%5D.mp4",
+  "title": "«38 попугаев» (1976), Василий Ливанов (Удав): «А в попугаях-то я гораздо длиннее» (финал первого фильма; архив.org: «Союзмультфильм. Золотая коллекция HD»)",
+  "cut": [
+   479.8,
+   491.5
+  ],
+  "gain_db": 13.2,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=11.10:d=0.6,volume=13.2dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в игре: end=8.95 (пауза перед «длиннее»), aend=11.1"
+ },
+ {
+  "file": "media/music/multyahi/r1_900_looney.mp3",
+  "source": "https://soundcloud.com/user-630233803/merrie-melodies-looney-tunes-theme",
+  "title": "Looney Tunes / Merrie Melodies — заглавная тема («Merrily We Roll Along»), SoundCloud «ARB Radio»",
+  "cut": [
+   1.0,
+   19.4
+  ],
+  "gain_db": -2.0,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=17.60:d=0.8,volume=-2.0dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "без слов; в игре играет целиком"
+ }
+]
