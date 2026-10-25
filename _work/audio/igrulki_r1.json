@@ -1,0 +1,51 @@
+[
+ {
+  "file": "media/music/igrulki/r1_100_mario.mp3",
+  "source": "https://soundcloud.com/vhsfilmsandtvs/koji-kondo-super-mario-bros",
+  "source2": "https://soundcloud.com/andrew-zuehlke/super-mario-bros-coin-sound",
+  "title": "Super Mario Bros. (NES, 1985): три звука монетки (Andrew Zuehlke) + главная тема «Ground Theme», Кодзи Кондо («Super Mario Bros. Theme (Original Version)», VHS Films & TV's)",
+  "cut": [
+   0.0,
+   11.1
+  ],
+  "gain_db": 2.0,
+  "ffmpeg": "[монетка +6 дБ ×3 со сдвигом 0 / 0.25 / 0.5 с] + [тема, исходник 0–9.6 с, сдвиг 1.55 с] → amix; затем afade=t=in:d=0.03,afade=t=out:st=9.9:d=1.2,volume=2.0dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "исходник темы 165 с, нужна только первая фраза; громкость доведена до -15 LUFS"
+ },
+ {
+  "file": "media/music/igrulki/r1_500_cs.mp3",
+  "source": "https://soundcloud.com/zhuravlik/counter-strike-counter",
+  "title": "Counter-Strike 1.6: голос диктора «Counter-Terrorists win!» (Zhuravlik, «Counter Strike Counter - Terrorists Win Sound Effect»)",
+  "cut": [
+   0.0,
+   2.14
+  ],
+  "gain_db": 0.8,
+  "ffmpeg": "afade=t=in:d=0.01,afade=t=out:st=1.89:d=0.25,volume=0.8dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "проверено Whisper: «Counter-terrorists win!»"
+ },
+ {
+  "file": "media/music/igrulki/r1_800_ducktales.mp3",
+  "source": "https://soundcloud.com/n1n10d0h/ducktales-nes-moon-theme",
+  "title": "DuckTales (NES, Capcom, 1989) — Moon Theme, Хиросиге Тономура (Ninten, «DuckTales (NES) Moon Theme»)",
+  "cut": [
+   0.0,
+   22.0
+  ],
+  "gain_db": -2.7,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=20.8:d=1.2,volume=-2.7dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "оригинал 92.7 с, взято вступление и основная тема"
+ },
+ {
+  "file": "media/music/igrulki/r1_1000_heroes.mp3",
+  "source": "https://soundcloud.com/xouman/high-quality-heroes-of-might-and-magic-3-castle-town",
+  "title": "Heroes of Might and Magic III (1999) — Castle Town Theme, Пол Ромеро / Роб Кинг (Xouman, «[High Quality] Heroes Of Might And Magic 3 - Castle Town»)",
+  "cut": [
+   1.6,
+   27.1
+  ],
+  "gain_db": -5.2,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=24.0:d=1.5,volume=-5.2dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "оригинал 156 с, вступление темы замка; запасные копии: soundcloud.com/mrzeth/heroes-of-might-and-magic-iii-castle-town-theme-music"
+ }
+]
