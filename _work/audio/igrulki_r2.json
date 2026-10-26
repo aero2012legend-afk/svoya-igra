@@ -1,0 +1,13 @@
+[
+ {
+  "file": "media/music/igrulki/r2_test_sonic.mp3",
+  "source": "https://soundcloud.com/imasake-kun/sonic-the-hedgehog-ost-1-green",
+  "title": "test",
+  "cut": [
+   0.0,
+   24.0
+  ],
+  "gain_db": -3.7,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=22.80:d=1.2,volume=-3.7dB,alimiter=limit=0.89:attack=3:release=40"
+ }
+]
