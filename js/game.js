@@ -677,8 +677,8 @@
   /* ----- шутки и подколы ----- */
   const JDEF = {
     correct: ['{name}, красавчик! Мама гордится.', 'Вот это мозг! {name}, ты что, гуглил?', '{name} знает! Подозрительно…', 'Верно! {name}, проверь карманы — там шпаргалка?'],
-    wrong: ['{name}, мимо. Как Старый мимо спортзала.', 'Нет! {name}, но звучало уверенно.', '{name}, это был смелый ход. Глупый, но смелый.', 'Минус! {name}, не расстраивайся, у тебя есть другие таланты. Наверное.'],
-    timeout: ['Тишина… Слышно, как думает Старый.', 'Никто не знает? Значит, вопрос был отличный.', 'Мозги загружаются… 3%…'],
+    wrong: ['{name}, мимо. Как пробка мимо горлышка.','Нет! {name}, но звучало уверенно.', '{name}, это был смелый ход. Глупый, но смелый.', 'Минус! {name}, не расстраивайся, у тебя есть другие таланты. Наверное.'],
+    timeout: ['Тишина… Слышно, как скрипят извилины.','Никто не знает? Значит, вопрос был отличный.', 'Мозги загружаются… 3%…'],
     bribe: ['Коррупция на марше!', 'Судья делает вид, что не видел.'],
     medal: ['Дорогой вопрос — дорогие нервы.', 'Сейчас станет жарко.', 'Это вопрос для настоящих олдов.'],
     leader: ['{name} рвёт всех. Подозрительно — телефон на шпаргалки проверили?', '{name} лидирует. Остальные — на позитиве.'],
@@ -1099,7 +1099,8 @@
     return ['read', 'open', 'ans'].includes(q.stage) && !q.tried.includes(eid);
   }
   async function onBribe(eid, k) {
-    const q = G.q; if (!q || q.key !== k || !canBribe(eid)) return;
+    const q = G.q; if (!q || q.key !== k) return;
+    if (!canBribe(eid)) { const j = !q.bribed.includes(eid) && ent(eid) ? joke('noBribe', entName(eid)) : ''; if (j) toast('💰 ' + j); return; } // опоздал с подкупом
     snap();
     const cost = bribeCost(q), hint = curD().hint || '';
     q.bribed.push(eid); q.blog.push({ e: eid, h: !!hint }); addScore(eid, -cost);
@@ -2169,7 +2170,7 @@
     round: d => `<div class="ov-rays"></div><div class="ov-title">${letters(d.title)}</div>${d.sub ? `<div class="ov-sub">${esc(d.sub)}</div>` : ''}`,
     medal: d => `<div class="ov-rays medal m${d.md}"></div><div class="ov-medalbox m${d.md}"><span>${MEDALS[d.md][0]}</span></div><div class="ov-title medal m${d.md}">${letters(MEDALS[d.md][1] + '!')}</div><div class="ov-sub">${esc(joke('medal'))}</div>`,
     mashup: () => `<div class="ov-mash"><span>🧑</span><span>👩</span></div><div class="ov-title">${letters('Мешап!')}</div><div class="ov-sub">Два лица в одном. Назови обоих!</div>`,
-    final: () => { const FT = finThemes(); return `<div class="ov-title">${letters('ФИНАЛ')}</div><div class="ov-sub">${FT.length > 1 ? `${FT.length} тем — по очереди вычёркиваем, пока не останется одна` : 'Тема: ' + esc((FT[0] || {}).theme || '')}</div>`; },
+    final: () => { const FT = finThemes(); return `<div class="ov-title">${letters('ФИНАЛ')}</div><div class="ov-sub">${FT.length > 1 ? `${FT.length} тем — по очереди вычёркиваем, пока не останется одна` : 'Тема: ' + esc((FT[0] || {}).theme || '')}</div>${PACK.jokes && PACK.jokes.final ? `<div class="ov-sub sm">${esc(joke('final'))}</div>` : ''}`; },
   };
   const OVDUR = { cat: 3400, auction: 3000, trap: 2600, angel: 2700, devil: 2700, bonus: 2600, music: 2100, video: 2000, bribe: 3000, round: 2600, final: 3400, medal: 2600, mashup: 2200 };
   const OVFX = {
