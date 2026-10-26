@@ -1,0 +1,122 @@
+[
+ {
+  "file": "media/music/nash2007/r2_200_umbrella.mp3",
+  "source": "https://soundcloud.com/mehdi-afsari/umbrella-rihanna",
+  "title": "Rihanna feat. Jay-Z — Umbrella (2007)",
+  "cut": [
+   5.5,
+   22.3
+  ],
+  "gain_db": 15.0,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=15.60:d=1.2,volume=15.0dB,alimiter=limit=0.84:attack=3:release=40:level=disabled",
+  "note": "бит и первый куплет Рианны (до припева); слов названия во фрагменте нет"
+ },
+ {
+  "file": "media/music/nash2007/r2_400_frog.mp3",
+  "source": "https://soundcloud.com/ludwing-axel-marin-donat/crazy-frog-axel-f",
+  "title": "Crazy Frog — Axel F (2005)",
+  "cut": [
+   0.7,
+   15.7
+  ],
+  "gain_db": 2.1,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=13.80:d=1.2,volume=2.1dB",
+  "note": "главная мелодия «Axel F» в версии лягушки; слов нет"
+ },
+ {
+  "file": "media/music/nash2007/r2_600_bilan.mp3",
+  "source": "https://soundcloud.com/user-719989288/dima-bilan-believe-2008",
+  "title": "Дима Билан — Believe (2008)",
+  "cut": [
+   14.6,
+   28.5
+  ],
+  "gain_db": 3.9,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=12.70:d=1.2,volume=3.9dB",
+  "note": "скрипка и первые строки куплета (до припева); слова «Believe» во фрагменте нет"
+ },
+ {
+  "file": "media/music/nash2007/r2_800_linkin.mp3",
+  "source": "https://soundcloud.com/jurko-ba-k/linkin-park-what-ive-done-1",
+  "title": "Linkin Park — What I've Done (2007)",
+  "cut": [
+   30.5,
+   47.0
+  ],
+  "gain_db": 0.5,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=15.30:d=1.2,volume=0.5dB",
+  "note": "гитарный рифф и начало первого куплета; слов названия нет"
+ },
+ {
+  "file": "media/music/nash2007/r2_1000_gradusy.mp3",
+  "source": "https://soundcloud.com/bakuridzedima/8kuhfvawtkow",
+  "title": "Градусы — Режиссёр (2009)",
+  "cut": [
+   16.0,
+   31.0
+  ],
+  "gain_db": -4.9,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=13.80:d=1.2,volume=-4.9dB",
+  "note": "вступление и начало первого куплета; слова «режиссёр» во фрагменте нет"
+ },
+ {
+  "file": "media/music/nash2007/r2_1200_stereo.mp3",
+  "source": "https://soundcloud.com/3beat/edward-maya-stereo-love-radio",
+  "title": "Edward Maya feat. Vika Jigulina — Stereo Love (2009)",
+  "cut": [
+   32.0,
+   46.0
+  ],
+  "gain_db": -0.5,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=12.80:d=1.2,volume=-0.5dB",
+  "note": "инструментальная аккордеонная тема, без вокала"
+ },
+ {
+  "file": "media/music/nash2007/r2_1400_serebro.mp3",
+  "source": "https://soundcloud.com/serebro/serebro-song-1-1",
+  "title": "Серебро — Song #1 (2007)",
+  "cut": [
+   7.2,
+   20.5
+  ],
+  "gain_db": -3.8,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=12.10:d=1.2,volume=-3.8dB",
+  "note": "вступительные строки перед первым куплетом; слов «Song #1» во фрагменте нет"
+ },
+ {
+  "file": "media/music/nash2007/r2_1600_gorillaz.mp3",
+  "source": "https://soundcloud.com/jordy-262003/feel-good-inc-w-de-la-soul",
+  "title": "Gorillaz feat. De La Soul — Feel Good Inc. (2005)",
+  "cut": [
+   2.2,
+   13.9
+  ],
+  "gain_db": -3.1,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=10.50:d=1.2,volume=-3.1dB",
+  "note": "инструментальное вступление (бас и смех), без вокала"
+ },
+ {
+  "file": "media/music/nash2007/r2_1800_crazy.mp3",
+  "source": "https://soundcloud.com/wallxcrewst/gnarls-barkley-crazy",
+  "title": "Gnarls Barkley — Crazy (2006)",
+  "cut": [
+   24.3,
+   36.0
+  ],
+  "gain_db": -5.4,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=10.50:d=1.2,volume=-5.4dB",
+  "note": "конец первого куплета; запись обрывается перед словами «Does that make me crazy?»"
+ },
+ {
+  "file": "media/music/nash2007/r2_2000_lordi.mp3",
+  "source": "https://soundcloud.com/yago-amorim-834072215/lordi-hard-rock-hallelujah",
+  "title": "Lordi — Hard Rock Hallelujah (2006)",
+  "cut": [
+   13.0,
+   25.0
+  ],
+  "gain_db": -12.0,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=10.80:d=1.2,volume=-12.0dB",
+  "note": "риф и начало первого куплета после выкриков названия; слов названия во фрагменте нет"
+ }
+]
