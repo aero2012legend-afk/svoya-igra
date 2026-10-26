@@ -33,7 +33,7 @@
   ],
   "gain_db": 9.6,
   "ffmpeg": "afade=t=in:d=0.01,afade=t=out:st=3.98:d=0.12,volume=9.6dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "«That was too close. You were almost a Jill sandwich.»; Whisper слышит «jiffy sandwich», «Jill» начинается на ~2.93 с; в игре end=2.86 (пауза после «a», до «Jill»), aend=4.1"
+  "note": "«That was too close. You were almost a Jill sandwich.»; Whisper слышит «jiffy sandwich», «Jill» начинается на ~2.93 с; в игре end=2.82 (пауза после «a», до «Jill»), aend=4.1"
  },
  {
   "file": "media/music/igrulki/r2_2000_papers.mp3",
