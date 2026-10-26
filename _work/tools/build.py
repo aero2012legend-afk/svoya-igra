@@ -28,7 +28,7 @@ SPECIALS = [('auction', 2), ('cat', 2), ('trap', 4), ('bonus', 6)]
 # в каких позициях темы (0 — самый дешёвый вопрос) может стоять спецклетка; медали (три последних) не трогаем
 SLOTS = {'auction': (3, 6), 'cat': (1, 6), 'trap': (0, 6), 'bonus': (0, 6)}
 FXS = {'blur', 'deblur', 'pixel', 'zoom', 'crop', 'tiles', 'silhouette', 'negative', 'mirror'}
-FIELD_ORDER = ['q', 'a', 'c', 'hint', 'img', 'fx', 'area', 'aimg', 'audio', 'video', 'start', 'end', 'aend',
+FIELD_ORDER = ['q', 'a', 'c', 'hint', 'img', 'fx', 'area', 'px', 'tiles', 'aimg', 'audio', 'video', 'start', 'end', 'aend',
                'kar', 'pics', 'names', 'catTheme', 'contest']
 EXTRAS = [  # ключ в extras.json, комментарий в questions.js
     ('angelTruth', 'Ловушка «Ангел» → «Правда»: вопросы, на которые надо ответить честно'),
@@ -72,6 +72,7 @@ HEADER = r"""/* ================================================================
               'zoom' — крупно один кусочек, 'crop' — видно только окошко, 'tiles' — перемешанные
               квадраты, 'silhouette' — силуэт, 'negative' — негатив, 'mirror' — зеркально
      area   — для zoom и crop: [x, y, ширина, высота] в процентах от картинки
+     px     — для pixel: размер «пикселя» (по умолчанию 28); tiles — для tiles: квадратов в ряду (по умолчанию 4)
      aimg   — другая картинка, которую показывают вместе с ответом
      audio  — звук: 'media/music/тема/файл.mp3';  video — видео: 'media/video/тема/файл.mp4'
      start, end — с какой и по какую секунду играть файл (необязательно)
@@ -223,7 +224,7 @@ def write_question(out, q, i, special):
         head += f", type: {js_str(typ)}"
     lines = [head]
     keys = [k for k in FIELD_ORDER if k in q] + [k for k in q if k not in FIELD_ORDER and k not in ('price', 'type')]
-    groups = [('q',), ('a',), ('c',), ('hint',), ('img', 'fx', 'area', 'aimg'), ('audio', 'video', 'start', 'end', 'aend'),
+    groups = [('q',), ('a',), ('c',), ('hint',), ('img', 'fx', 'area', 'px', 'tiles', 'aimg'), ('audio', 'video', 'start', 'end', 'aend'),
               ('pics', 'names'), ('catTheme', 'contest')]
     done = set()
     for g in groups:

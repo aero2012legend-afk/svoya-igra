@@ -9,7 +9,7 @@
   ],
   "gain_db": 7.3,
   "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=15.10:d=1.2,volume=7.3dB,alimiter=limit=0.84:attack=3:release=40:level=disabled",
-  "note": "вступительный рэп Jay-Z (до слов «Rihanna, where you at»); слов названия и имени исполнительницы во фрагменте нет; радиоверсия, официальный канал Rihanna на Dailymotion"
+  "note": "вступительный рэп Jay-Z (до слов «Rihanna, where you at»); слов названия и имени исполнительницы во фрагменте нет; радиоверсия, официальный канал Rihanna на Dailymotion (restore в этой среде: http_proxy=$HTTPS_PROXY)"
  },
  {
   "file": "media/music/nash2007/r2_400_frog.mp3",
@@ -33,7 +33,7 @@
   ],
   "gain_db": 3.6,
   "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=15.50:d=1.2,volume=3.6dB",
-  "note": "скрипичный проигрыш и первая строка куплета; слова «Believe» во фрагменте нет; студийная версия (аудиодорожка клипа на Dailymotion)"
+  "note": "скрипичный проигрыш и первая строка куплета; слова «Believe» во фрагменте нет; студийная версия (аудиодорожка клипа на Dailymotion; restore в этой среде: http_proxy=$HTTPS_PROXY)"
  },
  {
   "file": "media/music/nash2007/r2_800_linkin.mp3",
@@ -93,7 +93,7 @@
   ],
   "gain_db": 5.7,
   "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=10.50:d=1.2,volume=5.7dB,alimiter=limit=0.84:attack=3:release=40:level=disabled",
-  "note": "инструментальное вступление (бас и смех), без вокала; дорожка клипа на Dailymotion, песня начинается на 22.7 с"
+  "note": "инструментальное вступление (бас и смех), без вокала; дорожка клипа на Dailymotion, песня начинается на 22.7 с (restore в этой среде: http_proxy=$HTTPS_PROXY)"
  },
  {
   "file": "media/music/nash2007/r2_1800_crazy.mp3",

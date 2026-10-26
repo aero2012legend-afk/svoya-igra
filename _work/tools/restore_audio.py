@@ -26,7 +26,7 @@ def fetch(url):
     have = glob.glob(os.path.join(CACHE, key + '.*'))
     if have:
         return have[0]
-    subprocess.run([YTDLP, '-q', '--no-playlist', '-f', 'bestaudio/best', '-o', os.path.join(CACHE, key + '.%(ext)s'), url], check=True)
+    subprocess.run([YTDLP, '-q', '--no-playlist', '-f', 'bestaudio/best', '-o', os.path.join(CACHE, key + '.%(ext)s'), url], check=True, env=proxy_env())
     return glob.glob(os.path.join(CACHE, key + '.*'))[0]
 
 
@@ -45,11 +45,15 @@ def chain(e):
     return f'afade=t=in:d=0.4,afade=t=out:st={max(0, d - 1.2):.2f}:d=1.2'  # как cut_audio.sh
 
 
-def ff(args):
+def proxy_env():
     env = dict(os.environ)
     if env.get('HTTPS_PROXY') and not env.get('http_proxy'):
-        env['http_proxy'] = env['HTTPS_PROXY']  # ffmpeg сам не видит HTTPS_PROXY, а ссылки archive.org читает напрямую
-    subprocess.run(['ffmpeg', '-v', 'error', '-y'] + args, check=True, env=env)
+        env['http_proxy'] = env['HTTPS_PROXY']  # ffmpeg сам не видит HTTPS_PROXY (archive.org, потоки Dailymotion через yt-dlp)
+    return env
+
+
+def ff(args):
+    subprocess.run(['ffmpeg', '-v', 'error', '-y'] + args, check=True, env=proxy_env())
 
 
 def make(e, out):
