@@ -16,9 +16,9 @@
    0.0,
    17.33
   ],
-  "gain_db": 1.7,
-  "ffmpeg": "afade=t=in:d=0.2,afade=t=out:st=17.18:d=0.15,volume=1.7dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "в игре: end=16.21, aend=17.18"
+  "gain_db": 1.3,
+  "ffmpeg": "afade=t=in:d=0.2,afade=t=out:st=17.18:d=0.15,volume=1.3dB,alimiter=limit=0.85:attack=3:release=40",
+  "note": "в игре: end=16.2, aend=17.18"
  },
  {
   "file": "media/music/dyryavy/r1_300_topolinyj.mp3",
@@ -43,5 +43,77 @@
   "gain_db": -5.8,
   "ffmpeg": "afade=t=in:d=0.12,afade=t=out:st=16.26:d=0.15,volume=-5.8dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "в игре: end=14.12, aend=16.26"
+ },
+ {
+  "file": "media/music/dyryavy/r1_500_billiejean.mp3",
+  "source": "https://archive.org/download/billie-jean-single-version/Billie%20Jean%20%28Single%20Version%29.mp3",
+  "title": "Michael Jackson — Billie Jean (Single Version) (до слова «lover»; архив archive.org, сверено с официальным фрагментом)",
+  "cut": [
+   73.02,
+   89.6
+  ],
+  "gain_db": 0.9,
+  "ffmpeg": "afade=t=in:d=0.1,afade=t=out:st=16.43:d=0.15,volume=0.9dB,alimiter=limit=0.85:attack=3:release=40",
+  "note": "в игре: end=15.91, aend=16.43"
+ },
+ {
+  "file": "media/music/dyryavy/r1_600_lose.mp3",
+  "source": "https://archive.org/download/flac-eminem-lose-yourself-soundtrack-version-225ba8d9/Eminem%20-%20Lose%20Yourself%20%28Soundtrack%20Version%29.mp3",
+  "title": "Eminem — Lose Yourself (Soundtrack Version) (до слова «spaghetti»; архив archive.org, сверено с официальным фрагментом)",
+  "cut": [
+   44.0,
+   59.3
+  ],
+  "gain_db": -4.2,
+  "ffmpeg": "afade=t=in:d=0.15,afade=t=out:st=15.15:d=0.15,volume=-4.2dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в игре: end=14.6, aend=15.15"
+ },
+ {
+  "file": "media/music/dyryavy/r1_700_africa.mp3",
+  "source": "https://archive.org/download/1982_toto_iv/%5B1982%5D%20Toto%20-%20Toto%20IV/10%20-%20Africa.mp3",
+  "title": "Toto — Africa (до слова «rains»; архив archive.org, альбом Toto IV, темп сверен с официальным фрагментом)",
+  "cut": [
+   75.35,
+   90.14
+  ],
+  "gain_db": 4.4,
+  "ffmpeg": "afade=t=in:d=0.2,afade=t=out:st=14.64:d=0.15,volume=4.4dB,alimiter=limit=0.85:attack=3:release=40",
+  "note": "в игре: end=13.84, aend=14.64"
+ },
+ {
+  "file": "media/music/dyryavy/r1_800_duhast.mp3",
+  "source": "https://archive.org/download/rammstein-du-hast-2023-remaster/Rammstein%20-%20Du%20hast%20%282023%20Remaster%29.flac",
+  "title": "Rammstein — Du hast (2023 Remaster) (до слова «Nein»; архив archive.org)",
+  "cut": [
+   88.0,
+   102.77
+  ],
+  "gain_db": -7.1,
+  "ffmpeg": "afade=t=in:d=0.15,afade=t=out:st=14.62:d=0.15,volume=-7.1dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в игре: end=14.02, aend=14.62"
+ },
+ {
+  "file": "media/music/dyryavy/r1_900_fox.mp3",
+  "source": "https://archive.org/download/gs_ylvis-the-fox-what-does-the-fox-say/1-01%20The%20Fox%20%28What%20Does%20the%20Fox%20Say%20%29.mp3",
+  "title": "Ylvis — The Fox (What Does the Fox Say?) (до слова «toot»; архив archive.org, оригинальный сингл)",
+  "cut": [
+   7.85,
+   23.13
+  ],
+  "gain_db": -8.1,
+  "ffmpeg": "afade=t=in:d=0.12,afade=t=out:st=15.13:d=0.15,volume=-8.1dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в игре: end=14.27, aend=15.13"
+ },
+ {
+  "file": "media/music/dyryavy/r1_1000_queen.mp3",
+  "source": "https://archive.org/download/07-queen-bohemian-rhapsody/07%20Queen%20-%20Bohemian%20Rhapsody.mp3",
+  "title": "Queen — Bohemian Rhapsody (до слова «monstrosity»; архив archive.org, студийная запись 1975)",
+  "cut": [
+   196.0,
+   212.13
+  ],
+  "gain_db": -3.6,
+  "ffmpeg": "afade=t=in:d=0.1,afade=t=out:st=15.98:d=0.15,volume=-3.6dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в игре: end=14.57, aend=15.98"
  }
 ]
