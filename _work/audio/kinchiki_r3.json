@@ -1,0 +1,14 @@
+[
+ {
+  "file": "media/music/kinchiki/r3_1200_godfather.mp3",
+  "source": "https://archive.org/download/nino-rota-the-godfather-original-motion-picture-soundtrack/01%20Main%20Title%20%28The%20Godfather%20Waltz%29.mp3",
+  "title": "«Крёстный отец» (1972) — Нино Рота, «Main Title (The Godfather Waltz)» (оригинальный саундтрек, archive.org; та же запись, что в официальной загрузке Nino Rota на SoundCloud — сверено по хромаграмме)",
+  "cut": [
+   0.6,
+   22.6
+  ],
+  "gain_db": 3.5,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=20.80:d=1.2,volume=3.5dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "соло трубы: две полные фразы вальса, с первой ноты (в исходнике ~1.0 с)"
+ }
+]
