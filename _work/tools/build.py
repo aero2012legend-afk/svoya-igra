@@ -199,8 +199,8 @@ def place_specials(rno, themes):
                         continue
                     if kind == 'bonus' and (q.get('audio') or q.get('video')):
                         continue  # музыкальный вопрос жалко терять ради конкурса
-                    if any(tt == t and abs(ii - i) <= 1 for tt, ii in used):
-                        continue  # две спецклетки подряд в одной теме — перебор
+                    if any(tt == t and (abs(ii - i) <= 1 or k == kind) for (tt, ii), k in used.items()):
+                        continue  # две спецклетки подряд или две одинаковые в одной теме — перебор
                     cands.append((per_theme[t], per_row.get(i, 0), rng.random(), t, i))
             if not cands:
                 break
