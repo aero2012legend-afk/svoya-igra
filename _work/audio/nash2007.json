@@ -1,15 +1,15 @@
 [
  {
   "file": "media/music/nash2007/r2_200_umbrella.mp3",
-  "source": "https://soundcloud.com/mehdi-afsari/umbrella-rihanna",
+  "source": "https://www.dailymotion.com/video/x5mmgqd",
   "title": "Rihanna feat. Jay-Z — Umbrella (2007)",
   "cut": [
-   5.5,
-   22.3
+   0.5,
+   16.8
   ],
-  "gain_db": 15.0,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=15.60:d=1.2,volume=15.0dB,alimiter=limit=0.84:attack=3:release=40:level=disabled",
-  "note": "бит и первый куплет Рианны (до припева); слов названия во фрагменте нет"
+  "gain_db": 7.3,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=15.10:d=1.2,volume=7.3dB,alimiter=limit=0.84:attack=3:release=40:level=disabled",
+  "note": "вступительный рэп Jay-Z (до слов «Rihanna, where you at»); слов названия и имени исполнительницы во фрагменте нет; радиоверсия, официальный канал Rihanna на Dailymotion"
  },
  {
   "file": "media/music/nash2007/r2_400_frog.mp3",
@@ -25,15 +25,15 @@
  },
  {
   "file": "media/music/nash2007/r2_600_bilan.mp3",
-  "source": "https://soundcloud.com/user-719989288/dima-bilan-believe-2008",
+  "source": "https://www.dailymotion.com/video/x52z6l",
   "title": "Дима Билан — Believe (2008)",
   "cut": [
-   14.6,
-   28.5
+   12.5,
+   29.2
   ],
-  "gain_db": 3.9,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=12.70:d=1.2,volume=3.9dB",
-  "note": "скрипка и первые строки куплета (до припева); слова «Believe» во фрагменте нет"
+  "gain_db": 3.6,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=15.50:d=1.2,volume=3.6dB",
+  "note": "скрипичный проигрыш и первая строка куплета; слова «Believe» во фрагменте нет; студийная версия (аудиодорожка клипа на Dailymotion)"
  },
  {
   "file": "media/music/nash2007/r2_800_linkin.mp3",
@@ -85,15 +85,15 @@
  },
  {
   "file": "media/music/nash2007/r2_1600_gorillaz.mp3",
-  "source": "https://soundcloud.com/jordy-262003/feel-good-inc-w-de-la-soul",
+  "source": "https://www.dailymotion.com/video/xom0t",
   "title": "Gorillaz feat. De La Soul — Feel Good Inc. (2005)",
   "cut": [
-   2.2,
-   13.9
+   22.9,
+   34.6
   ],
-  "gain_db": -3.1,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=10.50:d=1.2,volume=-3.1dB",
-  "note": "инструментальное вступление (бас и смех), без вокала"
+  "gain_db": 5.7,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=10.50:d=1.2,volume=5.7dB,alimiter=limit=0.84:attack=3:release=40:level=disabled",
+  "note": "инструментальное вступление (бас и смех), без вокала; дорожка клипа на Dailymotion, песня начинается на 22.7 с"
  },
  {
   "file": "media/music/nash2007/r2_1800_crazy.mp3",
