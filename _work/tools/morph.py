@@ -64,7 +64,7 @@ def ensure_egl():
     if os.environ.get('MORPH_REEXEC'):
         return
     import glob
-    cands = sorted(glob.glob('/opt/pw-browsers/chromium*/chrome-linux/libEGL.so'))
+    cands = sorted(glob.glob('/opt/pw-browsers/chromium*/chrome-linux*/libEGL.so'))
     if not cands:
         return
     d = os.path.dirname(cands[0])

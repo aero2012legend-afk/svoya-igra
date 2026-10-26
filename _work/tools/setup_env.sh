@@ -29,6 +29,11 @@ from faster_whisper import WhisperModel
 WhisperModel('medium', device='cpu', compute_type='int8', download_root='/opt/models/whisper')
 print('whisper ok')" || echo "whisper не скачался"
 
+step "libegl1 libgles2 (нужны mediapipe для мешапа)"
+dpkg -s libegl1 libgles2 >/dev/null 2>&1 || apt-get install -y -q libegl1 libgles2 >/dev/null 2>&1 \
+  || { apt-get update -q >/dev/null 2>&1 && apt-get install -y -q libegl1 libgles2 >/dev/null 2>&1; } \
+  || echo "libegl1/libgles2 не встали — мешап (mediapipe) может не работать"
+
 step face-landmarker
 mkdir -p /tmp/mashup/models
 [ -s /tmp/mashup/models/face_landmarker.task ] || curl -sSL -o /tmp/mashup/models/face_landmarker.task \
