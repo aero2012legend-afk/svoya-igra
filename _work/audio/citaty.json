@@ -1,0 +1,14 @@
+[
+ {
+  "file": "media/music/citaty/r3_900_gentlemen.mp3",
+  "source": "https://archive.org/download/youtube-XukcyHljlCE/XukcyHljlCE.mp4",
+  "title": "«Джентльмены удачи» (1971, реж. Александр Серый): «Доцент» (Евгений Леонов) — «Украл, выпил, в тюрьму… Украл, выпил, в тюрьму… Романтика!» (полный фильм на archive.org, youtube-XukcyHljlCE; реплика на 59:48 от начала этой записи, по Викицитатнику — 58:58 в другой версии)",
+  "cut": [
+   3587.95,
+   3593.8
+  ],
+  "gain_db": -4.9,
+  "ffmpeg": "afade=t=in:d=0.05,afade=t=out:st=5.50:d=0.35,volume=-4.9dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в файле: «Украл» с ~0.25 с, «тюрьму» кончается на 4.25 с, пауза 4.25–4.65 с, «романтика» 4.65–5.4 с; в игре end=4.45, aend=5.6"
+ }
+]
