@@ -36,18 +36,6 @@
   "note": "«That was too close. You were almost a Jill sandwich.»; Whisper слышит «jiffy sandwich», «Jill» начинается на ~2.93 с; в игре end=2.82 (пауза после «a», до «Jill»), aend=4.1"
  },
  {
-  "file": "media/music/igrulki/r2_2000_papers.mp3",
-  "source": "https://soundcloud.com/user-808329607/papers-please-main-theme",
-  "title": "Papers, Please (Лукас Поуп, 2013) — главная тема / гимн Арстотцки «Glory to Arstotzka» (iBezyn4ik, «Papers, Please - Main Theme», 103 с)",
-  "cut": [
-   0.0,
-   22.0
-  ],
-  "gain_db": -2.5,
-  "ffmpeg": "afade=t=in:d=0.03,afade=t=out:st=20.80:d=1.2,volume=-2.5dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "оригинал 103 с, взято начало"
- },
- {
   "file": "media/music/igrulki/r2_400_mk.mp3",
   "source": "https://www.myinstants.com/media/sounds/e64a3c_mortal_kombat_2_finish_him_sound_effect.mp3",
   "title": "Mortal Kombat (аркада/Sega, 1992–93): голос диктора «Finish him!» (Mortal Kombat 2, звуковая кнопка myinstants «Finish Him! (MK2)»)",
@@ -70,5 +58,17 @@
   "gain_db": 16.8,
   "ffmpeg": "afade=t=in:d=0.02,afade=t=out:st=11.61:d=0.15,volume=16.8dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "проверено Whisper: «Hey, you. You're finally awake. You were trying to cross the border, right? Walked right into that Imperial ambush, same as us, and that thief over there.»; в игре end=6.25 (пауза после «right?»), aend=11.7"
+ },
+ {
+  "file": "media/music/igrulki/r2_2000_crysis.mp3",
+  "source": "https://www.myinstants.com/media/sounds/crysis-maximum-armor.mp3",
+  "title": "Crysis (Crytek, 2007) — голос нанокостюма «Maximum armor» (myinstants «crysis_maximum_armor»)",
+  "cut": [
+   0.0,
+   1.46
+  ],
+  "gain_db": 10.8,
+  "ffmpeg": "afade=t=in:d=0.01,afade=t=out:st=1.33:d=0.13,volume=10.8dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "исходник 1,47 с и -25,8 LUFS (очень тихий), Whisper: «MAXIMUM ARMOR» (речь 0–1,28 с); в игре без end; запасные: myinstants crysis-maximum-speed.mp3, crysis-maximum-strength.mp3"
  }
 ]

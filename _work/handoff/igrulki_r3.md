@@ -27,3 +27,6 @@
 - Поиск картинок: Bing даёт мусор, используй Яндекс: python3 /tmp/claude-0/-home-user-svoya-igra/795d83a0-58df-5c31-a907-79cf2837bdab/scratchpad/ys.py "запрос" /tmp/igrulki_r3/s_xxx 8 префикс (лист — префикс_sheet.jpg); для прозрачного фона (fx silhouette): тот же каталог, ysa.py (помечает ALPHA). Большие PNG с альфой сохранять в WebP (quality 88, ≤ 400 КБ).
 - Запись вопроса: scratchpad/addq.py вопрос.json (добавляет/заменяет по цене и сортирует). Поиск звуков myinstants: scratchpad/mi.py "запрос".
 - В игре fx zoom показывает ровно прямоугольник area (js/game.js, picFit), а review.py и AGENT_RULES считают окно со стороной max(w,h)% — делай w=h, тогда одинаково.
+
+## Доп. задача: замена вопроса 2000 в igrulki_r2 — ГОТОВО
+Papers, Please заменён на Crysis (голос нанокостюма «Maximum armor», fx deblur): media/img/igrulki/r2_2000_crysis.jpg, _private/media/music/igrulki/r2_2000_crysis.mp3 (запись в _work/audio/igrulki_r2.json, источник myinstants crysis-maximum-armor.mp3). Старые файлы r2_2000_papers.* и запись о них удалены; остальные вопросы R2 не менялись.
