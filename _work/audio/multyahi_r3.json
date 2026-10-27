@@ -24,6 +24,42 @@
   "note": "в игре играет целиком (start/end не нужны); проверено Whisper: в нарезке ровно две реплики; громкость ≈ −14.9 LUFS"
  },
  {
+  "file": "media/music/multyahi/r3_2400_naruto.mp3",
+  "source": "https://www.dailymotion.com/video/xbzkjs",
+  "title": "«Наруто» (Naruto, 2002), опенинг 1 «R★O★C★K★S» группы Hound Dog (запись заставки, Dailymotion «Naruto (Opening 1)», manganihon, 84 с, TV-версия): вступление и первая строка куплета",
+  "cut": [
+   1.9,
+   22.7
+  ],
+  "gain_db": 0.7,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=20.00:d=0.8,volume=0.7dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в игре играет целиком (start/end не нужны); японский вокал без слова «Naruto» (проверено Whisper по всей TV-версии); громкость ≈ −15.0 LUFS; запасной источник — SoundCloud https://soundcloud.com/animeofficial/rocks-hound-dog-naruto-openings-1 (полная версия, 292 с, другая аранжировка вступления)"
+ },
+ {
+  "file": "media/music/multyahi/r3_2700_kolobki.mp3",
+  "source": "https://www.dailymotion.com/video/x303v7y",
+  "title": "«Следствие ведут Колобки» (рисованный, 1986–1987, Татарский и Ковалёв, ТО «Экран»): Коллега — «Ой, шеф, а я вас вижу!», Шеф (Леонид Броневой) — «Аналогично.» (Dailymotion «Следствие ведут Колобки (1987)», Р-Мяу, 20:38 — весь фильм; реплика на 229.8–233.3 с; это НЕ кукольные «Колобки» 1983 года)",
+  "cut": [
+   229.45,
+   233.95
+  ],
+  "gain_db": 5.6,
+  "ffmpeg": "afade=t=in:d=0.05,afade=t=out:st=4.15:d=0.35,volume=5.6dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в игре играет целиком (start/end не нужны); проверено Whisper: в нарезке ровно две реплики; громкость ≈ −15.2 LUFS; при пересоздании скачивается весь фильм (≈68 МБ, hls-380)"
+ },
+ {
+  "file": "media/music/multyahi/r3_3000_gargoyles.mp3",
+  "source": "https://www.dailymotion.com/video/xpj9ti",
+  "title": "«Гаргульи» (Gargoyles, Disney, 1994): заставка первого сезона (запись заставки, Dailymotion «Gargoyles S1 Intro», Scott See, 62 с): вступление и первая тема; без дикторского текста",
+  "cut": [
+   0.0,
+   24.0
+  ],
+  "gain_db": -4.1,
+  "ffmpeg": "afade=t=in:d=0.15,afade=t=out:st=23.00:d=1.0,volume=-4.1dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в игре играет целиком (start/end не нужны); голоса нет — слова «Gargoyles» не слышно (проверено Whisper по всей заставке с отделением голоса Demucs); громкость ≈ −15.0 LUFS; на экране исходного видео есть плашки TV-Y7/CC — картинки брать не оттуда"
+ },
+ {
   "file": "media/music/multyahi/r3_300_southpark.mp3",
   "source": "https://soundcloud.com/user-962234403/south-park-oh-my-god-they-killed-kenny-you-bastards-wwwmp3freexbiz",
   "title": "«Южный парк» (South Park): Стэн и Кайл — «Oh my God, they killed Kenny! You bastards!» (SoundCloud, загрузка «User 962234403», 9 с: ~3 с звука и тишина)",
