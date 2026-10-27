@@ -89,7 +89,8 @@
         24.34
        ]
       ]
-     ]
+     ],
+     "minus": "media/music/dyryavy/r1_100_18mne_minus.mp3"
     },
     {
      "price": 200,
@@ -104,21 +105,50 @@
      "kar": [
       [
        0.0,
-       "♪ ♪ ♪"
+       "♪ ♪ ♪",
+       [
+        0.0,
+        0.51,
+        1.01
+       ]
       ],
       [
        4.28,
-       "Hi Barbie! Hi Ken!"
+       "Hi Barbie! Hi Ken!",
+       [
+        4.26,
+        4.59,
+        5.48,
+        5.78
+       ]
       ],
       [
        10.2,
-       "I'm a Barbie girl, in a Barbie world."
+       "I'm a Barbie girl, in a Barbie world.",
+       [
+        10.04,
+        10.46,
+        10.59,
+        11.06,
+        11.98,
+        12.22,
+        12.37,
+        12.92
+       ]
       ],
       [
        13.8,
-       "Life in plastic, it's ___"
+       "Life in plastic, it's ___",
+       [
+        14.3,
+        14.42,
+        14.7,
+        16.08,
+        16.23
+       ]
       ]
-     ]
+     ],
+     "minus": "media/music/dyryavy/r1_200_barbie_minus.mp3"
     },
     {
      "price": 300,

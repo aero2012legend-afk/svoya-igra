@@ -663,7 +663,7 @@
     if (q.con) { const c = q.con; return c.id === 'kar' && c.step === 'play' ? { L, t: karA && karA.el ? karA.el.currentTime : 0, rv: true, cut: 0, d } : null; }
     const m = MP && MP.key === q.key ? MP : null, e = m && (m.mode === 'minus' ? m.mel : m.el), rv = q.stage === 'reveal', cut = +d.end || 0;
     let t = e ? e.currentTime : 0;
-    if (!rv && cut) t = Math.min(t, cut - 0.02); // под минус подсветка замирает на пропуске
+    if (!rv && cut) t = Math.min(t, cut + 0.04); // под минус подсветка замирает на пропуске
     return { L, t, rv, cut, d };
   }
   // слово с пропуском до ответа — пустое место, после — само слово
@@ -2697,5 +2697,5 @@
   setInterval(() => { renderScores(); if (G.phase === 'lobby') updLobby(); }, 4000);
   setInterval(() => { if (client) client.publish(T('hb'), 1, false); const hb = JSON.stringify({ hb: 1 }); for (const pid in peers) dcRaw(pid, hb); }, 10000); // сердцебиение для телефонов
   mediaInit();
-  window.__svi = { get G() { return G; }, get MP() { return MP; }, get disco() { return discoOn; }, act, judge, reveal, nextAction, spaceAction, force: FORCE, pubState, pickEvent, conOk: (id, a) => conOk(CX[id], a) };
+  window.__svi = { get G() { return G; }, get MP() { return MP; }, get karA() { return karA; }, get disco() { return discoOn; }, get djSong() { return djSong; }, act, judge, reveal, nextAction, spaceAction, force: FORCE, pubState, pickEvent, conOk: (id, a) => conOk(CX[id], a) };
 })();

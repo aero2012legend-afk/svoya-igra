@@ -115,5 +115,27 @@
   "gain_db": -3.6,
   "ffmpeg": "afade=t=in:d=0.1,afade=t=out:st=15.98:d=0.15,volume=-3.6dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "в игре: end=14.57, aend=15.98"
+ },
+ {
+  "file": "media/music/dyryavy/r1_100_18mne_minus.mp3",
+  "source": "https://soundcloud.com/ryki-vverh/ruki-vverkh-18-mne-uzhe",
+  "title": "Руки Вверх — 18 мне уже (до слова «везде») — минус (без голоса)",
+  "cut": [
+   53.6,
+   121.05
+  ],
+  "demucs": "no_vocals",
+  "ffmpeg": "volume=1.1dB,afade=t=in:d=0.2,afade=t=out:st=65.95:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/dyryavy/r1_200_barbie_minus.mp3",
+  "source": "https://soundcloud.com/aqua-official/barbie-girl",
+  "title": "Aqua — Barbie Girl (до слова «fantastic»; официальная загрузка группы, 30-секундный фрагмент) — минус (без голоса)",
+  "cut": [
+   0.0,
+   29.753
+  ],
+  "demucs": "no_vocals",
+  "ffmpeg": "volume=3.3dB,afade=t=in:d=0.2,afade=t=out:st=28.25:d=1.5,alimiter=limit=0.89:attack=3:release=40"
  }
 ]
