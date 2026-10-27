@@ -2,80 +2,84 @@ import sys, math
 sys.path.insert(0, '/home/user/svoya-igra/_work/handoff')
 from narisoval_kid import *
 
-k = Kid(seed=2700)
-# серое небо, тучи закрывают свет
+k = Kid(seed=2701)
+# --- серое осеннее небо (без листьев: слово из названия не рисуем) ---
 sky = [(-20, -20), (W + 20, -20), (W + 20, 500), (-20, 510)]
-k.fill(sky, '#c9d3e2', gap=13, angle=8, op=0.8)
+k.fill(sky, '#b8c4d8', gap=13, angle=8, op=0.9)
+k.fill(sky, '#b8c4d8', gap=15, angle=-40, op=0.7)
 
-def cloud(cx, cy, s):
+def cloud(cx, cy, s, fill='#f4f6fa', line='#6f7f99', face=False):
     pts = []
     for (dx, dy, r) in [(-90, 12, 44), (-40, -26, 56), (26, -34, 60), (84, -2, 50), (130, 18, 36)]:
         pts += ell(cx + dx * s, cy + dy * s, r * s, r * s, 10, a0=190, a1=350)
     pts += [(cx + 150 * s, cy + 52 * s), (cx - 120 * s, cy + 56 * s)]
-    k.shape(pts, '#f4f6fa', '#6f7f99', w=8, amp=2.2, gap=10)
-cloud(250, 120, 1.0); cloud(700, 80, 1.15); cloud(1090, 140, 0.95)
+    k.shape(pts, fill, line, w=7, amp=2.0, gap=10)
+cloud(640, 92, 0.85)
 
-# земля: растрескавшаяся, снег и лёд
-ground = [(-20, 480), (W + 20, 470), (W + 20, H + 20), (-20, H + 20)]
-k.fill(ground, '#a98760', gap=12, angle=-6)
-for pts in ([(40, 640), (90, 610), (70, 575), (130, 545)], [(330, 640), (370, 620), (350, 600), (400, 590)], [(850, 630), (880, 650), (860, 680)], [(1130, 700), (1100, 670), (1130, 640)], [(215, 640), (190, 610), (230, 590)], [(450, 690), (420, 665), (460, 645)], [(660, 690), (700, 670), (680, 650)], [(260, 700), (310, 660), (290, 628)], [(900, 690), (960, 650), (940, 615), (1010, 590)],
-            [(1160, 650), (1200, 610), (1180, 570)], [(500, 690), (540, 670), (520, 650), (580, 640)], [(780, 700), (830, 676), (812, 650)]):
-    k.line(pts, '#4a3018', w=6, amp=2, smooth=False, twice=False)
-def ice(x, y, w, h):
-    k.shape([(x, y + h * 0.3), (x + w * 0.3, y), (x + w, y + h * 0.15), (x + w * 0.9, y + h), (x + w * 0.2, y + h * 0.9)], '#d4e6f2', '#6f93b0', w=6, gap=9, smooth=False, amp=2)
-    k.line([(x + w * 0.2, y + h * 0.2), (x + w * 0.5, y + h * 0.5), (x + w * 0.45, y + h * 0.9)], '#6f93b0', w=4, smooth=False, twice=False)
-ice(40, 480, 170, 90); ice(1060, 484, 180, 86)
-def snow(x, y, w, h):
-    pts = [(x, y + h)] + ell(x + w / 2, y + h, w / 2, h, 14, a0=180, a1=360) + [(x + w, y + h)]
-    k.solid(pts, '#ffffff'); k.line(pts, '#8aa0b8', w=6, amp=2)
-snow(20, 590, 230, 100); snow(1010, 600, 250, 100); snow(300, 650, 150, 60); snow(800, 660, 170, 50)
+# --- горящие корабли в небе ---
+def flame(x, y, s):
+    for (sc, col, ln) in [(1.0, '#e8402a', '#8a1a0a'), (0.68, '#ff9a1f', None), (0.38, '#ffe14a', None)]:
+        pts = [(-26, 30), (-14, -10), (-22, -40), (-2, -20), (4, -70), (14, -30), (30, -44), (26, 30)]
+        k.shape([(x + px * s * sc, y + py * s * sc + (1 - sc) * 24 * s) for px, py in pts], col, ln, w=4, gap=7, smooth=False, amp=1.2)
+def ship(x, y, s):
+    T = Xf(x, y, s)
+    k.line(T([(130, -6), (200, -34)]), '#47280e', w=8, amp=1.2, twice=False)                                     # бушприт
+    k.shape(T([(-140, -8), (140, -8), (116, 44), (60, 62), (-60, 62), (-116, 44)]), '#8a5a2b', '#47280e', w=8, gap=11)    # корпус
+    for yy in (14, 34):
+        k.line(T([(-120, yy), (120, yy)]), '#47280e', w=4, twice=False, amp=1)
+    k.line(T([(0, -8), (0, -240)]), '#47280e', w=10, amp=1.2)                                                     # мачта
+    k.shape(T([(-8, -222), (-8, -44), (-128, -44)]), '#f4efe0', '#47280e', w=6, gap=9, smooth=False)             # паруса
+    k.shape(T([(8, -200), (8, -44), (110, -44)]), '#f4efe0', '#47280e', w=6, gap=9, smooth=False)
+    k.shape(T([(0, -240), (0, -276), (46, -258)]), '#c0392b', '#7a1a10', w=4, gap=7, smooth=False)               # флажок
+    for (fx, fy, fs) in [(-70, -100, 0.9), (-36, -160, 0.8), (58, -92, 0.9), (76, -50, 0.7), (-100, -52, 0.7)]:
+        fx2, fy2 = T([(fx, fy)])[0]
+        flame(fx2, fy2, fs * s)
+    for (ox, oy) in [(-60, -210), (60, -186)]:                                                                     # дым
+        sx, sy = T([(ox, oy)])[0]
+        k.line([(sx, sy), (sx + 22 * s, sy - 44 * s), (sx - 12 * s, sy - 90 * s), (sx + 20 * s, sy - 136 * s)], '#6a6a76', w=15 * s, amp=2.5)
+        k.shape(ell(sx + 18 * s, sy - 150 * s, 24 * s, 18 * s, 10), '#8a8a96', None)
+ship(215, 232, 0.62); ship(1075, 190, 0.55)
 
-# --- лоскутное одеяло ---
-Q = [(300, 410), (980, 410), (1070, 612), (210, 612)]
-def lerp(a, b, t): return (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
-def P(u, v): return lerp(lerp(Q[0], Q[1], u), lerp(Q[3], Q[2], u), v)
-NX, NY = 7, 3
-cols = ['#e23b3b', '#ffb020', '#ffd43b', '#46a84f', '#2f6fd6', '#8e5bd0', '#f28cb1', '#3fc1c9']
-for i in range(NX):
-    for j in range(NY):
-        poly = [P(i / NX, j / NY), P((i + 1) / NX, j / NY), P((i + 1) / NX, (j + 1) / NY), P(i / NX, (j + 1) / NY)]
-        k.fill(poly, cols[(i * 3 + j * 5 + 1) % len(cols)], gap=9, angle=k.r.choice([40, -40, 75, 10]))
-for i in range(NX + 1):
-    k.line([P(i / NX, 0), P(i / NX, 1)], '#5a4a3a', w=4, amp=1.2, twice=False)
-for j in range(NY + 1):
-    k.line([P(0, j / NY), P(1, j / NY)], '#5a4a3a', w=4, amp=1.2, twice=False)
-k.line(Q, '#3a2a1c', w=8, closed=True, amp=2, smooth=False)
-# стежки
-for i in range(NX):
-    for j in range(NY):
-        c = P((i + 0.5) / NX, (j + 0.5) / NY)
-        k.line([(c[0] - 10, c[1]), (c[0] + 10, c[1])], '#ffffff', w=4, twice=False, smooth=False, amp=0.5)
+# --- земля, лужа, камни ---
+ground = [(-20, 468), (W + 20, 460), (W + 20, H + 20), (-20, H + 20)]
+k.fill(ground, '#9a9486', gap=12, angle=-6, op=0.95)
+k.fill(ground, '#9a9486', gap=14, angle=40, op=0.7)
+k.line([(-20, 468), (W + 20, 460)], '#5a554a', w=6, amp=2)
+PX, PY, PRX, PRY = 640, 604, 360, 92
+puddle = ell(PX, PY, PRX, PRY, 30)
+k.solid(puddle, '#a9dcf5', smooth=True)
+k.fill(puddle, '#8fd0f2', gap=11, angle=5, op=0.8)
+k.line(puddle, '#3f6a9e', w=10, closed=True, amp=2.4)
+# небо в луже: облака, птицы и плачущее небо под ногами
+for (cx2, cy2, s2) in [(450, 590, 0.30), (830, 600, 0.30), (730, 548, 0.22)]:
+    cloud(cx2, cy2, s2, '#ffffff', '#7fa6cf')
+cloud(640, 606, 0.42, '#ffffff', '#6f93b8')
+def bird(x, y, s):
+    k.line([(x - 18 * s, y - 4 * s), (x - 8 * s, y - 14 * s), (x, y), (x + 8 * s, y - 14 * s), (x + 18 * s, y - 4 * s)], '#1b1b22', w=5 * s + 2, amp=0.8, twice=False)
+for (x, y, s) in [(430, 640, 0.9), (540, 560, 0.8), (780, 640, 0.9), (870, 578, 0.8), (580, 650, 0.7), (700, 648, 0.7)]:
+    bird(x, y, s)                                                                               # отражения
+for (x, y, s) in [(500, 520, 1.7), (590, 420, 1.5), (690, 500, 2.0), (790, 400, 1.6), (900, 490, 1.8), (400, 430, 1.4)]:
+    bird(x, y, s)                                                                               # птицы разлетаются
+for (x, y, rx, ry) in [(110, 612, 74, 46), (1186, 604, 86, 54), (255, 692, 54, 30), (1012, 694, 62, 32)]:
+    k.shape(ell(x, y, rx, ry, 16), '#9aa0ab', '#4a4f5a', w=7, gap=10)
+    k.line([(x - rx * 0.5, y - ry * 0.3), (x - rx * 0.1, y - ry * 0.6)], '#d8dce4', w=6, twice=False, amp=1)
 
-# кольцевая дорога вокруг города на одеяле
-ring = ell(640, 515, 255, 66, 28)
-k.line(ring, '#6f7480', w=30, closed=True, amp=2.2)
-k.line(ell(640, 515, 255, 66, 28), '#f4f4f4', w=4, closed=True, amp=1, twice=False)
 
-def house(x, y, w, h, wall, roof, chim=False):
-    k.shape(rect(x - w / 2, y - h, w, h), wall, '#333', w=5, gap=8)
-    k.shape([(x - w / 2 - 6, y - h), (x, y - h - h * 0.55), (x + w / 2 + 6, y - h)], roof, '#333', w=5, gap=8, smooth=False, amp=1.2)
-    k.shape(rect(x - w * 0.18, y - h * 0.45, w * 0.36, h * 0.45), '#6b3a1e', '#2a1608', w=3, gap=7)
-    if chim:
-        k.shape(rect(x + w * 0.22, y - h - h * 0.62, w * 0.18, h * 0.4), '#8a8a8a', '#333', w=3, gap=6)
-for (x, y, w, h, wall, roof, chim) in sorted([
-        (545, 508, 60, 50, '#fff2c9', '#c9552f', True), (610, 492, 54, 56, '#ffd2d2', '#2f6fd6', False), (690, 488, 78, 76, '#e8f3ff', '#c9552f', True),
-        (775, 506, 58, 52, '#e2f5d6', '#8e5bd0', False), (655, 546, 50, 44, '#fff2c9', '#2f6fd6', True), (580, 548, 46, 38, '#ffd2d2', '#c9552f', False),
-        (735, 548, 48, 40, '#fff2c9', '#46a84f', False)], key=lambda t: t[1]):
-    house(x, y, w, h, wall, roof, chim)
+# --- ветер вновь играет рваными цепями ---
+for (x0, y0) in [(300, 262), (330, 352), (940, 280)]:
+    k.line([(x0, y0), (x0 + 70, y0 - 16), (x0 + 140, y0 + 6), (x0 + 210, y0 - 14)], '#ffffff', w=7, amp=2.4, twice=False)
+links = []
+for i in range(15):
+    t = i / 14.0
+    x = 360 + 560 * t
+    y = 318 + 34 * math.sin(t * 2 * math.pi * 1.1)
+    links.append((x, y))
+for i, (x, y) in enumerate(links):
+    if i == 14:
+        k.line(ell(x, y, 26, 15, 14, a0=40, a1=320), '#3d424d', w=9, amp=1.2)                 # последнее звено порвано
+    elif i % 2 == 0:
+        k.line(ell(x, y, 27, 15, 14), '#3d424d', w=9, closed=True, amp=1.2)
+    else:
+        k.line(ell(x, y, 13, 21, 14), '#3d424d', w=9, closed=True, amp=1.2)
 
-# жёлтый дым над городом
-for (x0, y0) in [(556, 396), (702, 360), (668, 470)]:
-    pts = [(x0, y0)]
-    for i in range(1, 6):
-        pts.append((x0 + (18 if i % 2 else -18) + k.J(5), y0 - i * 42))
-    k.line(pts, '#f2c200', w=16, amp=3)
-for (cx, cy) in [(600, 215), (770, 195)]:
-    for (dx, dy, r) in [(-34, 8, 30), (0, -12, 38), (36, 8, 30)]:
-        k.shape(ell(cx + dx, cy + dy, r, r, 12), '#f7d94a', '#c9a400', w=4, gap=9)
-
-k.save('/tmp/narisoval/2700', 'media/img/narisoval/r3_2700_zvezda.webp')
+k.save('/tmp/narisoval/2700', 'media/img/narisoval/r3_2700_osen.webp')
