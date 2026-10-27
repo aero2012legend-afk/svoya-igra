@@ -1,5 +1,89 @@
 [
  {
+  "file": "media/music/chyo/r3_1200_catdog.mp3",
+  "source": "https://soundcloud.com/user-382946314/liyd4kyohclv",
+  "title": "Котопёс — заставка (рус. версия)",
+  "cut": [
+   7.8,
+   23.6
+  ],
+  "gain_db": -6.2,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=14.60:d=1.2,volume=-6.2dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "SoundCloud user-382946314 «Котопёс» (34.9 с, запись целиком); слово после end начинается на ~14.09 с файла (21.89 исходника), провал между словами всего ~50 мс (14.04–14.08); end=14.02, aend=14.02 (дальше сразу «Котопёс»); проверено Whisper+demucs; -14.8 LUFS"
+ },
+ {
+  "file": "media/music/chyo/r3_1500_ben10.mp3",
+  "source": "https://soundcloud.com/user-382946314/pxnyyfdjls77",
+  "title": "Бен 10 — заставка (рус. версия)",
+  "cut": [
+   0.5,
+   17.45
+  ],
+  "gain_db": 5.8,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=15.75:d=1.2,volume=5.8dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "SoundCloud user-382946314 «Бен Тен» (58.0 с, запись целиком); слово после end начинается на ~14.75 с файла (15.25 исходника), провал 14.60–14.72; end=14.64, aend=15.70 (дальше сразу «Бен Тен»); проверено Whisper+demucs; -15.0 LUFS"
+ },
+ {
+  "file": "media/music/chyo/r3_1800_kim.mp3",
+  "source": "https://soundcloud.com/user-382946314/avdzsngfycvb",
+  "title": "Ким Пять-с-плюсом — заставка (рус. версия)",
+  "cut": [
+   1.5,
+   18.97
+  ],
+  "gain_db": 12.6,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=16.27:d=1.2,volume=12.6dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "SoundCloud user-382946314 «Ким Пять - С-плюсом» (58.0 с, запись целиком, очень тихая -27.9 LUFS); слово «всегда» начинается на ~15.05 с файла (16.55 исходника), провал между словами ~16.52-16.54 исходника мелкий; end=14.98, aend=16.22; проверено Whisper+demucs; -15.0 LUFS"
+ },
+ {
+  "file": "media/music/chyo/r3_2100_shaman.mp3",
+  "source": "https://archive.org/download/OpeningRussianostShamanKing/OpeningRussianostShamanKing.mp3",
+  "title": "Шаман Кинг (2001) — заставка (рус. версия)",
+  "cut": [
+   33.0,
+   49.55
+  ],
+  "gain_db": -13.4,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=15.35:d=1.2,volume=-13.4dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "archive.org OpeningRussianostShamanKing.mp3 (57.7 с; совпадает с SC user-463443628/shaman-king-opening-1-rus); запись очень громкая (-2 LUFS, клиппинг), поэтому gain -13.4; слово «борьбу» начинается на ~14.44 с файла (47.44 исходника; перед ним закрытие «б» 47.39-47.44), end=14.38, aend=14.38 (дальше сразу «Я должен…»); проверено Whisper+demucs; -15.0 LUFS"
+ },
+ {
+  "file": "media/music/chyo/r3_2400_jimmy.mp3",
+  "source": "https://soundcloud.com/user-382946314/ljimg04u7l7c",
+  "title": "Приключения Джимми Нейтрона, мальчика-гения — заставка (рус. версия)",
+  "cut": [
+   4.0,
+   24.89
+  ],
+  "gain_db": -1.7,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=19.69:d=1.2,volume=-1.7dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "SoundCloud user-382946314 «Приключения Джимми Нейтрона» (38.7 с, запись целиком); слово «разрушений» начинается на ~18.06 с файла (22.06 исходника; перед ним закрытие «т» 17.98-18.05), end=17.99, aend=17.99 (дальше сразу «И всем поможет»); проверено Whisper+demucs; -15.0 LUFS"
+ },
+ {
+  "file": "media/music/chyo/r3_2700_gummi.mp3",
+  "source": "https://soundcloud.com/mariya-yanyushkina/mishki-gammi_russkaya-zastavka",
+  "title": "Приключения мишек Гамми — заставка (рус. версия)",
+  "cut": [
+   29.2,
+   50.2
+  ],
+  "gain_db": 0.0,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=19.80:d=1.2,volume=0.0dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "SoundCloud mariya-yanyushkina «Мишки Гамми_русская заставка» (64.6 с, запись целиком, уже -15 LUFS); слово «прыжками» начинается на ~18.46 с файла (47.66 исходника; провал 18.40-18.44), end=18.4, aend=18.4 (дальше пауза и «в гостях у них»); проверено Whisper+demucs"
+ },
+ {
+  "file": "media/music/chyo/r3_3000_freak.mp3",
+  "source": "https://soundcloud.com/mariya-yanyushkina/frikazoid-opening_rus",
+  "title": "Фрикозоид (Freakazoid!) — заставка (рус. версия)",
+  "cut": [
+   33.5,
+   49.67
+  ],
+  "gain_db": -4.0,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=14.97:d=1.2,volume=-4.0dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "SoundCloud mariya-yanyushkina «Frikazoid_-_opening_rus» (61.8 с, запись целиком); слово «Голливуд» начинается на ~14.31 с файла (47.81 исходника; провал перед ним 14.22-14.30 всего 6 дБ), end=14.24, aend=14.88 (дальше сразу «Фрикоя»); проверено Whisper (2 прогона, с --vocals и без); -15.0 LUFS"
+ },
+ {
   "file": "media/music/chyo/r3_300_chip.mp3",
   "source": "https://soundcloud.com/user-382946314/ts3p7x4aoxbd",
   "title": "Чип и Дейл спешат на помощь — заставка (рус.)",
@@ -10,5 +94,29 @@
   "gain_db": -1.5,
   "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=21.80:d=1.2,volume=-1.5dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "русская телеверсия заставки (запись целиком 57.7 с, SoundCloud «Voplotitel2000»; такая же запись у «The Replica» https://soundcloud.com/replica-the/8gpozo0pbjyr); Whisper: слово после end начинается на 17.78 с файла; end=17.72, aend=21.70 (дальше сразу хор); -15.0 LUFS"
+ },
+ {
+  "file": "media/music/chyo/r3_600_pokemon.mp3",
+  "source": "https://soundcloud.com/xiao-310209886/convert_pokemon-season-1",
+  "title": "Покемон — заставка 1-го сезона (рус. версия)",
+  "cut": [
+   24.5,
+   43.6
+  ],
+  "gain_db": -3.1,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=17.90:d=1.2,volume=-3.1dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "SoundCloud Xiao «Convert_Pokémon Season 1 Russian Opening (HQ)» (запись 59.7 с); слово после end начинается на ~16.04 с файла (40.54 исходника), end=15.97, aend=15.97; проверено Whisper+demucs; -15.0 LUFS"
+ },
+ {
+  "file": "media/music/chyo/r3_900_chernyplash.mp3",
+  "source": "https://soundcloud.com/3apa3a-studio/f2gjqrpxsmni",
+  "title": "Чёрный плащ (Darkwing Duck) — заставка «Дисней клуб» (рус.)",
+  "cut": [
+   9.5,
+   26.0
+  ],
+  "gain_db": -7.9,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=15.30:d=1.2,volume=-7.9dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "SoundCloud 3apa3a-studio «Дисней клуб - Черный плащ» (58.0 с); слово «винта» начинается на ~14.15 с файла (23.66 исходника), end=14.00, aend=15.10; проверено Whisper+demucs; -15.1 LUFS"
  }
 ]
