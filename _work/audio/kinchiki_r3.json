@@ -1,5 +1,17 @@
 [
  {
+  "file": "media/music/kinchiki/r3_600_ivan.mp3",
+  "source": "https://archive.org/download/20240217_20240217_1554/%D0%98%D0%B2%D0%B0%D0%BD%20%D0%92%D0%B0%D1%81%D0%B8%D0%BB%D1%8C%D0%B5%D0%B2%D0%B8%D1%87%20%D0%BC%D0%B5%D0%BD%D1%8F%D0%B5%D1%82%20%D0%BF%D1%80%D0%BE%D1%84%D0%B5%D1%81%D1%81%D0%B8%D1%8E.mp4",
+  "title": "«Иван Васильевич меняет профессию» (1973, реж. Леонид Гайдай): Бунша (Юрий Яковлев) — «Я требую продолжения банкета!» (запись из телеэфира, archive.org, файл «Иван Васильевич меняет профессию.mp4», 75:24 от начала)",
+  "cut": [
+   4523.75,
+   4527.25
+  ],
+  "gain_db": 8.6,
+  "ffmpeg": "afade=t=in:d=0.1,afade=t=out:st=3.15:d=0.35,volume=8.6dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "реплика 4524.24–4526.58 с исходника; в файле: реплика с ~0.5 до ~2.8 с; без start/end"
+ },
+ {
   "file": "media/music/kinchiki/r3_1200_godfather.mp3",
   "source": "https://archive.org/download/nino-rota-the-godfather-original-motion-picture-soundtrack/01%20Main%20Title%20%28The%20Godfather%20Waltz%29.mp3",
   "title": "«Крёстный отец» (1972) — Нино Рота, «Main Title (The Godfather Waltz)» (оригинальный саундтрек, archive.org; та же запись, что в официальной загрузке Nino Rota на SoundCloud — сверено по хромаграмме)",
@@ -10,5 +22,29 @@
   "gain_db": 3.5,
   "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=20.80:d=1.2,volume=3.5dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "соло трубы: две полные фразы вальса, с первой ноты (в исходнике ~1.0 с)"
+ },
+ {
+  "file": "media/music/kinchiki/r3_2100_silence.mp3",
+  "source": "https://www.myinstants.com/media/sounds/4-1991-silence-of-the-lambs.mp3",
+  "title": "«Молчание ягнят» (1991), оригинальная озвучка: Ганнибал Лектер (Энтони Хопкинс), финальная реплика «I do wish we could chat longer, but I'm having an old friend for dinner. Bye.» (клип myinstants «#4 1991 - Silence of the Lambs»)",
+  "cut": [
+   0.0,
+   9.19
+  ],
+  "gain_db": 8.8,
+  "ffmpeg": "afade=t=in:d=0.03,afade=t=out:st=8.79:d=0.4,volume=8.8dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "весь клип 9.2 с; громкость исходника −24 LUFS, подтянута до −15"
+ },
+ {
+  "file": "media/music/kinchiki/r3_3000_bladerunner.mp3",
+  "source": "https://archive.org/download/07.-blade-runner-blues/01.%20Main%20Titles.mp3",
+  "title": "«Бегущий по лезвию» (1982) — Вангелис, «Main Titles» (альбом «Blade Runner», 1994, archive.org; первые ~25 с: нарастающий аккорд заставки и синтезаторные волны)",
+  "cut": [
+   0.3,
+   25.8
+  ],
+  "gain_db": 1.4,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=24.00:d=1.5,volume=1.4dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "с самого начала трека (звук в исходнике с ~1 с); в игре без start/end"
  }
 ]

@@ -3,17 +3,17 @@
 Файл темы: `_work/content/multyahi_r3.json` (одна тема, round 3, name «Мултяхи»). Цены 300…3000.
 Аудио-реестр: `_work/audio/multyahi_r3.json` (для звука: file/source/title/cut/gain_db/ffmpeg). Звук лежит в `_private/media/music/multyahi/r3_*.mp3`.
 Картинки: `media/img/multyahi/r3_<цена>_<что>.jpg`. Рабочая папка: `/tmp/multyahi_r3/` (может пропасть — тогда качать заново).
-Помощник записи: `/tmp/multyahi_r3/tools/qstore.py` (`from qstore import put; put({...вопрос...})` — вставляет/заменяет вопрос по цене).
+Помощники: /tmp/multyahi_r3/tools/mkaudio.py (SRC OUT S E [lufs fade_in fade_out] — режет как restore_audio.py и подбирает gain под −15 LUFS), /tmp/multyahi_r3/tools/regadd.py (add({...}) — запись в аудио-реестр). Помощник записи вопроса: `/tmp/multyahi_r3/tools/qstore.py` (`from qstore import put; put({...вопрос...})` — вставляет/заменяет вопрос по цене).
 
 ## ГОТОВО
+- 300 — «Южный парк», реплика (аудио r3_300_southpark.mp3, ~3 с; img r3_300_southpark.jpg fx pixel px16). Запись в _work/audio/multyahi_r3.json есть, restore_audio.py проверен (файл воспроизводится идентично)
 - 600 — «Том и Джерри», кадр, fx=tiles (media/img/multyahi/r3_600_tomjerry.jpg)
+- 900 — «ВАЛЛ-И», описание, img r3_900_walle_q.jpg (fx deblur) + aimg r3_900_walle_a.jpg
+- 1200 — «Бэтмен» (заставка, Dailymotion x7xik5b, нарезка 37.5–59.0 с; img r3_1200_batman_q.jpg = фон Готэма, fx negative; aimg r3_1200_batman_a.jpg). Запись в реестре есть, restore проверен
+- 1500 — «Тайна третьей планеты», реплика (r3_1500_tayna.mp3 = archive.org 865.7–872.0 с, 2 реплики целиком; img r3_1500_tayna_q.jpg fx zoom [36,6,36,36] — голова птицы-продавца; aimg r3_1500_tayna_a.jpg). Запись в аудио-реестре есть
+- 1800 — «Корова и Цыплёнок» (файлы r3_1800_cow_q/a.jpg), fx=crop area [38,0,18,84] (ноги отца; q-картинка почищена cv2.inpaint, aimg — оригинал кадра)
 
-## ПЛАН НА ОСТАЛЬНЫЕ (порядок по сложности)
-- 300 — реплика EN «Южный парк»: «Oh my God, they killed Kenny! You bastards!» Источник: SoundCloud https://soundcloud.com/user-962234403/south-park-oh-my-god-they-killed-kenny-you-bastards-wwwmp3freexbiz (9 с; файл скачан /tmp/multyahi_r3/sc/southpark.m4a). Картинка: кадр с четырьмя мальчиками (найти Яндексом по-русски), fx pixel.
-- 900 — описание «ВАЛЛ-И» (2008, Pixar): img = /tmp/multyahi_r3/s_wall/y_10.jpg (крупный план, fx deblur), aimg = /tmp/multyahi_r3/s_wall/y_1.jpg (WALL-E и EVE на фоне луны).
-- 1200 — реплика RU «Тайна третьей планеты» (1981): диалог «— Скажите, пожалуйста, сколько стоит эта птица? — Нахал! Это я его продаю!» (Селезнёв и птица Говорун) = 866.09–871.37 с в файле archive.org (URL в /tmp/multyahi_r3/tayna_url.txt: «1981 Тайна третьей планеты [viju TV1000 HD].mp4» из коллекции 1982-1_202606). Whisper-разбор: /tmp/multyahi_r3/tayna_scan_a.txt. Картинку-кадр взять ffmpeg -ss из того же mp4 (http_proxy=$HTTPS_PROXY) или Яндексом.
-- 1500 — «Корова и Цыплёнок» (CN, 1997): zoom на ноги отца — кадр /tmp/multyahi_r3/s_cow/y_4.jpg (1200x960; ноги в зелёных брюках по центру, ботинки жёлтые). Подкол: родителей показывают только ниже пояса.
-- 1800 — тема «Бэтмен» (Batman: The Animated Series, 1992, Дэнни Элфман): Dailymotion https://www.dailymotion.com/video/x2wdftt (61 с). Официальная загрузка Элфмана на SoundCloud защищена DRM — не качается.
+## ПЛАН НА ОСТАЛЬНЫЕ (порядок по сложности; цены пересчитаны: 1200 Бэтмен, 1500 Тайна, 1800 Корова, 2100 Гибли, 2400 Наруто, 2700 Колобки, 3000 Гаргульи)
 - 2100 — кадр «Унесённые призраки» (Ghibli, 2001) с жёстким fx (tiles 6 / crop). Источник — Яндекс.
 - 2400 (бронза) — тема аниме «Наруто» (опенинг 1, «R★O★C★K★S», Hound Dog): Dailymotion https://www.dailymotion.com/video/xbzkjs (84 с) или x9dqph. Без слов «Naruto» во фрагменте.
 - 2700 (серебро) — реплика «Следствие ведут Колобки» (рисованный, 1986, Татарский и Ковалёв): «— Ой, шеф, а я вас вижу! — Аналогично.» Источник: Dailymotion https://www.dailymotion.com/video/x303v7y (в первых секундах слышно «Шеф. Аналогично.» 0.66–1.48 с). ВНИМАНИЕ: есть ещё кукольные «Колобки» 1983 (Зябликова, Dailymotion x303ije) — другой фильм.
