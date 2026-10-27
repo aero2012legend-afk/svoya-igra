@@ -26,7 +26,7 @@ def fetch(url):
     have = glob.glob(os.path.join(CACHE, key + '.*'))
     if have:
         return have[0]
-    subprocess.run([YTDLP, '-q', '--no-playlist', '-f', 'bestaudio/best', '-o', os.path.join(CACHE, key + '.%(ext)s'), url], check=True, env=proxy_env())
+    subprocess.run([YTDLP, '-q', '--no-playlist', '-f', 'bestaudio/best', '-o', os.path.join(CACHE, key + '.%(ext)s'), url], check=True, env=proxy_env(), stderr=subprocess.DEVNULL)
     return glob.glob(os.path.join(CACHE, key + '.*'))[0]
 
 

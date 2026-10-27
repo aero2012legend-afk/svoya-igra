@@ -1,0 +1,134 @@
+[
+ {
+  "file": "media/dance/01_rasputin.mp3",
+  "source": "https://soundcloud.com/engrbappi47/boney-m-rasputin-youtube",
+  "title": "Boney M. - Rasputin - YouTube (engrbappi47)",
+  "cut": [
+   97.5,
+   137.5
+  ],
+  "gain_db": -4.4,
+  "ffmpeg": "volume=-4.4dB,afade=t=in:d=0.4,afade=t=out:st=38.5:d=1.5,alimiter=limit=0.9:attack=3:release=40"
+ },
+ {
+  "file": "media/dance/02_taet_led.mp3",
+  "source": "https://soundcloud.com/grebz-978226984/griby-taet-lyod",
+  "title": "Грибы - Тает Лёд (Grebz)",
+  "cut": [
+   137.0,
+   177.0
+  ],
+  "gain_db": -1.1,
+  "ffmpeg": "volume=-1.1dB,afade=t=in:d=0.4,afade=t=out:st=38.5:d=1.5,alimiter=limit=0.9:attack=3:release=40"
+ },
+ {
+  "file": "media/dance/03_dragostea.mp3",
+  "source": "https://soundcloud.com/gabriele-mueller-986230065/dragostea-din-tei",
+  "title": "O-Zone — Dragostea Din Tei (официальная загрузка O-Zone)",
+  "cut": [
+   165.5,
+   205.5
+  ],
+  "gain_db": -7.6,
+  "ffmpeg": "volume=-7.6dB,afade=t=in:d=0.4,afade=t=out:st=38.5:d=1.5,alimiter=limit=0.9:attack=3:release=40"
+ },
+ {
+  "file": "media/dance/04_mambo.mp3",
+  "source": "https://soundcloud.com/cleopatra-recs/lou-bega-mambo-no-5-a-little",
+  "title": "Lou Bega — Mambo No. 5 (A Little Bit Of…) (официальная загрузка Lou Bega)",
+  "cut": [
+   95.0,
+   135.0
+  ],
+  "gain_db": -7.5,
+  "ffmpeg": "volume=-7.5dB,afade=t=in:d=0.4,afade=t=out:st=38.5:d=1.5,alimiter=limit=0.9:attack=3:release=40"
+ },
+ {
+  "file": "media/dance/05_cotton_eye_joe.mp3",
+  "source": "https://soundcloud.com/rednex/rednex-cotton-eye-joe-2002",
+  "title": "Rednex - Cotton Eye Joe 2002 (REDNEX Official)",
+  "cut": [
+   52.5,
+   92.5
+  ],
+  "gain_db": -6.6,
+  "ffmpeg": "volume=-6.6dB,afade=t=in:d=0.4,afade=t=out:st=38.5:d=1.5,alimiter=limit=0.9:attack=3:release=40"
+ },
+ {
+  "file": "media/dance/06_uptown_funk.mp3",
+  "source": "https://soundcloud.com/sandavidtokyojapan/house-mark-ronson-uptown-funk-ft-bruno-mars-san-david-remix",
+  "title": "Mark Ronson - Uptown Funk Ft. Bruno Mars (SAN DAVID aka MonaLisaBeats)",
+  "cut": [
+   143.0,
+   183.0
+  ],
+  "gain_db": -10.6,
+  "ffmpeg": "volume=-10.6dB,afade=t=in:d=0.4,afade=t=out:st=38.5:d=1.5,alimiter=limit=0.9:attack=3:release=40"
+ },
+ {
+  "file": "media/dance/07_party_rock.mp3",
+  "source": "https://soundcloud.com/gustavo-callegari/lmfao-party-rock-anthem",
+  "title": "LMFAO - Party Rock Anthem (Gustavo Callegari)",
+  "cut": [
+   213.0,
+   253.0
+  ],
+  "gain_db": -5.9,
+  "ffmpeg": "volume=-5.9dB,afade=t=in:d=0.4,afade=t=out:st=38.5:d=1.5,alimiter=limit=0.9:attack=3:release=40"
+ },
+ {
+  "file": "media/dance/08_saxobeat.mp3",
+  "source": "https://soundcloud.com/daymira/alexandra-stan-mr-saxobeat",
+  "title": "Alexandra Stan - Mr Saxobeat (Daymira)",
+  "cut": [
+   27.0,
+   67.0
+  ],
+  "gain_db": -7.0,
+  "ffmpeg": "volume=-7.0dB,afade=t=in:d=0.4,afade=t=out:st=38.5:d=1.5,alimiter=limit=0.9:attack=3:release=40"
+ },
+ {
+  "file": "media/dance/09_skibidi.mp3",
+  "source": "https://soundcloud.com/ibuychino/skibidi",
+  "title": "Little Big – Skibidi (I'm $ad)",
+  "cut": [
+   62.5,
+   102.5
+  ],
+  "gain_db": -2.6,
+  "ffmpeg": "volume=-2.6dB,afade=t=in:d=0.4,afade=t=out:st=38.5:d=1.5,alimiter=limit=0.9:attack=3:release=40"
+ },
+ {
+  "file": "media/dance/10_rozovoe_vino.mp3",
+  "source": "https://soundcloud.com/sayonarasickboy/rozovoe-vino-feat-feduk",
+  "title": "Розовое вино (feat. FEDUK) (Элджей)",
+  "cut": [
+   26.0,
+   66.0
+  ],
+  "gain_db": -3.6,
+  "ffmpeg": "volume=-3.6dB,afade=t=in:d=0.4,afade=t=out:st=38.5:d=1.5,alimiter=limit=0.9:attack=3:release=40"
+ },
+ {
+  "file": "media/dance/11_we_like_to_party.mp3",
+  "source": "https://soundcloud.com/juan-moreno-893459339/vengaboys-we-like-to-party",
+  "title": "Vengaboys - We Like To Party (Juan C. Moreno)",
+  "cut": [
+   124.0,
+   164.0
+  ],
+  "gain_db": -1.2,
+  "ffmpeg": "volume=-1.2dB,afade=t=in:d=0.4,afade=t=out:st=38.5:d=1.5,alimiter=limit=0.9:attack=3:release=40"
+ },
+ {
+  "file": "media/dance/12_blue.mp3",
+  "source": "https://soundcloud.com/blisscorporation/eiffel-65-blue-da-ba-dee-1",
+  "title": "Eiffel 65 - \"Blue (Da Ba Dee)\" (BlissCo)",
+  "cut": [
+   112.5,
+   152.5
+  ],
+  "gain_db": -1.5,
+  "ffmpeg": "volume=-1.5dB,afade=t=in:d=0.4,afade=t=out:st=38.5:d=1.5,alimiter=limit=0.9:attack=3:release=40"
+ }
+]

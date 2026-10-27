@@ -137,5 +137,16 @@
   ],
   "demucs": "no_vocals",
   "ffmpeg": "volume=3.3dB,afade=t=in:d=0.2,afade=t=out:st=28.25:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/dyryavy/r1_300_topolinyj_minus.mp3",
+  "source": "https://soundcloud.com/lyubov-kravchenko-520866727/topolinyj-pux",
+  "title": "Иванушки International — Тополиный пух (до слова «июль») — минус (без голоса)",
+  "cut": [
+   41.6,
+   102.2
+  ],
+  "demucs": "no_vocals",
+  "ffmpeg": "volume=-4.4dB,afade=t=in:d=0.2,afade=t=out:st=59.10:d=1.5,alimiter=limit=0.89:attack=3:release=40"
  }
 ]

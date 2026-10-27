@@ -25,15 +25,15 @@
  },
  {
   "file": "media/music/kinchiki/r3_2100_silence.mp3",
-  "source": "https://www.myinstants.com/media/sounds/4-1991-silence-of-the-lambs.mp3",
-  "title": "«Молчание ягнят» (1991), оригинальная озвучка: Ганнибал Лектер (Энтони Хопкинс), финальная реплика «I do wish we could chat longer, but I'm having an old friend for dinner. Bye.» (клип myinstants «#4 1991 - Silence of the Lambs»)",
+  "source": "https://ok.ru/video/10396548008703",
+  "title": "«Молчание ягнят» (1991), русский дубляж: Ганнибал Лектер (Энтони Хопкинс), финальная реплика по телефону «Рад был бы поболтать подольше, но ко мне на ужин пожаловал старый друг. Пока.» (ok.ru, фильм целиком 1:58:33; реплика на ~6741.6–6749.8 с; восстановление качает весь фильм, ~0,9 ГБ)",
   "cut": [
-   0.0,
-   9.19
+   6741.2,
+   6750.3
   ],
-  "gain_db": 8.8,
-  "ffmpeg": "afade=t=in:d=0.03,afade=t=out:st=8.79:d=0.4,volume=8.8dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "весь клип 9.2 с; громкость исходника −24 LUFS, подтянута до −15"
+  "gain_db": 13.7,
+  "ffmpeg": "afade=t=in:d=0.03,afade=t=out:st=8.70:d=0.4,volume=13.7dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "громкость исходника подтянута до −15 LUFS; заменяет английскую запись (myinstants)"
  },
  {
   "file": "media/music/kinchiki/r3_3000_bladerunner.mp3",

@@ -58,5 +58,17 @@
   "gain_db": -2.0,
   "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=17.60:d=0.8,volume=-2.0dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "без слов; в игре играет целиком"
+ },
+ {
+  "file": "media/music/multyahi/r1_200_pinkpanther.mp3",
+  "source": "https://soundcloud.com/henry-mancini-official/the-pink-panther-theme",
+  "title": "«Розовая пантера» — тема Генри Манчини (The Pink Panther Theme, официальная загрузка Henry Mancini на SoundCloud, 30-секундный фрагмент): первая фраза саксофона",
+  "cut": [
+   3.6,
+   11.6
+  ],
+  "gain_db": 7.4,
+  "ffmpeg": "afade=t=in:d=0.05,afade=t=out:st=7.50:d=0.5,volume=7.4dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "без слов; в игре играет целиком; громкость ≈ −15 LUFS"
  }
 ]

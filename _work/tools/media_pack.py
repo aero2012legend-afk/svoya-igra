@@ -9,7 +9,8 @@ import glob, json, os, subprocess, sys, zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 JS = """const fs=require('fs'),vm=require('vm');const c={window:{}};vm.runInNewContext(fs.readFileSync(process.argv[1],'utf8'),c);
-const G=c.window.GAME,out=[];G.rounds.forEach((r,ri)=>r.themes.forEach(t=>t.questions.forEach(q=>{for(const k of ['audio','video'])if(q[k])out.push({r:ri+1,theme:t.name,price:q.price,file:q[k],a:q.a||''});})));
+const G=c.window.GAME,out=[];G.rounds.forEach((r,ri)=>r.themes.forEach(t=>t.questions.forEach(q=>{for(const k of ['audio','video','minus'])if(q[k])out.push({r:ri+1,theme:t.name,price:q.price,file:q[k],a:q.a||'',k});})));
+(G.danceSongs||[]).forEach(f=>out.push({r:0,theme:'Танцевальный баттл',price:'',file:f,a:'',k:'dance'}));
 console.log(JSON.stringify(out));"""
 
 
@@ -26,15 +27,16 @@ def main():
             src[e.get('file')] = e
     miss = [x['file'] for x in items if not os.path.exists(os.path.join(ROOT, '_private', x['file']))]
     lines = ['# 🎵 Музыка и видео для игры', '',
-             f'В игре {len(items)} вопросов со звуком. Файлы защищены авторским правом, поэтому на GitHub их нет —',
+             f'В игре {len(items)} звуковых файлов (вопросы, минусы для караоке, песни для танцевального баттла).',
+             'Файлы защищены авторским правом, поэтому на GitHub их нет —',
              'они лежат в архиве, который присылает автор пака (`svoya-igra-media.zip`).', '',
              '**Как подключить:** распакуй архив в любую папку, в лобби игры нажми **«📁 Папка с музыкой и видео»**',
              'и выбери распакованную папку (ту, где лежит папка `media`). Chrome и Edge её запомнят; после перезапуска',
              'браузера нажми на надпись у кнопки один раз, чтобы разрешить доступ. Рядом видно, сколько файлов найдено.', '',
              'Нет файла — игра не сломается: ведущий может напеть мелодию или сразу показать ответ.', '',
              'Пересоздать все файлы по источникам: `python3 _work/tools/restore_audio.py` (нужен интернет и `bash _work/tools/setup_env.sh`).', '']
-    for r in sorted({x['r'] for x in items}):
-        lines += [f'## Раунд {r}', '', '| Тема | Цена | Файл | Что звучит |', '|---|---|---|---|']
+    for r in sorted({x['r'] for x in items}, key=lambda v: v or 99):
+        lines += [f'## Раунд {r}' if r else '## Танцевальный баттл', '', '| Тема | Цена | Файл | Что звучит |', '|---|---|---|---|']
         for x in [y for y in items if y['r'] == r]:
             title = (src.get(x['file']) or {}).get('title', '').replace('|', '/')
             lines.append(f"| {x['theme']} | {x['price']} | `{x['file']}` | {title} |")

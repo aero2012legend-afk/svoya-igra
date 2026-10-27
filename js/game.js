@@ -1782,7 +1782,7 @@
   function conStare(loser) {
     const q = G.q, c = q && q.con; if (!c || c.step !== 'play' || !['a', 'b'].includes(loser) || !(DUELW[c.id] || c.id === 'laugh')) return;
     const w = loser === 'a' ? c.b : c.a, l = loser === 'a' ? c.a : c.b; snap();
-    if (c.id === 'laugh') return conFinish({ [w]: c.stake }, w, loser === 'b' ? `${entName(l)} не выдерживает и смеётся — ставка у ${entName(w)}!` : `${entName(w)} держит лицо — ставка его(её)!`);
+    if (c.id === 'laugh') return conFinish({ [w]: c.stake }, w, loser === 'b' ? `${entName(l)} не выдерживает и смеётся! Ставку забирает ${entName(w)}` : `${entName(w)} держит каменное лицо и забирает ставку!`);
     conFinish({ [w]: c.stake }, w, `${entName(l)} ${DUELW[c.id]} — ${entName(w)} побеждает!`);
   }
   function conSolo(ok) {
