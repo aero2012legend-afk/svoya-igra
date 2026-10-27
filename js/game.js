@@ -325,7 +325,7 @@
 
   /* ================= отрисовка ================= */
   function changed() { save(); publish(); render(); }
-  function render() { renderTop(); renderStage(); renderScores(); musicSync(); }
+  function render() { renderTop(); renderStage(); renderScores(); musicSync(); if (!['q', 'final'].includes(G.phase)) bgClock(null); }
   // фоновая музыка: в лобби, на табло и в итогах; во время вопроса — тишина, чтобы слышать игроков
   let musicMode;
   function musicSync() {
@@ -730,9 +730,27 @@
     const mp = q.mp && q.stage !== 'reveal' ? `<div class="mpart">Угадан один: <b>${esc((d.names || [])[q.mp.n - 1] || '№' + q.mp.n)}</b> · ${esc(entName(q.mp.who))} ${sgn(q.mp.val)} · кто назовёт второго?</div>` : '';
     const pic = !!d.img, fs = pic || md ? Math.min(pic ? (q.stage === 'reveal' ? 2.2 : 2.6) : 3, qSize(d.q)) : qSize(d.q), mdl = qMedal(q);
     return el(`<div class="qscreen st-${q.stage} ${md ? 'md md-' + md : ''} ${pic ? 'haspic' : ''} ${d.kar ? 'haskar' : ''}"><div class="qhead"><span class="qth">${esc(themeOf(q))}</span><span class="qpr ${mdl ? 'medal m' + mdl : ''}">${fmt(q.stake || q.price)}</span>${badge(q)}</div>${own}${media}${mp}
-      <div class="qtext" style="font-size:${fs}rem">${esc(d.q)}</div><div class="timer" id="timer"><i></i><b></b></div><div class="qstatus" id="qstatus"></div>${banner}${answer}
+      <div class="qtext" style="font-size:${fs}rem">${twHTML(q, d)}</div><div class="timer" id="timer"><i></i><b></b></div><div class="qstatus" id="qstatus"></div>${banner}${answer}
       <div class="hostbar">${hostButtons(q)}</div></div>`);
   }
+  /* текст вопроса печатается; нажали кнопку раньше — печать замирает (ведущий видит весь текст на пульте сразу).
+     Ненапечатанный остаток прозрачный, чтобы строки не прыгали. */
+  const TW_CPS = 40; // знаков в секунду
+  const twShown = (q, d) => (q.tw == null || q.stage === 'reveal' ? (d.q || '').length : Math.floor(q.tw));
+  function twHTML(q, d) {
+    const s = d.q || '', n = twShown(q, d);
+    return n >= s.length ? esc(s) : `${esc(s.slice(0, n))}<span class="twr">${esc(s.slice(n))}</span>`;
+  }
+  let twLast = 0;
+  function twTick() {
+    const now = performance.now(), dt = Math.min(0.25, (now - (twLast || now)) / 1000); twLast = now;
+    const q = G.q; if (G.phase !== 'q' || !q || q.tw == null || !['read', 'open'].includes(q.stage)) return;
+    const d = curD(), len = (d.q || '').length; if (q.tw >= len) return;
+    q.tw = Math.min(len, q.tw + TW_CPS * dt);
+    const box = $('#stage .qtext'), n = String(twShown(q, d)); if (!box || box.dataset.n === n) return;
+    box.dataset.n = n; box.innerHTML = twHTML(q, d);
+  }
+  setInterval(twTick, 40);
   // длинный вопрос + длинный ответ с комментарием не помещаются на экран — ужимаем текст вопроса, пока кнопки ведущего не окажутся на виду
   function fitQ() {
     const qs = $('#stage .qscreen'), qt = qs && $('.qtext', qs), hb = qs && $('.hostbar', qs); if (!qt || !hb) return;
@@ -801,13 +819,22 @@
   }
   function updTimer() {
     const h = holder(), t = $('#timer');
-    if (!t || !h) { document.body.classList.remove('danger'); return; }
+    if (!t || !h) { document.body.classList.remove('danger'); bgClock(null); return; }
     const tot = G.phase === 'final' ? G.set.ftimer : (h.tot || G.set.timer), frac = Math.max(0, Math.min(1, h.tl / tot));
     t.firstElementChild.style.transform = `scaleX(${frac.toFixed(4)})`;
     t.querySelector('b').textContent = Math.ceil(h.tl);
     t.classList.toggle('warn', h.tl <= tot * 0.5 && h.tl > 5); t.classList.toggle('danger', h.tl <= 5); t.classList.toggle('paused', !h.tr);
     document.body.classList.toggle('danger', !!h.tr && h.tl <= 5);
+    bgClock(G.phase === 'final' ? (h.stage === 'q' ? h : null) : (['open', 'timeup'].includes(h.stage) ? h : null), tot);
     if (G.phase === 'q') picState();
+  }
+  // огромные цифры таймера на фоне — их видно с любого конца комнаты
+  function bgClock(h, tot) {
+    let c = $('#bgclock');
+    if (!h) { if (c) c.textContent = ''; return; }
+    if (!c) { c = el('<div id="bgclock"></div>'); $('#bg').appendChild(c); }
+    const s = String(Math.ceil(h.tl)); if (c.textContent !== s) c.textContent = s;
+    c.className = (h.tl <= 5 ? 'danger' : h.tl <= tot * 0.5 ? 'warn' : '') + (h.tr ? '' : ' paused');
   }
 
   /* ----- таймер ----- */
@@ -967,7 +994,7 @@
     G.played[key] = true;
     const type = ['cat', 'auction', 'trap', 'bonus'].includes(d.type) ? d.type : 'normal';
     const tot = isMediaQ(d) ? Math.max(G.set.timer, 30) : G.set.timer; // на музыку и видео — не меньше 30 секунд
-    G.q = { key, r: G.round, t, i, price: +d.price || 0, type, stage: 'intro', tried: [], bribed: [], blog: [], ans: null, owner: null, stake: null, tl: tot, tot, tr: false, victim: null, auc: null, trap: null, con: null, result: null, al: null, ar: false, aup: false };
+    G.q = { key, r: G.round, t, i, price: +d.price || 0, type, stage: 'intro', tried: [], bribed: [], blog: [], ans: null, owner: null, stake: null, tl: tot, tot, tr: false, victim: null, auc: null, trap: null, con: null, result: null, al: null, ar: false, aup: false, tw: 0 };
     G.phase = 'q'; curSig = null; save(); publish();
     if (isMediaQ(d)) mediaPrep(G.q, d); // файл начинает грузиться заранее
     await flipCell(cellEl);
@@ -2240,9 +2267,11 @@
     if (['lobby', 'board', 'end'].includes(G.phase)) items.push(['🗑 Удалить', 'del']);
     const m = el(`<div class="emenu"><div class="em-h" style="--c:${e.color}">${esc(e.name)}</div>${items.map(([t, a, k]) => `<button data-act="${a}" data-id="${esc(id)}"${k ? ` data-k="${k}"` : ''}>${t}</button>`).join('')}</div>`);
     document.body.appendChild(m);
-    const r = card.getBoundingClientRect(), mr = m.getBoundingClientRect();
-    m.style.left = Math.min(innerWidth - mr.width - 8, Math.max(8, r.left + r.width / 2 - mr.width / 2)) + 'px';
-    m.style.top = Math.max(8, r.top - mr.height - 12) + 'px';
+    // размеры — без учёта анимации появления (она масштабирует меню), иначе нижние пункты уезжают за экран
+    if (m.offsetHeight > innerHeight - 16) m.classList.add('cols'); // не влезает по высоте — в две колонки
+    const r = card.getBoundingClientRect(), mw = m.offsetWidth, mh = m.offsetHeight;
+    m.style.left = Math.min(innerWidth - mw - 8, Math.max(8, r.left + r.width / 2 - mw / 2)) + 'px';
+    m.style.top = Math.max(8, Math.min(innerHeight - mh - 8, r.top - mh - 12)) + 'px';
   }
   function topMenu() {
     if ($('.tmenu')) return closeMenus();

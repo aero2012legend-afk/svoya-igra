@@ -18,7 +18,7 @@
 | `laugh.mp3` | OpenGameArt «Group giggling» (озвучка AuraVoice, загрузил Nocturnal_Vanguard) — https://opengameart.org/content/group-giggling | CC0 |
 | `cat.mp3` | OpenGameArt «Cat Purr & Meow» (Kerzoven) + синтез: звоночек — https://opengameart.org/content/cat-purr-meow | CC0 |
 | `heart.mp3` | OpenGameArt «Heartbeat (single sound)» (Independent.nu / supergamez2014) — https://opengameart.org/content/heartbeat-single-sound | CC0 |
-| `roll.mp3`, `flip.mp3`, `bid.mp3` | Kenney, «Casino Audio» (кубики, карта, фишка) — https://kenney.nl/assets/casino-audio | CC0 |
+| `roll.mp3`, `bid.mp3` | Kenney, «Casino Audio» (кубики, фишка) — https://kenney.nl/assets/casino-audio | CC0 |
 | `auction.mp3` | Kenney, «Impact Sounds» (дерево — молоток) + синтез: звонок — https://kenney.nl/assets/impact-sounds | CC0 |
 | `freeze.mp3` | Kenney, «Impact Sounds» (стекло) + синтез: колокольчики | CC0 |
 | `coin.mp3`, `bribe.mp3` | Kenney, «RPG Audio» (монеты, защёлка кассы) + синтез: звонки — https://kenney.nl/assets/rpg-audio | CC0 |
@@ -28,7 +28,7 @@
 ### Синтез (создано для этого проекта, CC0)
 
 Собрано программно (аддитивный/FM-синтез, формантный «хор», Karplus-Strong «арфа», барабаны, реверберация) — без чужих записей:
-`select`, `vote`, `tick`, `tickFast`, `roul`, `beep`, `join`, `open`, `land`, `pop`, `swap`, `clap`, `correct`, `wrong`, `buzz`, `timeout`, `horn`,
+`select`, `flip` (мягкий шорох карточки), `vote`, `tick`, `tickFast`, `roul`, `beep`, `join`, `open`, `land`, `pop`, `swap`, `clap`, `correct`, `wrong`, `buzz`, `timeout`, `horn`,
 `tada`, `results`, `medal`, `partial`, `bonus`, `round`, `final`, `go`, `drumroll`, `rimshot`, `flyby`, `whoosh`, `mashup`, `trap`, `angel`, `devil`, `sing`, `boo`.
 
 ## Фоновая музыка (`media/bgm/*.mp3`) — CC BY 4.0
