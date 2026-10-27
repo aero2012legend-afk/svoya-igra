@@ -221,7 +221,7 @@
         bribes: (q.blog || []).map(b => ({ n: entName(b.e), h: b.h, f: b.f ? 1 : 0 })),
         ev: T0 ? (T0.side === 'a' ? '😇 Ангел' : T0.side === 'd' ? '😈 Дьявол' : '') + (T0.ev && EVX[T0.ev] ? ': ' + EVX[T0.ev].name : '') : '',
         card: (T0 && (T0.card || T0.poem)) || '', c: d.c || '', names: d.names || null, mp: q.mp ? q.mp.n : null, vic: q.victim ? entName(q.victim) : '',
-        con: c ? { n: (CX[c.id] || {}).name || 'Бонус', st: c.step, a: c.a ? entName(c.a) : '', b: c.b ? entName(c.b) : '', stake: c.stake || 0, word: c.word || '' } : null,
+        con: c ? { n: (CX[c.id] || {}).name || 'Бонус', st: c.step, a: c.a ? entName(c.a) : '', b: c.b ? entName(c.b) : '', stake: c.stake || 0, word: c.word || '', pr: conPrompt(c), song: c.id === 'kar' ? d.a || '' : '' } : null,
       } : null,
       fin: f ? { st: f.stage, th: f.ti != null && FT[f.ti] ? FT[f.ti].theme : '', q: f.ti != null && FT[f.ti] ? FT[f.ti].q : '', a: f.ti != null && FT[f.ti] ? FT[f.ti].a : '', answers: Object.keys(f.answers).map(id => ({ n: entName(id), v: f.answers[id], b: f.bets[id] })) } : null,
     }, true);
@@ -651,27 +651,52 @@
     }
   }
 
-  /* ----- караоке: строчки текста синхронно с музыкой; что после остановки — прячем до ответа ----- */
+  /* ----- караоке: строчки текста синхронно с музыкой, подсветка по словам; что после остановки — прячем до ответа.
+     Строчка: [время, "текст", [время каждого слова]?]. Пропуск — «___» или {слово}: до ответа видно только пустое место. ----- */
   function karHTML(d) { return Array.isArray(d.kar) && d.kar.length ? '<div class="kar" id="kar"><div class="kl k0"></div><div class="kl k1"></div><div class="kl k2"></div></div>' : ''; }
+  const KGAP = /^([^\p{L}\p{N}_{]*)(?:\{([^}]*)\}|_{2,})([^\p{L}\p{N}_}]*)$/u;
+  const gapWord = d => String(d.gw || String(d.a || '').split(/\s+[(«]/)[0] || '').trim();
+  // откуда караоке берёт время и что показывать: обычный вопрос или конкурс «Караоке»
+  function karCtx() {
+    const q = G.q, d = curD(); if (G.phase !== 'q' || !q || !Array.isArray(d.kar)) return null;
+    const L = d.kar.filter(x => Array.isArray(x) && x.length >= 2); if (!L.length) return null;
+    if (q.con) { const c = q.con; return c.id === 'kar' && c.step === 'play' ? { L, t: karA && karA.el ? karA.el.currentTime : 0, rv: true, cut: 0, d } : null; }
+    const m = MP && MP.key === q.key ? MP : null, e = m && (m.mode === 'minus' ? m.mel : m.el), rv = q.stage === 'reveal', cut = +d.end || 0;
+    let t = e ? e.currentTime : 0;
+    if (!rv && cut) t = Math.min(t, cut - 0.02); // под минус подсветка замирает на пропуске
+    return { L, t, rv, cut, d };
+  }
+  // слово с пропуском до ответа — пустое место, после — само слово
+  function karTok(w, rv, d) {
+    const g = KGAP.exec(w); if (!g) return esc(w);
+    return rv ? `${esc(g[1])}<b class="gap open">${esc(g[2] != null ? g[2] : gapWord(d))}</b>${esc(g[3])}` : `${esc(g[1])}<b class="gap">＿＿＿</b>${esc(g[3])}`;
+  }
   let karRaf = 0;
   function karLoop() {
     cancelAnimationFrame(karRaf);
-    const box = $('#kar'), q = G.q, d = curD(); if (!box || !q || !Array.isArray(d.kar)) return;
+    const box = $('#kar'), K = box && karCtx(); if (!K) return;
     karRaf = requestAnimationFrame(karLoop);
-    const L = d.kar.filter(x => Array.isArray(x) && x.length >= 2), m = MP && MP.key === q.key ? MP : null;
-    if (!L.length) return; // строчки записаны неверно — не падаем
-    const t = m && m.el ? m.el.currentTime : 0, rv = q.stage === 'reveal', cut = +d.end || 0;
+    const { L, t, rv, cut, d } = K;
     let i = -1; for (let k = 0; k < L.length; k++) if (t + 0.05 >= +L[k][0]) i = k;
     const hide = k => !rv && cut && +L[k][0] >= cut - 0.05;
-    const txt = k => (k < 0 || k >= L.length ? '' : hide(k) ? '♪ ♪ ♪  ?' : String(L[k][1]));
+    const plain = k => (k < 0 || k >= L.length ? '' : hide(k) ? '♪ ♪ ♪  ?' : String(L[k][1]).replace(/\{([^}]*)\}/g, rv ? '$1' : '＿＿＿'));
     const lines = $$('.kl', box), cur = Math.max(0, i), sig = cur + ':' + rv;
     if (box.dataset.sig !== sig) {
-      box.dataset.sig = sig;
-      lines[0].textContent = i > 0 ? txt(i - 1) : ''; lines[1].textContent = txt(cur); lines[2].textContent = txt(cur + 1);
-      lines[1].classList.toggle('hid', hide(cur)); lines[2].classList.toggle('hid', cur + 1 < L.length && hide(cur + 1));
+      box.dataset.sig = sig; box.dataset.w = '';
+      lines[0].textContent = i > 0 ? plain(i - 1) : ''; lines[2].textContent = plain(cur + 1);
+      lines[1].innerHTML = hide(cur) ? esc(plain(cur)) : String(L[cur][1]).split(/\s+/).filter(Boolean).map(w => `<span class="w">${karTok(w, rv, d)}</span>`).join(' ');
+      lines[1].classList.toggle('hid', !!hide(cur)); lines[2].classList.toggle('hid', cur + 1 < L.length && !!hide(cur + 1));
     }
-    const st = i >= 0 ? +L[i][0] : 0, en = i >= 0 && i + 1 < L.length ? +L[i + 1][0] : st + 4, k = i < 0 ? 0 : Math.max(0, Math.min(1, (t - st) / Math.max(0.3, en - st)));
-    lines[1].style.setProperty('--k', (k * 100).toFixed(1) + '%');
+    if (i < 0 || hide(cur)) return;
+    // где поёт исполнитель: по временам слов, а если их нет — равномерно по строчке
+    const W = $$('.w', lines[1]), st = +L[i][0], nx = i + 1 < L.length ? +L[i + 1][0] : st + 4;
+    let ws = Array.isArray(L[i][2]) && L[i][2].length === W.length ? L[i][2].map(Number) : null;
+    if (!ws) { const n = W.map(w => w.textContent.length + 1), tot = n.reduce((a, b) => a + b, 0) || 1, dur = Math.min(nx - st, 0.09 * tot + 0.6); let a = 0; ws = n.map(x => { const v = st + dur * a / tot; a += x; return v; }); }
+    let j = -1; for (let k = 0; k < ws.length; k++) if (t >= ws[k] - 0.03) j = k;
+    const nextAt = j + 1 < ws.length ? ws[j + 1] : nx, len = j >= 0 ? W[j].textContent.length : 1;
+    const f = j < 0 ? 0 : Math.max(0, Math.min(1, (t - ws[j]) / Math.max(0.12, Math.min(nextAt - ws[j], 0.16 + 0.075 * len))));
+    if (box.dataset.w !== String(j)) { box.dataset.w = String(j); W.forEach((w, k) => { w.classList.toggle('on', k < j); w.classList.toggle('cur', k === j); }); }
+    if (j >= 0) W[j].style.setProperty('--k', (f * 100).toFixed(1) + '%');
   }
 
   /* ----- шутки и подколы ----- */
@@ -992,11 +1017,11 @@
     if (G.played[key] || !d) return;
     snap(); busy = true; Sound.play('select');
     G.played[key] = true;
-    const type = ['cat', 'auction', 'trap', 'bonus'].includes(d.type) ? d.type : 'normal';
+    const type = ['cat', 'auction', 'trap', 'bonus', 'karaoke'].includes(d.type) ? d.type : 'normal';
     const tot = isMediaQ(d) ? Math.max(G.set.timer, 30) : G.set.timer; // на музыку и видео — не меньше 30 секунд
     G.q = { key, r: G.round, t, i, price: +d.price || 0, type, stage: 'intro', tried: [], bribed: [], blog: [], ans: null, owner: null, stake: null, tl: tot, tot, tr: false, victim: null, auc: null, trap: null, con: null, result: null, al: null, ar: false, aup: false, tw: 0 };
     G.phase = 'q'; curSig = null; save(); publish();
-    if (isMediaQ(d)) mediaPrep(G.q, d); // файл начинает грузиться заранее
+    if (isMediaQ(d) && type !== 'karaoke') mediaPrep(G.q, d); // файл начинает грузиться заранее
     await flipCell(cellEl);
     render();
     try {
@@ -1004,6 +1029,7 @@
       else if (type === 'auction') { await overlay('auction'); G.q.stage = 'auction'; G.q.auc = { bids: {}, passed: {}, allin: {} }; }
       else if (type === 'trap') { await overlay('trap'); G.q.stage = 'trap'; G.q.trap = { side: null, ev: null, step: 0 }; G.q.victim = G.chooser && ent(G.chooser) ? G.chooser : null; }
       else if (type === 'bonus') { await overlay('bonus'); conInit(G.q, d); }
+      else if (type === 'karaoke') { await overlay('karaoke'); karInit(G.q); }
       else {
         const mdl = medalOf(PACK.rounds[G.round], t, i);
         if (mdl) await overlay('medal', { md: mdl });
@@ -1176,6 +1202,11 @@
     redeem: () => PACK.redemption || REDEEM,
     poem: () => PACK.poems || ['Старый, с днём рождения!\nТы не стареешь — ты выдерживаешься,\nкак сыр, вино и шутки про тебя.'],
     croc: () => PACK.croc || ['Вертолёт', 'Жираф', 'Пингвин', 'Холодильник', 'Свадьба', 'Рыбалка'],
+    hum: () => PACK.hum || ['«Группа крови» — Кино', '«Лесник» — Король и Шут', '«Батарейка» — Жуки', '«Крошка моя» — Руки Вверх', '«Пусть бегут неуклюже»', '«Jingle Bells»'],
+    chain: () => PACK.chain || ['Марки машин', 'Футбольные клубы', 'Города России', 'Сорта сыра', 'Фильмы про супергероев', 'Покемоны'],
+    toast: () => PACK.toast || ['Как кавказский тамада', 'Как диктор новостей', 'Как рэпер', 'Как магистр Йода', 'Как пират', 'Как футбольный комментатор'],
+    parody: () => PACK.parody || ['Шрек', 'Дарт Вейдер', 'Голлум', 'Джокер', 'Терминатор', 'Николай Дроздов'],
+    tongue: () => PACK.tongue || ['Шла Саша по шоссе и сосала сушку', 'Карл у Клары украл кораллы, а Клара у Карла украла кларнет', 'На дворе трава, на траве дрова', 'Ехал Грека через реку, видит Грека — в реке рак'],
   };
   function drawCard(kind) {
     const list = (CARDS[kind] ? CARDS[kind]() : []).filter(Boolean); if (!list.length) return '…';
@@ -1413,7 +1444,7 @@
   function phonePick(eid, k, v) {
     const q = G.q; if (G.phase !== 'q' || !q || q.key !== k) return;
     if (q.stage === 'trapev' && q.trap && q.trap.ev === 'give' && eid === q.victim) return giveTo(v);
-    if (q.stage === 'bonus' && q.con && q.con.step === 'pick' && eid === q.con.a) return conPick(v);
+    if (q.stage === 'bonus' && q.con && q.con.step === 'pick' && eid === conPicker(q.con)) return conPick(v);
   }
 
   /* ----- бонус-конкурсы (клетки «?») ----- */
@@ -1421,13 +1452,25 @@
     { id: 'rps', icon: '✊', name: 'Камень-ножницы-бумага', stake: true, rules: 'Выбор — тайно на телефоне. Победитель получает ставку, проигравший теряет 300. Ничья — переигровка.' },
     { id: 'dance', icon: '💃', name: 'Танцевальный баттл', need: 'dance', pickWord: 'партнёра по баттлу', rules: '30 секунд танцуете вдвоём под музыку, потом остальные голосуют на телефонах. Победителю — по 100 очков за каждый голос.' },
     { id: 'shot', icon: '🥃', name: 'Стопка без рук', need: 'drink', stake: true, rules: 'Руки за спину! Выпить стопку, не касаясь её руками. Каждый, кто справился, получает ставку.' },
-    { id: 'sing', icon: '🎤', name: 'Караоке-баттл', need: 'sing', pickWord: 'соперника по караоке', rules: 'Каждый поёт по 20 секунд на заданную тему, потом голосование. Победителю — по 100 очков за голос.' },
+    { id: 'sing', icon: '🎤', name: 'Караоке-баттл', need: 'sing', perf: 20, pl: 'Тема песни', pickWord: 'соперника по караоке', rules: 'Каждый поёт по 20 секунд на заданную тему, потом голосование. Победителю — по 100 очков за голос.' },
     { id: 'tap', icon: '👆', name: 'Тап-баттл', phone: true, stake: true, rules: '10 секунд жмите на кнопку телефона как можно быстрее. Кто больше нажал — получает ставку.' },
     { id: 'react', icon: '⚡', name: 'Дуэль реакции', phone: true, stake: true, rules: 'Экран телефона красный — ждём. Стал зелёным — жми! Кто быстрее, получает ставку. Нажал раньше времени — проиграл.' },
-    { id: 'croc', icon: '🐊', name: 'Крокодил', needA: 'act', phoneA: true, solo: true, stake: true, rules: 'Слово пришло тебе на телефон. Покажи его без слов и звуков за 60 секунд! Ставку получат показывающий и тот, кто угадал первым.' },
-    { id: 'stare', icon: '👁️', name: 'Гляделки', stake: true, rules: 'Смотрите друг другу в глаза. Кто первым моргнул, засмеялся или отвёл взгляд — проиграл. Победитель получает ставку.' },
+    { id: 'croc', icon: '🐊', name: 'Крокодил', needA: 'act', phoneA: true, solo: true, stake: true, deck: 'croc', show: 'Покажи его без слов и звуков', rules: 'Слово пришло тебе на телефон. Покажи его без слов и звуков за 60 секунд! Ставку получат показывающий и тот, кто угадал первым.' },
+    { id: 'stare', icon: '👁️', name: 'Гляделки', stake: true, duel: 'up', lose: '😑 Моргнул(а)', rules: 'Смотрите друг другу в глаза. Кто первым моргнул, засмеялся или отвёл взгляд — проиграл. Победитель получает ставку.' },
+    { id: 'arm', icon: '💪', name: 'Армрестлинг', stake: true, duel: 'win', pickWord: 'соперника по армрестлингу', rules: 'Локти на стол, ладони в замок, свободная рука за спиной. По команде ведущего — давите! Победитель получает ставку.' },
+    { id: 'balance', icon: '🦩', name: 'Цапля', stake: true, duel: 'up', lose: '🦶 Опустил(а) ногу', rules: 'Встаньте на одну ногу и закройте глаза. Кто первым коснулся пола второй ногой, открыл глаза или за что-то схватился — проиграл. Победитель получает ставку.' },
+    { id: 'chain', icon: '🔗', name: 'Цепочка', stake: true, duel: 'lose', lose: '🐢 Запнулся(ась)', deck: 'chain', rules: 'По очереди называете слова на тему с экрана — на ответ 5 секунд, повторяться нельзя. Кто запнулся или повторился — проиграл. Начинает тот, кто открыл клетку.' },
+    { id: 'laugh', icon: '😂', name: 'Не засмейся', stake: true, pickWord: 'того, кого будешь смешить', rules: '30 секунд смешишь соперника: рожи, голоса, шутки — только без рук. Засмеялся или улыбнулся — ставка твоя. Выстоял — ставка его.' },
+    { id: 'toast', icon: '🥂', name: 'Тост-баттл', perf: 30, deck: 'toast', each: true, pl: 'Стиль', pickWord: 'соперника по тостам', rules: 'Каждый говорит тост в честь именинника — 30 секунд и в стиле, который выпал. Потом голосование: победителю — по 100 очков за голос.' },
+    { id: 'parody', icon: '🎭', name: 'Пародия-баттл', need: 'act', perf: 20, deck: 'parody', each: true, pl: 'Персонаж', pickWord: 'соперника по пародиям', rules: 'Каждому выпадает свой персонаж — 20 секунд говорите и ведёте себя как он. Потом голосование: победителю — по 100 очков за голос.' },
+    { id: 'hum', icon: '🎵', name: 'Угадай, что я мычу', needA: 'sing', phoneA: true, solo: true, stake: true, deck: 'hum', show: 'Промычи её — без слов', rules: 'Песня пришла тебе на телефон. Промычи её без слов за 60 секунд! Ставку получат мычащий и тот, кто угадал первым.' },
+    { id: 'draw', icon: '✏️', name: 'Художник', phoneA: true, solo: true, stake: true, deck: 'croc', show: 'Нарисуй его — без букв и цифр', rules: 'Слово пришло тебе на телефон. Нарисуй его на листке или пальцем в воздухе за 60 секунд — без букв и цифр. Ставку получат художник и тот, кто угадал первым.' },
+    { id: 'tongue', icon: '👅', name: 'Скороговорка', solo: true, stake: true, deck: 'tongue', rules: 'Прочитай скороговорку с экрана три раза подряд — быстро и без запинок. Справился — ставка твоя.' },
+    // клетки темы-караоке: не выпадает в рулетке, открывается как кот в мешке
+    { id: 'kar', icon: '🎤', name: 'Караоке', hidden: true, solo: true, rules: 'Пой под минус — слова на экране. Остальные оценивают на телефонах: 👍 или 👎. Очки — цена вопроса × доля 👍.' },
   ];
   const CX = Object.fromEntries(CONTESTS.map(c => [c.id, c]));
+  const SHOWC = ['croc', 'hum', 'draw'], PERFC = ['sing', 'toast', 'parody']; // «показывает — угадывают» и «выступают по очереди — голосуют»
   const RPS = { r: ['✊', 'Камень'], s: ['✌️', 'Ножницы'], p: ['✋', 'Бумага'] };
   const beats = (x, y) => (x === 'r' && y === 's') || (x === 's' && y === 'p') || (x === 'p' && y === 'r');
   const SING = ['про любовь', 'про лето', 'из мультфильма', 'новогоднюю', 'на английском', 'из 90-х', 'про дружбу', 'про море', 'из кино', 'про город', 'про день рождения', 'про весну', 'со словом «ночь»', 'со словом «небо»'];
@@ -1435,16 +1478,23 @@
   const conA = (C, eid) => !!ent(eid) && (!C.need || entPref(eid, C.need)) && (!C.needA || entPref(eid, C.needA)) && (!(C.phone || C.phoneA) || hasPhone(eid));
   const conB = (C, a, eid) => eid !== a && !!ent(eid) && (!C.need || entPref(eid, C.need)) && (!C.phone || hasPhone(eid));
   const conOk = (C, a) => conA(C, a) && (C.solo ? G.ents.length > 1 : G.ents.some(e => conB(C, a, e.id)));
-  function conEligibleB(c) { const C = CX[c.id]; return C ? G.ents.filter(e => conB(C, c.a, e.id)) : []; }
+  function conEligibleB(c) {
+    if (c.id === 'kar') return G.ents.filter(e => G.ents.length < 2 || e.id !== c.g); // микрофон отдают другому
+    const C = CX[c.id]; return C ? G.ents.filter(e => conB(C, c.a, e.id)) : [];
+  }
   function conAfterSpin(c) { const C = CX[c.id]; return !C ? 'spin' : C.solo ? (C.stake ? 'stake' : 'ready') : 'pick'; }
+  const conPicker = c => (c.id === 'kar' ? c.g : c.a); // кто выбирает на шаге pick
+  const conPrompt = c => (c.id === 'sing' ? c.theme : c.pr ? c.pr[c.turn === 'b' ? 'b' : 'a'] : '') || '';
   function pubCon(c) {
     const C = CX[c.id] || {};
     const o = { id: c.id || null, i: C.icon || '🎁', n: C.name || 'Бонус-конкурс', st: c.step, a: c.a, b: c.b, stake: c.stake || 0 };
-    if (c.step === 'pick') { o.el = conEligibleB(c).map(e => e.id); o.pw = C.pickWord || 'соперника'; }
+    if (c.step === 'pick') { o.el = conEligibleB(c).map(e => e.id); o.pw = c.id === 'kar' ? 'кто будет петь' : C.pickWord || 'соперника'; o.g = conPicker(c); }
     if (c.step === 'ready' || c.step === 'play') {
       if (c.id === 'rps' && c.ch) { o.ch = { a: c.ch.a ? 1 : 0, b: c.ch.b ? 1 : 0 }; o.rnd = c.rnd || 1; }
       if (c.tot) o.tm = { l: r1(c.tl), r: !!c.tr, tot: c.tot };
-      if (c.id === 'sing') { o.turn = c.turn || null; o.theme = c.theme; }
+      if (C.perf) { o.turn = c.turn || null; o.theme = conPrompt(c); o.pl = C.pl || 'Тема'; if (c.pr) o.pr = c.pr; }
+      if (C.show) o.sh = C.show;
+      if (c.id === 'chain' || c.id === 'tongue') o.word = c.word || '';
       if (c.id === 'tap' || c.id === 'react') { o.cd = c.cd || 0; o.go = c.go ? 1 : 0; o.gid = c.gid || ''; }
     }
     if (c.step === 'vote') { o.vd = Object.keys(c.votes || {}); o.vs = c.voters || []; }
@@ -1467,13 +1517,23 @@
   }
   function conGo(c, step) {
     c.step = step;
-    if (step === 'ready' && c.id === 'croc' && !c.word) { c.word = drawCard('croc'); sendPrivate(c.a, { k: G.q.key, word: c.word }); }
+    const C = CX[c.id] || {};
+    if (step === 'ready' && SHOWC.includes(c.id) && !c.word) { c.word = drawCard(C.deck); sendPrivate(c.a, { k: G.q.key, word: c.word }); }
+    if (step === 'ready' && (c.id === 'chain' || c.id === 'tongue') && !c.word) c.word = drawCard(C.deck);
     if (step === 'ready' && c.id === 'sing' && !c.theme) c.theme = pick(SING);
+    if (step === 'ready' && C.each && !c.pr) { const x = drawCard(C.deck); let y = drawCard(C.deck); for (let k = 0; k < 5 && y === x; k++) y = drawCard(C.deck); c.pr = { a: x, b: y }; }
   }
   function conWho(eid) { const q = G.q, c = q && q.con; if (!c || c.step !== 'who' || !ent(eid)) return; snap(); c.a = eid; c.step = 'spin'; changed(); conAuto(); }
+  // клетка темы-караоке: кто открыл — отдаёт микрофон, тот поёт под минус, остальные ставят 👍/👎
+  function karInit(q) {
+    q.stage = 'bonus';
+    const g = G.chooser && ent(G.chooser) ? G.chooser : null;
+    q.con = { step: 'pick', id: 'kar', g, a: null, b: null, stake: 0 };
+    if (G.ents.length < 2) { q.con.a = g || G.ents[0].id; q.con.step = 'ready'; }
+  }
   async function conSpin() {
     const q = G.q, c = q && q.con; if (!c || c.step !== 'spin' || busy) return;
-    const list = CONTESTS.filter(x => conOk(x, c.a));
+    const list = CONTESTS.filter(x => !x.hidden && conOk(x, c.a));
     if (!list.length) { // никому не подходит ни один конкурс — просто дарим очки
       snap(); return conFinish({ [c.a]: q.price }, c.a, `Бонус для ${entName(c.a)}!`);
     }
@@ -1488,6 +1548,7 @@
   }
   function conPick(eid) {
     const q = G.q, c = q && q.con; if (!c || c.step !== 'pick' || busy) return;
+    if (c.id === 'kar') { if (!conEligibleB(c).some(e => e.id === eid)) return; snap(); c.a = eid; Sound.play('whoosh'); conGo(c, 'ready'); return changed(); }
     const C = CX[c.id]; if (!C || !conB(C, c.a, eid)) return;
     snap(); c.b = eid; Sound.play('whoosh'); conGo(c, C.stake ? 'stake' : 'ready'); changed(); conAuto();
   }
@@ -1506,14 +1567,41 @@
     switch (c.id) {
       case 'rps': c.ch = { a: null, b: null }; c.rnd = c.rnd || 1; Sound.play('open'); break;
       case 'dance': conTimer(30, () => conToVote()); discoStart(); break;
-      case 'sing': c.turn = 'a'; conTimer(20, () => conSingNext()); Sound.play('open'); break;
+      case 'sing': case 'toast': case 'parody': c.turn = 'a'; conTimer(CX[c.id].perf, () => conSingNext()); Sound.play('open'); break;
       case 'shot': c.ok = { a: null, b: null }; conTimer(30, null); Sound.play('roll'); break;
       case 'tap': c.taps = { a: 0, b: 0 }; c.fin = { a: false, b: false }; c.go = false; c.gid = Net.id(); changed(); return conCountdown(() => conTapGo());
       case 'react': return conReactRound();
-      case 'croc': c.guess = null; conTimer(60, null); Sound.play('open'); break;
-      case 'stare': c.t0 = Date.now(); heartOn(); Sound.play('open'); break;
+      case 'croc': case 'hum': case 'draw': c.guess = null; conTimer(60, null); Sound.play('open'); break;
+      case 'stare': case 'balance': c.t0 = Date.now(); if (c.id === 'stare') heartOn(); Sound.play('open'); break;
+      case 'arm': Sound.play('go'); break;
+      case 'chain': Sound.play('open'); break;
+      case 'laugh': conTimer(30, null); Sound.play('open'); break;
+      case 'tongue': conTimer(30, null); Sound.play('open'); break;
+      case 'kar': { const p = karStart(); changed(); return p; }
     }
     changed();
+  }
+  /* ----- караоке: минус песни, слова на экране; конец песни — оценки ----- */
+  let karA = null;
+  function karStop() { const A = karA; karA = null; if (A && A.el) { try { A.el.pause(); A.el.removeAttribute('src'); A.el.load(); } catch (e) { /* ничего */ } } cancelAnimationFrame(karRaf); }
+  async function karStart() {
+    const q = G.q, c = q.con, d = curD(), k = q.key, st = +d.kstart || 0, path = d.minus || d.audio;
+    karStop();
+    conTimer(+d.kdur || 90, () => conToVote()); Sound.play('open');
+    if (!path) return;
+    const A = karA = { key: k, el: null };
+    await mediaPermit(); const url = await mediaUrl(path);
+    if (karA !== A || !G.q || G.q.key !== k || c.step !== 'play') return;
+    const e = A.el = new Audio(url); e.preload = 'auto'; e.muted = Sound.muted;
+    e.addEventListener('loadedmetadata', () => {
+      try { if (st) e.currentTime = st; } catch (err) { /* ничего */ }
+      if (!+d.kdur && isFinite(e.duration) && karA === A && c.step === 'play') { c.tot = c.tl = Math.max(10, e.duration - st); updCon(); } // длина песни — по файлу
+    }, { once: true });
+    e.addEventListener('ended', () => { if (karA === A && G.q && G.q.key === k && c.step === 'play') conToVote(); });
+    e.addEventListener('error', () => { if (karA === A) toast('⚠ Нет файла с минусом — пусть поёт а капелла 🙂'); });
+    e.src = url;
+    if (c.tr) { const p = e.play(); if (p && p.catch) p.catch(() => {}); }
+    karLoop();
   }
   let conOnEnd = null;
   function conTimer(sec, onEnd) {
@@ -1529,12 +1617,17 @@
   }
   function conPause() {
     const c = G.q && G.q.con; if (!c || c.step !== 'play' || !c.tot || c.tl <= 0) return;
-    if (c.tr) { c.tr = false; clearInterval(cInt); cInt = null; if (discoOn) discoMusic(false); }
-    else { c.tr = true; cLast = performance.now(); clearInterval(cInt); cInt = setInterval(cTick, 100); if (discoOn) discoMusic(true); else if (c.id === 'dance') discoStart(); }
+    const ka = c.id === 'kar' && karA && karA.el;
+    if (c.tr) { c.tr = false; clearInterval(cInt); cInt = null; if (discoOn) discoMusic(false); if (ka) ka.pause(); }
+    else {
+      c.tr = true; cLast = performance.now(); clearInterval(cInt); cInt = setInterval(cTick, 100);
+      if (discoOn) discoMusic(true); else if (c.id === 'dance') discoStart();
+      if (ka) { const p = ka.play(); if (p && p.catch) p.catch(() => {}); }
+    }
     publish(); updCon();
   }
   function conHalt() {
-    clearInterval(cInt); cInt = null; conOnEnd = null; clearTimeout(reactT); clearTimeout(tapEndT); heartOff(); discoOff();
+    clearInterval(cInt); cInt = null; conOnEnd = null; clearTimeout(reactT); clearTimeout(tapEndT); heartOff(); discoOff(); karStop();
     const c = G && G.q && G.q.con; if (c) c.tr = false;
   }
   function conFinish(pts, win, text) {
@@ -1554,17 +1647,24 @@
     Sound.play('round'); changed();
   }
   function conSingNext() {
-    const q = G.q, c = q && q.con; if (!c || c.step !== 'play' || c.id !== 'sing') return;
-    if (c.turn === 'a') { c.turn = 'b'; Sound.play('whoosh'); conTimer(20, () => conSingNext()); changed(); } else conToVote();
+    const q = G.q, c = q && q.con; if (!c || c.step !== 'play' || !PERFC.includes(c.id)) return;
+    if (c.turn === 'a') { c.turn = 'b'; Sound.play('whoosh'); conTimer(CX[c.id].perf, () => conSingNext()); changed(); } else conToVote();
   }
   function conVote(pid, eid, k, v) {
-    const q = G.q, c = q && q.con; if (!c || c.step !== 'vote' || q.key !== k || !['a', 'b'].includes(v) || !(c.voters || []).includes(pid) || c.votes[pid]) return;
+    const q = G.q, c = q && q.con; if (!c || c.step !== 'vote' || q.key !== k || !(c.id === 'kar' ? ['y', 'n'] : ['a', 'b']).includes(v) || !(c.voters || []).includes(pid) || c.votes[pid]) return;
     c.votes[pid] = v; Sound.play('vote'); save(); publish(); updCon();
     if (Object.keys(c.votes).length >= c.voters.length) setTimeout(() => { if (G.q === q && c.step === 'vote') conCount(); }, 700);
   }
   function conCount(manual) {
     const q = G.q, c = q && q.con; if (!c || c.step !== 'vote' || busy) return;
     snap();
+    if (c.id === 'kar') { // очки певцу — цена × доля 👍; голосовать некому — оценивает ведущий
+      const vals = Object.values(c.votes || {}), y = vals.filter(x => x === 'y').length, n = vals.length - y;
+      const share = manual ? { y: 1, h: 0.5, n: 0 }[manual] || 0 : y + n ? y / (y + n) : 0;
+      const pts = share > 0 ? r10(q.price * share) : 0;
+      const how = manual ? (manual === 'y' ? 'Зажёг(ла)! 🔥' : manual === 'h' ? 'Неплохо 🙂' : 'Мимо нот 🙈') : `👍 ${y} · 👎 ${n}`;
+      return conFinish(pts ? { [c.a]: pts } : {}, pts ? c.a : null, `${entName(c.a)}: ${how} — ${pts ? sgn(pts) : 'без очков'}`);
+    }
     if (manual) { // голосовать некому — решает ведущий
       if (manual === 'tie') return conFinish({ [c.a]: 300, [c.b]: 300 }, null, 'Ничья! Каждому по 300');
       const w = manual === 'a' ? c.a : c.b; return conFinish({ [w]: 300 }, w, `${entName(w)} побеждает!`);
@@ -1663,21 +1763,31 @@
     snap(); conFinish({ [w]: c.stake }, w, `${entName(w)} быстрее${wt > 0 ? `: ${wt} мс` : ''}${other ? ' — соперник нажал раньше времени' : ''}!`);
   }
   function conGuess(eid) {
-    const q = G.q, c = q && q.con; if (!c || c.id !== 'croc' || c.step !== 'play' || !ent(eid) || eid === c.a) return;
-    snap(); conFinish({ [c.a]: c.stake, [eid]: c.stake }, eid, `${entName(eid)} угадывает «${c.word}»! Очки — обоим`);
+    const q = G.q, c = q && q.con; if (!c || !SHOWC.includes(c.id) || c.step !== 'play' || !ent(eid) || eid === c.a) return;
+    snap(); conFinish({ [c.a]: c.stake, [eid]: c.stake }, eid, `${entName(eid)} угадывает ${c.id === 'hum' ? c.word : `«${c.word}»`}! Очки — обоим`);
   }
   function conNone() {
-    const q = G.q, c = q && q.con; if (!c || c.step !== 'play' || !['croc', 'shot'].includes(c.id)) return;
-    snap(); conFinish({}, null, c.id === 'croc' ? `Никто не угадал. Слово было: «${c.word}»` : 'Без очков');
+    const q = G.q, c = q && q.con; if (!c || c.step !== 'play' || !SHOWC.concat('shot').includes(c.id)) return;
+    snap(); conFinish({}, null, c.id === 'shot' ? 'Без очков' : `Никто не угадал. ${c.id === 'hum' ? `Это была песня ${c.word}` : `Слово было: «${c.word}»`}`);
   }
   function conWord() {
-    const q = G.q, c = q && q.con; if (!c || c.id !== 'croc' || !['ready', 'play'].includes(c.step)) return;
-    c.word = drawCard('croc'); sendPrivate(c.a, { k: q.key, word: c.word }); save(); publishHost(false); toast('🔄 Новое слово ушло на телефон');
+    const q = G.q, c = q && q.con; if (!c || !['ready', 'play'].includes(c.step)) return;
+    const C = CX[c.id] || {}, priv = SHOWC.includes(c.id); if (!priv && c.id !== 'chain' && c.id !== 'tongue') return;
+    c.word = drawCard(C.deck);
+    if (priv) { sendPrivate(c.a, { k: q.key, word: c.word }); save(); publishHost(false); toast('🔄 Новое задание ушло на телефон'); }
+    else { Sound.play('roll'); changed(); }
   }
+  // дуэли, где исход видит ведущий: проиграл тот, на чью кнопку нажали
+  const DUELW = { stare: 'моргает', balance: 'теряет равновесие', chain: 'запинается', arm: 'сдаётся' };
   function conStare(loser) {
-    const q = G.q, c = q && q.con; if (!c || c.id !== 'stare' || c.step !== 'play' || !['a', 'b'].includes(loser)) return;
-    const w = loser === 'a' ? c.b : c.a; snap();
-    conFinish({ [w]: c.stake }, w, `${entName(loser === 'a' ? c.a : c.b)} моргает — ${entName(w)} побеждает!`);
+    const q = G.q, c = q && q.con; if (!c || c.step !== 'play' || !['a', 'b'].includes(loser) || !(DUELW[c.id] || c.id === 'laugh')) return;
+    const w = loser === 'a' ? c.b : c.a, l = loser === 'a' ? c.a : c.b; snap();
+    if (c.id === 'laugh') return conFinish({ [w]: c.stake }, w, loser === 'b' ? `${entName(l)} не выдерживает и смеётся — ставка у ${entName(w)}!` : `${entName(w)} держит лицо — ставка его(её)!`);
+    conFinish({ [w]: c.stake }, w, `${entName(l)} ${DUELW[c.id]} — ${entName(w)} побеждает!`);
+  }
+  function conSolo(ok) {
+    const q = G.q, c = q && q.con; if (!c || c.id !== 'tongue' || c.step !== 'play') return;
+    snap(); conFinish(ok ? { [c.a]: c.stake } : {}, ok ? c.a : null, ok ? `${entName(c.a)} справляется — язык без костей! 👅` : `${entName(c.a)} запинается — без очков`);
   }
   function conSpace() {
     const c = G.q && G.q.con; if (!c) return;
@@ -1690,7 +1800,7 @@
     const c = G.q && G.q.con; if (!c) return;
     if (['spin', 'stake', 'ready'].includes(c.step)) return conSpace();
     if (c.step === 'play') {
-      if (c.id === 'dance') return conToVote(); if (c.id === 'sing') return conSingNext(); if (c.id === 'tap') return conTapEnd();
+      if (c.id === 'dance' || c.id === 'kar') return conToVote(); if (PERFC.includes(c.id)) return conSingNext(); if (c.id === 'tap') return conTapEnd();
       if (c.id === 'react') return conReactEnd(true);
       if (c.id === 'rps' && !c.mini) { c.mini = true; curSig = null; return render(); } // телефон отвалился — ведущий вводит выбор сам
     }
@@ -1712,23 +1822,43 @@
     switch (c.step) {
       case 'who': return el(`<div class="special con"><div class="sp-title bonus">🎁 Бонус!</div><div class="sp-hint">Кто открыл эту клетку?</div>${pickerHTML(G.ents, 'cwho')}</div>`);
       case 'spin': {
-        const list = CONTESTS.filter(x => conOk(x, c.a));
+        const list = CONTESTS.filter(x => !x.hidden && conOk(x, c.a));
         return el(`<div class="special con"><div class="sp-title bonus">🎁 Бонус-конкурс</div><div class="sp-info">Играет ${nmB(A)}</div>
-          <div class="roul bonus" id="roul"><div class="rframe"></div><div class="rstrip" style="transform:translateX(-28rem)">${cardsHTML(list.length ? list : CONTESTS, 9)}</div></div>
+          <div class="roul bonus" id="roul"><div class="rframe"></div><div class="rstrip" style="transform:translateX(-28rem)">${cardsHTML(list.length ? list : CONTESTS.filter(x => !x.hidden), 9)}</div></div>
           <div class="hostbar">${B2('cspin', '🎰 Крутить', 'gold', 'Пробел')}</div></div>`);
       }
       case 'pick': {
-        const list = conEligibleB(c), ph = hasPhone(c.a);
+        const list = conEligibleB(c);
+        if (c.id === 'kar') {
+          const g = ent(c.g);
+          return el(`<div class="special con kar">${head}<div class="mic">🎤</div><div class="sp-info">${g ? `${nmB(g)}, кому отдаёшь микрофон?${hasPhone(g.id) ? ' Можно выбрать на телефоне 📱' : ''}` : 'Кто будет петь?'}</div>
+            <div class="sp-hint">Песня — сюрприз. Споёт хорошо — получит до ${fmt(q.price)}</div>${pickerHTML(list, 'cpick')}</div>`);
+        }
+        const ph = hasPhone(c.a);
         return el(`<div class="special con">${head}<div class="sp-info">${nmB(A)}, выбери ${esc(C.pickWord || 'соперника')}${ph ? ' на телефоне 📱' : ''}</div>
           <div class="sp-hint">${C.need ? `Выбрать можно только тех, кто в тесте отметил «${prefName(C.need)}»` : C.phone ? 'Только те, у кого телефон на связи' : 'Выбирай любого'}</div>${pickerHTML(list, 'cpick')}</div>`);
       }
       case 'stake': return el(`<div class="special con">${head}${vsHTML(c)}<div class="sp-hint">Разыгрываем ставку…</div><div class="slot" id="slot">???</div></div>`);
-      case 'ready': return el(`<div class="special con">${head}${vsHTML(c)}<div class="con-rules">${esc(C.rules || '')}</div>
-        ${c.id === 'sing' ? `<div class="sp-info">Тема песни: <b>${esc(c.theme || '')}</b></div>` : ''}${c.id === 'croc' ? '<div class="sp-hint">🤫 Слово пришло на телефон показывающему и на пульт ведущего</div>' : ''}
-        <div class="hostbar">${c.id === 'croc' ? B2('cword', '🔄 Другое слово') : ''}${B2('cstart', '▶ Начать', 'gold big', 'Пробел')}</div></div>`);
+      case 'ready': {
+        if (c.id === 'kar') {
+          const d = curD();
+          return el(`<div class="special con kar">${head}<div class="sp-info">🎤 Поёт ${nmB(A)}</div><div class="kar-song">${esc(d.q || '')}</div>${d.img ? `<img class="kar-img" src="${esc(d.img)}" alt="">` : ''}
+            <div class="con-rules">${esc(C.rules || '')}</div><div class="hostbar">${B2('cstart', '▶ Поехали!', 'gold big', 'Пробел')}</div></div>`);
+        }
+        const prompts = C.each && c.pr ? `<div class="sp-info">${esc(C.pl || 'Тема')}: ${esc(entName(c.a))} — <b>${esc(c.pr.a)}</b> · ${esc(entName(c.b))} — <b>${esc(c.pr.b)}</b></div>` : '';
+        return el(`<div class="special con">${head}${vsHTML(c)}<div class="con-rules">${esc(C.rules || '')}</div>
+        ${c.id === 'sing' ? `<div class="sp-info">Тема песни: <b>${esc(c.theme || '')}</b></div>` : ''}${prompts}${SHOWC.includes(c.id) ? '<div class="sp-hint">🤫 Задание пришло на телефон игроку и на пульт ведущего</div>' : ''}
+        ${c.id === 'chain' ? `<div class="con-word">${esc(c.word || '')}</div>` : ''}
+        <div class="hostbar">${SHOWC.includes(c.id) || c.id === 'chain' ? B2('cword', '🔄 Другое задание') : ''}${B2('cstart', '▶ Начать', 'gold big', 'Пробел')}</div></div>`);
+      }
       case 'play': return vConPlay(q, c, C, head, B2);
       case 'vote': {
         const n = (c.voters || []).length;
+        if (c.id === 'kar') {
+          return el(`<div class="special con kar">${head}<div class="mic">🎤</div><div class="sp-info">Как спел(а) ${nmB(A)}?</div>
+            ${n ? '<div class="sp-hint">Оценивайте на телефонах: 👍 или 👎</div><div class="votes" id="vcount"></div>' : '<div class="sp-hint">Голосовать некому — оценивает ведущий</div>'}
+            <div class="hostbar">${n ? B2('ccount', 'Подсчитать ▶', 'gold', '→') : B2('cwin', '👍 Зажёг(ла)!', 'ok', '', ' data-v="y"') + B2('cwin', '😐 Так себе — половина', '', '', ' data-v="h"') + B2('cwin', '👎 Мимо нот', 'bad', '', ' data-v="n"')}</div></div>`);
+        }
         return el(`<div class="special con">${head}${vsHTML(c)}<div class="sp-title sm">🗳 Голосуем!</div>
           ${n ? '<div class="sp-hint">Кто был лучше? Голосуйте на телефонах</div><div class="votes" id="vcount"></div>' : '<div class="sp-hint">Голосовать некому — решает ведущий</div>'}
           <div class="hostbar">${n ? B2('ccount', 'Подсчитать голоса ▶', 'gold', '→') : B2('cwin', `Победил(а) ${esc(entName(c.a))}`, 'ok', '', ' data-v="a"') + B2('cwin', 'Ничья', '', '', ' data-v="tie"') + B2('cwin', `Победил(а) ${esc(entName(c.b))}`, 'ok', '', ' data-v="b"')}</div></div>`);
@@ -1752,10 +1882,37 @@
           ${c.mini ? '' : `<div class="hostbar">${B2('cnext', 'Ввести выбор за игрока', '', '→')}</div>`}</div>`);
       }
       case 'dance': return el(`<div class="special con dance">${head}${vsHTML(c)}<div class="sp-title sm glow">💃 ТАНЦУЮТ! 🕺</div>${clock}<div class="hostbar">${pause}${B2('cnext', 'Стоп — к голосованию ▶', 'gold', '→')}</div></div>`);
-      case 'sing': {
-        const e = c.turn === 'b' ? B : A;
-        return el(`<div class="special con sing">${head}<div class="mic">🎤</div><div class="sp-info">Поёт: ${nmB(e)}</div><div class="sp-hint">Тема: <b>${esc(c.theme || '')}</b></div>${clock}
-          <div class="hostbar">${pause}${B2('cnext', c.turn === 'b' ? 'К голосованию ▶' : `Поёт ${esc(B ? B.name : '')} ▶`, 'gold', '→')}</div></div>`);
+      case 'sing': case 'toast': case 'parody': {
+        const e = c.turn === 'b' ? B : A, verb = c.id === 'sing' ? 'Поёт' : c.id === 'toast' ? 'Тост говорит' : 'Пародирует';
+        return el(`<div class="special con sing">${head}<div class="mic">${C.icon}</div><div class="sp-info">${verb}: ${nmB(e)}</div><div class="sp-hint">${esc(C.pl || 'Тема')}: <b>${esc(conPrompt(c))}</b></div>${clock}
+          <div class="hostbar">${pause}${B2('cnext', c.turn === 'b' ? 'К голосованию ▶' : `Теперь ${esc(B ? B.name : '')} ▶`, 'gold', '→')}</div></div>`);
+      }
+      case 'kar': {
+        const d = curD();
+        return el(`<div class="special con kar play">${head}<div class="sp-info">🎤 Поёт ${nmB(A)}</div>${karHTML(d).replace('class="kar"', 'class="kar big"')}${clock}
+          <div class="hostbar">${pause}${B2('cnext', 'Стоп — к оценкам ▶', 'gold', '→')}</div></div>`);
+      }
+      case 'hum': case 'draw': {
+        const others = G.ents.filter(e => e.id !== c.a);
+        return el(`<div class="special con">${head}<div class="sp-info">${nmB(A)} ${c.id === 'hum' ? 'мычит песню — угадывайте вслух!' : 'рисует слово — угадывайте вслух!'}</div>${clock}<div class="sp-hint">Кто угадал первым?</div>${pickerHTML(others, 'cguess')}
+          <div class="hostbar">${pause}${B2('cword', '🔄 Другое задание')}${B2('cnone', 'Никто не угадал', 'bad')}</div></div>`);
+      }
+      case 'arm': {
+        const win = s => `<div class="eyes">💪</div><button class="btn ok" data-act="cstare" data-v="${s === 'a' ? 'b' : 'a'}">🏆 Победа</button>`;
+        return el(`<div class="special con">${head}<div class="sp-title sm">Готовы? Давите!</div>${vsHTML(c, win)}</div>`);
+      }
+      case 'balance': case 'chain': {
+        const ic = c.id === 'balance' ? '🦩' : '🗣️', lose = s => `<div class="eyes">${ic}</div><button class="btn bad" data-act="cstare" data-v="${s}">${esc(C.lose)}</button>`;
+        return el(`<div class="special con">${head}${c.id === 'chain' ? `<div class="con-word">${esc(c.word || '')}</div><div class="sp-hint">По очереди, по 5 секунд на слово. Начинает ${nmB(A)}</div>` : '<div class="sp-title sm">🦩 Держим равновесие!</div>'}
+          ${vsHTML(c, lose)}${c.id === 'balance' ? '<div class="bigclock up" id="ctime"></div>' : ''}</div>`);
+      }
+      case 'laugh': {
+        return el(`<div class="special con">${head}<div class="sp-info">${nmB(A)} смешит, ${nmB(B)} держится</div>${clock}
+          <div class="hostbar">${B2('cstare', `😂 ${esc(B ? B.name : '')} засмеялся(ась)`, 'ok', '', ' data-v="b"')}${B2('cstare', `😐 ${esc(B ? B.name : '')} выстоял(а)`, 'bad', '', ' data-v="a"')}</div></div>`);
+      }
+      case 'tongue': {
+        return el(`<div class="special con">${head}<div class="sp-info">${nmB(A)}, три раза подряд — быстро и без запинок:</div><div class="con-word long">${esc(c.word || '')}</div>${clock}
+          <div class="hostbar">${B2('csolo', '✓ Справился(ась)', 'ok', '', ' data-v="1"')}${B2('csolo', '✗ Запнулся(ась)', 'bad', '', ' data-v="0"')}</div></div>`);
       }
       case 'shot': {
         const ex = s => `<div class="shotb" id="shot-${s}"><button class="btn ok" data-act="cshot" data-side="${s}" data-v="1">✓ Выпил</button><button class="btn bad" data-act="cshot" data-side="${s}" data-v="0">✗ Не смог</button></div>`;
@@ -1785,7 +1942,7 @@
     const q = G.q, c = q && q.con; if (!c) return;
     const t = $('#ctime');
     if (t) {
-      if (c.id === 'stare' && c.step === 'play') { const s = Math.floor((Date.now() - (c.t0 || Date.now())) / 1000); t.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
+      if ((c.id === 'stare' || c.id === 'balance') && c.step === 'play') { const s = Math.floor((Date.now() - (c.t0 || Date.now())) / 1000); t.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
       else if (c.tot) { t.textContent = Math.ceil(c.tl); t.classList.toggle('low', c.tl <= 5); t.classList.toggle('paused', !c.tr && c.tl > 0); }
       else t.textContent = '';
     }
@@ -1802,7 +1959,7 @@
     }
     if (c.step === 'vote') { const v = $('#vcount'); if (v) v.textContent = `Проголосовали: ${Object.keys(c.votes || {}).length} из ${(c.voters || []).length}`; }
   }
-  setInterval(() => { const c = G && G.phase === 'q' && G.q && G.q.con; if (c && c.id === 'stare' && c.step === 'play') updCon(); }, 500);
+  setInterval(() => { const c = G && G.phase === 'q' && G.q && G.q.con; if (c && (c.id === 'stare' || c.id === 'balance') && c.step === 'play') updCon(); }, 500);
   function heartOn() { heartOff(); heartT = setInterval(() => Sound.play('heart'), 860); }
   function heartOff() { clearInterval(heartT); heartT = null; }
 
@@ -1927,7 +2084,7 @@
   async function mediaPrep(q, d) {
     mediaStop();
     const kind = d.video ? 'video' : 'audio', path = d.video || d.audio;
-    const m = MP = { key: q.key, kind, path, el: null, err: false, started: false, an: null, buf: null, raf: 0 };
+    const m = MP = { key: q.key, kind, path, el: null, mel: null, mode: 'orig', err: false, started: false, an: null, buf: null, raf: 0 };
     await mediaPermit();
     const url = await mediaUrl(path);
     if (MP !== m) return;
@@ -1940,13 +2097,34 @@
     const st = +d.start || 0, en = +d.end || 0;
     if (st) e.addEventListener('loadedmetadata', () => { try { e.currentTime = st; } catch (err) { /* ничего */ } }, { once: true });
     m.stopAt = en || 0;
-    e.addEventListener('timeupdate', () => { if (m.stopAt && e.currentTime >= m.stopAt) e.pause(); });
+    e.addEventListener('timeupdate', () => { if (m.stopAt && e.currentTime >= m.stopAt) { e.pause(); toMinus(m); } });
+    // песня короче таймера — играет по кругу, пока идёт время (d.loop)
+    e.addEventListener('ended', () => { if (MP === m && d.loop && !m.stopAt && G.q && G.q.key === m.key && G.q.stage === 'open' && G.q.tr) { try { e.currentTime = st; } catch (err) { /* ничего */ } mediaPlay(); } });
     e.src = url; m.el = e;
-    if (kind === 'audio' && (url.startsWith('blob:') || /^https?:$/.test(location.protocol))) {
+    const web = url.startsWith('blob:') || /^https?:$/.test(location.protocol);
+    if (kind === 'audio' && web) {
       try { const ctx = Sound.ctx(); if (ctx) { const s = ctx.createMediaElementSource(e), an = ctx.createAnalyser(); an.fftSize = 256; an.smoothingTimeConstant = 0.6; s.connect(an); an.connect(Sound.out()); m.src = s; m.an = an; m.buf = new Uint8Array(an.frequencyBinCount); } } catch (err) { m.an = null; }
+    }
+    // минус (та же песня без голоса, на той же шкале времени): после пропущенного слова музыка играет дальше до конца таймера
+    if (kind === 'audio' && d.minus && en) {
+      const mu = await mediaUrl(d.minus); if (MP !== m) return;
+      const me = document.createElement('audio'); me.preload = 'auto'; me.muted = Sound.muted;
+      me.addEventListener('error', () => { if (MP === m && m.mel === me) { m.mel = null; m.mode = 'orig'; mediaUI(); } }); // минуса нет — как раньше, тишина после пропуска
+      me.addEventListener('ended', () => { if (MP === m && m.mode === 'minus' && G.q && G.q.key === m.key && G.q.stage === 'open' && G.q.tr) { try { me.currentTime = en; } catch (err) { /* ничего */ } const p = me.play(); if (p && p.catch) p.catch(() => {}); } });
+      me.addEventListener('play', () => { if (MP === m) mediaUI(); });
+      me.addEventListener('pause', () => { if (MP === m) mediaUI(); });
+      me.src = mu; m.mel = me;
+      if (m.an) { try { const s2 = Sound.ctx().createMediaElementSource(me); s2.connect(m.an); m.src2 = s2; } catch (err) { /* без визуализатора */ } }
     }
     if (q.stage === 'open' && q.tr) mediaPlay(); // файл догрузился, когда таймер уже идёт
     mediaAttach();
+  }
+  const mEl = m => (m && m.mode === 'minus' && m.mel ? m.mel : m && m.el); // что сейчас звучит
+  // дошли до пропуска, а таймер идёт — дальше звучит минус с того же места
+  function toMinus(m) {
+    if (MP !== m || !m.mel || m.mode === 'minus' || !G.q || G.q.key !== m.key || G.q.stage !== 'open' || !G.q.tr) return;
+    m.mode = 'minus'; try { m.mel.currentTime = m.stopAt; } catch (e) { /* ещё не загрузилось */ }
+    const p = m.mel.play(); if (p && p.catch) p.catch(() => {});
   }
   function mediaAttach() {
     const m = MP; if (!m || !G.q || G.q.key !== m.key) return;
@@ -1958,13 +2136,19 @@
   function mediaUI() {
     const m = MP; if (!m) return;
     const msg = m.err ? `⚠ Нет файла: ${esc(m.path)}<small>Положи его в папку media или выбери папку в лобби. Можно просто напеть 🙂</small>` : '';
-    const lbl = $('#vizlbl'); if (lbl) lbl.innerHTML = msg || (m.el && !m.el.paused ? '' : m.started ? '⏸ пауза' : '🎵 музыка начнётся вместе с таймером');
+    const e = mEl(m), lbl = $('#vizlbl');
+    if (lbl) lbl.innerHTML = msg || (e && !e.paused ? (m.mode === 'minus' ? '🎤 минус — подпевайте!' : '') : m.started ? '⏸ пауза' : '🎵 музыка начнётся вместе с таймером');
     const slot = $('#vslot'); if (slot) { const w = $('.merr', slot); if (msg && !w) slot.appendChild(el(`<div class="merr">${msg}</div>`)); }
   }
   function mediaPlay() {
     const m = MP; if (!m || !m.el || m.err || !G.q || G.q.key !== m.key) return;
+    const rv = G.q.stage === 'reveal', d = curD();
+    if (m.mode === 'minus') {
+      if (!rv) { m.started = true; const p = m.mel.play(); if (p && p.catch) p.catch(() => {}); return; } // ответили неверно — минус играет дальше
+      m.mel.pause(); m.mode = 'orig'; // ответ — звучит само пропущенное слово
+    }
     if (m.stopAt && m.el.currentTime >= m.stopAt - 0.05) { // дошли до места остановки — играем фрагмент заново
-      const d = curD(); try { m.el.currentTime = G.q.stage === 'reveal' && +d.aend > +d.end ? +d.end : (+d.start || 0); } catch (e) { /* ещё не загрузилось */ }
+      try { m.el.currentTime = rv && +d.aend > +d.end ? +d.end : (+d.start || 0); } catch (e) { /* ещё не загрузилось */ }
     }
     m.started = true; const p = m.el.play(); if (p && p.catch) p.catch(() => {});
     mediaWatch(m);
@@ -1975,21 +2159,21 @@
     if (!m.stopAt) return;
     m.wt = setInterval(() => {
       if (MP !== m || !m.el || m.el.paused || !m.stopAt) { clearInterval(m.wt); return; }
-      if (m.el.currentTime >= m.stopAt - 0.04) { m.el.pause(); try { m.el.currentTime = m.stopAt; } catch (e) { /* ещё не загрузилось */ } clearInterval(m.wt); }
+      if (m.el.currentTime >= m.stopAt - 0.04) { m.el.pause(); try { m.el.currentTime = m.stopAt; } catch (e) { /* ещё не загрузилось */ } clearInterval(m.wt); toMinus(m); }
     }, 15);
   }
-  function mediaPause() { const m = MP; if (m && m.el && !m.el.paused) m.el.pause(); }
-  function mediaToggle() { const m = MP; if (!m || !m.el) return; if (m.el.paused) mediaPlay(); else mediaPause(); }
+  function mediaPause() { const m = MP; if (!m) return; if (m.el && !m.el.paused) m.el.pause(); if (m.mel && !m.mel.paused) m.mel.pause(); }
+  function mediaToggle() { const m = MP, e = mEl(m); if (!e) return; if (e.paused) mediaPlay(); else mediaPause(); }
   function mediaStop() {
     const m = MP; if (!m) return; MP = null; cancelAnimationFrame(m.raf); clearInterval(m.wt);
-    try { if (m.src) m.src.disconnect(); if (m.an) m.an.disconnect(); } catch (e) { /* уже отключено */ }
-    if (m.el) { try { m.el.pause(); m.el.removeAttribute('src'); m.el.load(); } catch (e) { /* ничего */ } if (m.el.parentNode) m.el.remove(); }
+    try { if (m.src) m.src.disconnect(); if (m.src2) m.src2.disconnect(); if (m.an) m.an.disconnect(); } catch (e) { /* уже отключено */ }
+    [m.el, m.mel].forEach(x => { if (!x) return; try { x.pause(); x.removeAttribute('src'); x.load(); } catch (e) { /* ничего */ } if (x.parentNode) x.remove(); });
   }
   function vizLoop() {
     const m = MP, cv = $('#viz');
     if (!m || m.kind !== 'audio' || !cv) { if (m) m.raf = 0; return; }
     m.raf = requestAnimationFrame(vizLoop);
-    const playing = m.el && !m.el.paused && !m.err;
+    const e = mEl(m), playing = e && !e.paused && !m.err;
     if (!playing && m.idle) return; // на паузе рисуем один раз
     m.idle = !playing;
     const c = cv.getContext('2d'), W = cv.width, H = cv.height, half = 22, n = half * 2, bw = W / n, t = performance.now() / 1000;
@@ -2197,9 +2381,10 @@
     round: d => `<div class="ov-rays"></div><div class="ov-title">${letters(d.title)}</div>${d.sub ? `<div class="ov-sub">${esc(d.sub)}</div>` : ''}`,
     medal: d => `<div class="ov-rays medal m${d.md}"></div><div class="ov-medalbox m${d.md}"><span>${MEDALS[d.md][0]}</span></div><div class="ov-title medal m${d.md}">${letters(MEDALS[d.md][1] + '!')}</div><div class="ov-sub">${esc(joke('medal'))}</div>`,
     mashup: () => `<div class="ov-mash"><span>🧑</span><span>👩</span></div><div class="ov-title">${letters('Мешап!')}</div><div class="ov-sub">Два лица в одном. Назови обоих!</div>`,
+    karaoke: () => `<div class="ov-rays"></div><div class="ov-emoji mic">🎤</div><div class="ov-title">${letters('Караоке!')}</div><div class="ov-sub">Кому достанется микрофон?</div>`,
     final: () => { const FT = finThemes(); return `<div class="ov-title">${letters('ФИНАЛ')}</div><div class="ov-sub">${FT.length > 1 ? `${FT.length} тем — по очереди вычёркиваем, пока не останется одна` : 'Тема: ' + esc((FT[0] || {}).theme || '')}</div>${PACK.jokes && PACK.jokes.final ? `<div class="ov-sub sm">${esc(joke('final'))}</div>` : ''}`; },
   };
-  const OVDUR = { cat: 3400, auction: 3000, trap: 2600, angel: 2700, devil: 2700, bonus: 2600, music: 2100, video: 2000, bribe: 3000, round: 2600, final: 3400, medal: 2600, mashup: 2200 };
+  const OVDUR = { cat: 3400, auction: 3000, trap: 2600, angel: 2700, devil: 2700, bonus: 2600, music: 2100, video: 2000, bribe: 3000, round: 2600, final: 3400, medal: 2600, mashup: 2200, karaoke: 2800 };
   const OVFX = {
     cat: () => { Sound.play('whoosh'); setTimeout(() => { Sound.play('cat'); FX.burst(innerWidth / 2, innerHeight * 0.4, '#ffcc33', 70); }, 1050); },
     auction: () => { Sound.play('auction'); [0, 380, 760].forEach(d => setTimeout(() => FX.burst(innerWidth * 0.53, innerHeight * 0.38, '#ffcc33', 45), d + 260)); },
@@ -2213,6 +2398,7 @@
     round: () => Sound.play('round'),
     medal: d => { Sound.play('medal'); const col = { 1: '#e08a4c', 2: '#e6eefc', 3: '#ffd34d' }[d.md]; [0, 250, 500].forEach(t => setTimeout(() => FX.burst(innerWidth * (0.35 + t / 1700), innerHeight * 0.4, col, 55), t + 300)); },
     mashup: () => { Sound.play('mashup'); FX.burst(innerWidth / 2, innerHeight * 0.4, '#36e2ff', 60); },
+    karaoke: () => { Sound.play('open'); FX.rain('🎵', 30); setTimeout(() => FX.burst(innerWidth / 2, innerHeight * 0.38, '#ff5fa2', 70), 300); },
     final: () => { Sound.play('final'); FX.burst(innerWidth / 2, innerHeight * 0.45, '#ffcc33', 90); },
   };
   function overlay(type, d) {
@@ -2313,7 +2499,7 @@
   }
   function toggleFS() { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); }
   function toggleMute() {
-    Sound.toggleMute(); if (MP && MP.el) MP.el.muted = Sound.muted; if (djEl) djEl.muted = Sound.muted;
+    Sound.toggleMute(); [MP && MP.el, MP && MP.mel, djEl, karA && karA.el].forEach(x => { if (x) x.muted = Sound.muted; });
     renderTop(); toast(Sound.muted ? '🔇 Звук выключен' : '🔊 Звук включён');
   }
 
@@ -2391,6 +2577,7 @@
       case 'cnone': return conNone();
       case 'cword': return conWord();
       case 'cstare': return conStare(ds.v);
+      case 'csolo': return conSolo(ds.v === '1');
       case 'fstrike': return finStrike(null, ds.i, true);
       case 'aucclose': return aucClose();
       case 'redeem': return redeem(ds.id, ds.v);

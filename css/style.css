@@ -599,7 +599,14 @@ body.lite .ov-devil::before { display: none; }
 .kar { width: 100rem; margin-top: .8rem; display: flex; flex-direction: column; align-items: center; gap: .3rem; }
 .kar .kl { min-height: 2rem; font-weight: 800; line-height: 1.2; transition: opacity .3s; }
 .kar .k0 { font-size: 1.7rem; opacity: .35; }
-.kar .k1 { font-size: 3.2rem; color: rgba(255, 255, 255, .45); background: linear-gradient(90deg, var(--gold) var(--k, 0%), rgba(255, 255, 255, .45) var(--k, 0%)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 .2rem .6rem rgba(0, 0, 0, .6)); }
+.kar .k1 { font-size: 3.2rem; color: rgba(255, 255, 255, .45); filter: drop-shadow(0 .2rem .6rem rgba(0, 0, 0, .6)); text-align: center; }
+.kar .k1 .w.on { color: var(--gold); }
+.kar .k1 .w.cur { background: linear-gradient(90deg, var(--gold) var(--k, 0%), rgba(255, 255, 255, .45) var(--k, 0%)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.kar .gap { color: var(--pink); -webkit-text-fill-color: var(--pink); font-weight: 900; animation: pulse .8s infinite alternate; }
+.kar .gap.open { color: var(--gold); -webkit-text-fill-color: var(--gold); animation: none; text-shadow: 0 0 1.2rem rgba(255, 204, 51, .7); }
+.kar.big .k0 { font-size: 2.2rem; }
+.kar.big .k1 { font-size: 4.4rem; }
+.kar.big .k2 { font-size: 2.6rem; }
 .kar .k2 { font-size: 2rem; opacity: .6; }
 .kar .kl.hid { color: var(--pink) !important; -webkit-text-fill-color: var(--pink); background: none; letter-spacing: .3em; animation: pulse .8s infinite alternate; }
 .qscreen.haskar .qtext { margin: .6rem 0 .8rem; }

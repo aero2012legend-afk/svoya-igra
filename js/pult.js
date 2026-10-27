@@ -58,7 +58,9 @@
       h += `<div class="qth">${esc(q.th)} · <b>${esc(q.stake || q.p)}</b> ${TAG[q.ty] ? `<span class="tag">${TAG[q.ty]}</span>` : ''} ${MD[q.md] ? `<span class="tag md">${MD[q.md]}</span>` : ''}</div>`;
       if (c) {
         h += `<div class="qq">🎁 ${esc(c.n)}${c.a ? ` · ${esc(c.a)}${c.b ? ' против ' + esc(c.b) : ''}` : ''}${c.stake ? ` · ставка ${esc(c.stake)}` : ''}</div>`;
-        if (c.word) h += `<div class="qa">🐊 Слово: ${esc(c.word)}</div>`;
+        if (c.word) h += `<div class="qa">🤫 Задание: ${esc(c.word)}</div>`;
+        if (c.pr) h += `<div class="qh">🎭 ${esc(c.pr)}</div>`;
+        if (c.song) h += `<div class="qa">🎤 Песня: ${esc(c.song)}</div>`;
       } else {
         h += `<div class="qq">${esc(q.text)}</div><div class="qa">${esc(q.a)}</div>` + (q.names ? `<div class="qh">🧬 №1 — <b>${esc(q.names[0] || '')}</b>, №2 — <b>${esc(q.names[1] || '')}</b>${q.mp ? ` · уже угадан №${esc(q.mp)}` : ''}</div>` : '')
           + (q.hint ? `<div class="qh">💡 ${esc(q.hint)}</div>` : '') + (q.c ? `<div class="qh">😄 ${esc(q.c)}</div>` : '');
