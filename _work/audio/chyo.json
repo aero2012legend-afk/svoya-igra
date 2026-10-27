@@ -1,0 +1,14 @@
+[
+ {
+  "file": "media/music/chyo/r3_300_chip.mp3",
+  "source": "https://soundcloud.com/user-382946314/ts3p7x4aoxbd",
+  "title": "Чип и Дейл спешат на помощь — заставка (рус.)",
+  "cut": [
+   14.0,
+   37.0
+  ],
+  "gain_db": -1.5,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=21.80:d=1.2,volume=-1.5dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "русская телеверсия заставки (запись целиком 57.7 с, SoundCloud «Voplotitel2000»; такая же запись у «The Replica» https://soundcloud.com/replica-the/8gpozo0pbjyr); Whisper: слово после end начинается на 17.78 с файла; end=17.72, aend=21.70 (дальше сразу хор); -15.0 LUFS"
+ }
+]
