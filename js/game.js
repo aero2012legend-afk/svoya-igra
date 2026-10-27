@@ -1964,25 +1964,32 @@
   function heartOff() { clearInterval(heartT); heartT = null; }
 
   /* ----- танцпол: огни на экране и на телефонах, музыка ----- */
-  let djEl = null;
+  let djEl = null, djSong = '';
   function discoStart() {
     discoOn = true; document.body.classList.add('disco');
     if (!$('#disco')) document.body.insertBefore(el(`<div id="disco">${[1, 2, 3, 4, 5].map(i => `<div class="dz-beam c${i}"></div>`).join('')}<div class="dz-spot s1"></div><div class="dz-spot s2"></div><div class="dz-spot s3"></div><div class="dz-ball"></div><div class="dz-floor">${'<i></i>'.repeat(24)}</div></div>`), $('#app'));
-    discoMusic(true); publishNow();
+    djSong = nextDance(); discoMusic(true); publishNow();
   }
   function discoOff() {
     if (!discoOn) return;
     discoOn = false; document.body.classList.remove('disco');
     const d = $('#disco'); if (d) d.remove();
-    discoMusic(false); publish();
+    discoMusic(false, true); publish();
   }
-  async function discoMusic(on) {
-    if (!on) { Sound.beat(false); if (djEl) { djEl.pause(); djEl = null; } return; }
-    const songs = (PACK.danceSongs || []).filter(Boolean);
-    if (!songs.length) return Sound.beat(true);
-    const url = await mediaUrl(pick(songs)); if (!discoOn) return;
+  // каждый баттл — новая песня, пока не прозвучат все
+  function nextDance() {
+    const songs = (PACK.danceSongs || []).filter(Boolean); if (!songs.length) return '';
+    const used = (G.du || []).filter(x => songs.includes(x)), fresh = songs.filter(x => !used.includes(x));
+    const s = pick(fresh.length ? fresh : songs.length > 1 ? songs.filter(x => x !== used[used.length - 1]) : songs);
+    G.du = (fresh.length ? used : []).concat(s); return s;
+  }
+  async function discoMusic(on, stop) {
+    if (!on) { Sound.beat(false); if (djEl) { djEl.pause(); if (stop) djEl = null; } return; }
+    if (!djSong) return Sound.beat(true);
+    if (djEl && djEl.dataset.song === djSong) { djEl.play().catch(() => {}); return; } // пауза в баттле — та же песня играет дальше
+    const url = await mediaUrl(djSong); if (!discoOn) return;
     if (djEl) djEl.pause();
-    const a = djEl = new Audio(url); a.loop = true; a.muted = Sound.muted;
+    const a = djEl = new Audio(url); a.dataset.song = djSong; a.loop = true; a.muted = Sound.muted;
     const fallback = () => { if (djEl === a) { djEl = null; if (discoOn) Sound.beat(true); } };
     a.addEventListener('error', fallback);
     a.play().catch(fallback);

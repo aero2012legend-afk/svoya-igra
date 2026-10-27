@@ -188,7 +188,7 @@
         'q', q.k, q.st, q.an === eid ? 'me' : q.an, q.ow === eid ? 'own' : q.ow, (q.tr || []).length, (q.tr || []).includes(eid) ? 't' : '', fzMe(eid) ? 'f' : '',
         (q.bb || []).includes(eid) ? 'b' : '', priv && priv.k === q.k ? 'h' + (priv.word || '') + (priv.poem ? 'p' : '') : '', q.side || '', q.ev ? q.ev.id : '', q.res || '', q.card || '', q.vic, q.at && q.at.up ? 'up' : '', q.ask || '',
       ];
-      if (c) a.push(c.st, c.id, c.a, c.b, c.stake, c.rnd, c.turn, c.go, c.cd, c.gid, (c.vd || []).includes(pid) ? 'v' : '', (c.el || []).join(','), c.ch ? c.ch.a + '' + c.ch.b : '', c.res || '');
+      if (c) a.push(c.st, c.id, c.a, c.b, c.g, c.stake, c.rnd, c.turn, c.theme, c.word, c.go, c.cd, c.gid, (c.vd || []).includes(pid) ? 'v' : '', (c.el || []).join(','), c.ch ? c.ch.a + '' + c.ch.b : '', c.res || '');
       return a.join('|');
     }
     if (S.phase === 'final' && f) return ['f', f.st, (f.pt || []).includes(eid) ? 'p' : 'n', f.turn, (f.left || []).join(','), f.th].join('|');
@@ -290,14 +290,18 @@
     switch (c.st) {
       case 'who': return center('🎁', 'Бонус!', 'Ведущий выбирает, кто играет');
       case 'spin': return center('🎰', 'Бонус-конкурс!', 'Крутим рулетку конкурсов — смотри на экран');
-      case 'pick':
-        if (c.a !== eid) return head + center(c.i, 'Выбор соперника', `${entB(c.a)} выбирает ${esc(c.pw || 'соперника')}…`);
-        if (done['pick' + q.k]) return head + center('⚔️', 'Выбор сделан', 'Смотри на экран');
-        return head + `<div class="center"><div class="t">Выбери ${esc(c.pw || 'соперника')}</div>${(c.el || []).length ? picks(c.el, 'con') : '<div class="s">Некого выбрать — ведущий решит сам</div>'}</div>`;
+      case 'pick': {
+        const pk = c.g || c.a, kar = c.id === 'kar';
+        if (pk !== eid) return head + center(c.i, kar ? 'Кому достанется микрофон?' : 'Выбор соперника', pk ? `${entB(pk)} ${kar ? 'решает, кто будет петь' : 'выбирает ' + esc(c.pw || 'соперника')}…` : 'Решает ведущий');
+        if (done['pick' + q.k]) return head + center(kar ? '🎤' : '⚔️', 'Выбор сделан', 'Смотри на экран');
+        return head + `<div class="center"><div class="t">${kar ? 'Кому отдаёшь микрофон?' : 'Выбери ' + esc(c.pw || 'соперника')}</div>${(c.el || []).length ? picks(c.el, 'con') : '<div class="s">Некого выбрать — ведущий решит сам</div>'}</div>`;
+      }
       case 'stake': return head + center('🎰', vs, 'Разыгрываем ставку…');
       case 'ready': {
-        if (c.id === 'croc' && s === 'a') return head + wordCard(q) + '<div class="s ctr">Как будешь готов(а), ведущий запустит таймер</div>';
-        if (s) return head + center(c.i, 'Ты участвуешь!', `${vs}<br>Правила — на экране.${c.id === 'sing' && c.theme ? `<br>Тема песни: <b>${esc(c.theme)}</b>` : ''}`);
+        if (c.id === 'kar') return head + (s ? center('🎤', 'Поёшь ты!', 'Песня и слова — на экране. Ведущий запустит минус') : center('🎤', `Поёт ${entN(c.a)}`, 'Слушай внимательно — потом оценишь 👍 или 👎'));
+        if (c.sh && s === 'a') return head + wordCard(q, c) + '<div class="s ctr">Как будешь готов(а), ведущий запустит таймер</div>';
+        const mine = s && c.pr ? `<br>${esc(c.pl || 'Тема')}: <b>${esc(c.pr[s])}</b>` : s && c.theme ? `<br>${esc(c.pl || 'Тема')}: <b>${esc(c.theme)}</b>` : '';
+        if (s) return head + center(c.i, 'Ты участвуешь!', `${vs}<br>Правила — на экране.${mine}`);
         return head + center(c.i, esc(c.n), vs);
       }
       case 'play': return head + tbar + conPlay(eid, q, c, s, vs);
@@ -306,15 +310,16 @@
         const can = (c.vs || []).includes(pid), voted = (c.vd || []).includes(pid) || done['vote' + q.k];
         if (!can) return head + center('🗳', 'Голосование', vs);
         if (voted) return head + center('✅', 'Голос принят', 'Ждём остальных');
+        if (c.id === 'kar') return head + `<div class="center"><div class="t">Как спел(а) ${entB(c.a)}?</div><div class="picks"><button class="pick big" data-vote="y" style="--c:#2ecc71">👍 Круто!</button><button class="pick big" data-vote="n" style="--c:#e74c3c">👎 Мимо</button></div><div class="s">Голос тайный</div></div>`;
         return head + `<div class="center"><div class="t">Кто был лучше?</div><div class="picks">${['a', 'b'].map(x => { const e = entO(c[x]); return e ? `<button class="pick big" data-vote="${x}" style="--c:${e.c}">${esc(e.n)}</button>` : ''; }).join('')}</div></div>`;
       }
       case 'result': return head + center(c.win === eid ? '🏆' : '🎉', c.win === eid ? 'Ты победил(а)!' : 'Итог', esc(c.res || ''));
     }
     return head;
   }
-  function wordCard(q) {
-    const w = priv && priv.k === q.k && priv.word;
-    return `<div class="center"><div class="s">🤫 Твоё слово — никому не показывай!</div><div class="word">${w ? esc(w) : '…'}</div><div class="t sm">Покажи его без слов и звуков</div></div>`;
+  function wordCard(q, c) {
+    const w = priv && priv.k === q.k && priv.word, hum = c && c.id === 'hum';
+    return `<div class="center"><div class="s">🤫 ${hum ? 'Твоя песня' : 'Твоё слово'} — никому не показывай!</div><div class="word">${w ? esc(w) : '…'}</div><div class="t sm">${esc((c && c.sh) || 'Покажи его без слов и звуков')}</div></div>`;
   }
   function conPlay(eid, q, c, s, vs) {
     switch (c.id) {
@@ -325,12 +330,20 @@
         return `<div class="center"><div class="t">${c.rnd > 1 ? 'Переигровка! ' : ''}Твой выбор</div><div class="rpsb">${Object.keys(RPS).map(k => `<button data-rps="${k}"><span>${RPS[k][0]}</span><b>${RPS[k][1]}</b></button>`).join('')}</div><div class="s">Соперник не увидит, пока не выберете оба</div></div>`;
       }
       case 'dance': return s ? center('💃', 'ТАНЦУЙ!', 'Покажи всё, на что способен(на)! 🔥') : center('🕺', 'Танцевальный баттл', `${vs}<br>Смотри внимательно — потом голосование`);
-      case 'sing': {
-        const cur = c.turn === 'b' ? c.b : c.a;
-        if (cur === eid) return center('🎤', 'ПОЁШЬ ТЫ!', `Тема: <b>${esc(c.theme || '')}</b>`);
-        if (s) return center('🎶', c.turn === 'a' ? 'Ты следующий(ая)' : 'Ты уже спел(а)', `Сейчас поёт ${entB(cur)}`);
-        return center('🎤', `Поёт ${entN(cur)}`, `Тема: <b>${esc(c.theme || '')}</b>`);
+      case 'sing': case 'toast': case 'parody': {
+        const cur = c.turn === 'b' ? c.b : c.a, pr = `${esc(c.pl || 'Тема')}: <b>${esc(c.theme || '')}</b>`;
+        const now = c.id === 'sing' ? 'ПОЁШЬ ТЫ!' : c.id === 'toast' ? 'ТВОЙ ТОСТ!' : 'ТВОЙ ВЫХОД!';
+        if (cur === eid) return center(c.i, now, pr);
+        if (s) return center('⏳', c.turn === 'a' ? 'Ты следующий(ая)' : 'Ты уже выступил(а)', `Сейчас — ${entB(cur)}`);
+        return center(c.i, `Выступает ${entN(cur)}`, pr);
       }
+      case 'kar': return s ? center('🎤', 'ПОЙ!', 'Слова — на экране. Жги! 🔥') : center('🎤', `Поёт ${entN(c.a)}`, 'Слушай — потом оценишь 👍 или 👎');
+      case 'hum': case 'draw': return c.a === eid ? wordCard(q, c) : center(c.i, esc(c.n), `${entB(c.a)} ${c.id === 'hum' ? 'мычит песню' : 'рисует'} — угадывай вслух!`);
+      case 'arm': return s ? center('💪', 'ДАВИ!', 'Локоть не отрывать!') : center('💪', 'Армрестлинг', vs);
+      case 'balance': return s ? center('🦩', 'Стой на одной ноге!', 'Глаза закрыты, руками ни за что не держаться') : center('🦩', 'Цапля', vs);
+      case 'chain': return center('🔗', esc(c.word || 'Цепочка'), s ? 'Называй по очереди — 5 секунд на слово, без повторов' : vs);
+      case 'laugh': return s === 'a' ? center('🤪', 'СМЕШИ!', `Рассмеши ${entB(c.b)} — только без рук`) : s === 'b' ? center('😐', 'НЕ СМЕЙСЯ!', 'Держи лицо 30 секунд') : center('😂', 'Не засмейся', vs);
+      case 'tongue': return s ? center('👅', 'Три раза подряд!', esc(c.word || '')) : center('👅', 'Скороговорка', `${entB(c.a)} читает с экрана`);
       case 'shot': return s ? center('🥃', 'Руки за спину!', 'Стопку — только без рук!') : center('🥃', 'Стопка без рук', vs);
       case 'tap': {
         if (!s) return center('👆', 'Тап-баттл', vs);
@@ -342,7 +355,7 @@
         document.body.classList.add(c.go ? 'rgo' : 'rwait');
         return `<button class="rzone ${c.go ? 'go' : 'wait'}" id="rzone"><b>${c.go ? 'ЖМИ!' : 'Жди зелёного…'}</b><small>${c.go ? '' : 'Нажмёшь раньше — проиграешь'}</small></button>`;
       }
-      case 'croc': return c.a === eid ? wordCard(q) : center('🐊', 'Крокодил', `${entB(c.a)} показывает слово — угадывай вслух!`);
+      case 'croc': return c.a === eid ? wordCard(q, c) : center('🐊', 'Крокодил', `${entB(c.a)} показывает слово — угадывай вслух!`);
       case 'stare': return s ? center('👁️', 'Не моргай!', 'Смотри сопернику в глаза и держись') : center('👀', 'Гляделки', vs);
     }
     return center(c.i || '🎁', esc(c.n || ''), vs);

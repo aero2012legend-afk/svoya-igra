@@ -56,9 +56,31 @@ def ff(args):
     subprocess.run(['ffmpeg', '-v', 'error', '-y'] + args, check=True, env=proxy_env())
 
 
+def separate(wav, tmp):
+    """Demucs: wav → (голос, музыка без голоса). Примерно минута счёта на минуту звука."""
+    import tempfile
+    od = tempfile.mkdtemp(dir=tmp)
+    subprocess.run(['/opt/aienv/bin/python', '-m', 'demucs', '--two-stems=vocals', '-n', 'htdemucs', '-o', od, wav],
+                   check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    found = {}
+    for r, _, fs in os.walk(od):
+        for f in fs:
+            if f in ('vocals.wav', 'no_vocals.wav'):
+                found[f] = os.path.join(r, f)
+    return found['vocals.wav'], found['no_vocals.wav']
+
+
 def make(e, out):
     src = fetch(e['source'])
     cut = e['cut']
+    if e.get('demucs'):
+        # минус: тот же кусок источника, голос убирает Demucs, потом обычная цепочка фильтров
+        import tempfile
+        tmp = tempfile.mkdtemp()
+        raw = os.path.join(tmp, 'raw.wav')
+        ff(['-ss', str(cut[0]), '-t', f'{cut[1] - cut[0]:.3f}', '-i', src, '-vn', '-ac', '2', '-ar', '44100', raw])
+        voc, music = separate(raw, tmp)
+        return ff(['-i', voc if e['demucs'] == 'vocals' else music, '-af', chain(e)] + ENC + [out])
     if 'source2' in e and 'mario' in e['file']:
         # три звука монетки со сдвигом 0 / 0.25 / 0.5 с (+6 дБ) и первая фраза темы со сдвигом 1.55 с
         coin = fetch(e['source2'])

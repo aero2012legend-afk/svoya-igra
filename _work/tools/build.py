@@ -25,11 +25,12 @@ STEP = {1: 100, 2: 200, 3: 300}
 PER_THEME = 10
 # спецклетки на полный раунд (11 тем); если тем меньше — пропорционально меньше
 SPECIALS = [('auction', 2), ('cat', 2), ('trap', 4), ('bonus', 6)]
-# в каких позициях темы (0 — самый дешёвый вопрос) может стоять спецклетка; медали (три последних) не трогаем
-SLOTS = {'auction': (3, 6), 'cat': (1, 6), 'trap': (0, 6), 'bonus': (0, 6)}
+# в каких позициях темы (0 — самый дешёвый вопрос) может стоять спецклетка; медали (три последних) не трогаем.
+# Аукцион — только на самом трудном вопросе перед медалями: на лёгком ва-банк слишком легко удвоить счёт.
+SLOTS = {'auction': (6, 6), 'cat': (1, 6), 'trap': (0, 6), 'bonus': (0, 6)}
 FXS = {'blur', 'deblur', 'pixel', 'zoom', 'crop', 'tiles', 'silhouette', 'negative', 'mirror'}
 FIELD_ORDER = ['q', 'a', 'c', 'hint', 'img', 'fx', 'area', 'px', 'tiles', 'aimg', 'audio', 'video', 'start', 'end', 'aend',
-               'kar', 'pics', 'names', 'catTheme', 'contest']
+               'minus', 'loop', 'gw', 'kstart', 'kdur', 'kar', 'pics', 'names', 'catTheme', 'contest']
 EXTRAS = [  # ключ в extras.json, комментарий в questions.js
     ('angelTruth', 'Ловушка «Ангел» → «Правда»: вопросы, на которые надо ответить честно'),
     ('angelDare', 'Ловушка «Ангел» → «Действие»: лёгкие задания'),
@@ -77,15 +78,23 @@ HEADER = r"""/* ================================================================
      audio  — звук: 'media/music/тема/файл.mp3';  video — видео: 'media/video/тема/файл.mp4'
      start, end — с какой и по какую секунду играть файл (необязательно)
      aend   — после «Показать ответ» звук доиграет от end до aend (чтобы все услышали слово)
-     kar    — караоке: [[секунда, 'строчка'], …]; строчки после end скрыты до ответа,
-              пропущенное слово пишется как ___
+     kar    — караоке: [[секунда, 'строчка', [секунды слов]], …] — третье поле (необязательно)
+              даёт подсветку точно по словам; строчки после end скрыты до ответа,
+              пропущенное слово пишется как ___ (или {слово}: до ответа видно пустое место)
+     minus  — та же песня без голоса (минус) на той же шкале времени: после пропуска
+              музыка играет дальше до конца таймера; gw — пропущенное слово для строчки караоке
+     loop   — песня короче таймера: играет по кругу, пока идёт время
      type   — особая клетка (необязательно):
               'cat'     — 🐱 Кот в мешке: вопрос отдают другому игроку (catTheme — своя тема)
               'auction' — 🔨 Аукцион: игроки торгуются за вопрос
               'trap'    — ⚠ Ловушка: монетка «ангел или дьявол», событие, потом сам вопрос
               'bonus'   — 🎁 Скрытый бонус: на табло как обычная клетка, вместо вопроса —
                           конкурс из рулетки (свой конкурс: contest: 'rps' | 'dance' | 'shot' |
-                          'sing' | 'tap' | 'react' | 'croc')
+                          'sing' | 'tap' | 'react' | 'croc' | 'stare' | 'arm' | 'balance' | 'chain' |
+                          'laugh' | 'toast' | 'parody' | 'hum' | 'draw' | 'tongue')
+              'karaoke' — 🎤 Караоке: открывший отдаёт микрофон, тот поёт под minus со словами
+                          kar (kstart — с какой секунды, kdur — сколько), остальные ставят
+                          на телефонах 👍/👎, певцу — цена × доля 👍
               'mashup'  — 🎭 Мешап: pics — два исходных фото, names — два имени
 
    Музыки и видео нет на GitHub: положи их в папку media или выбери папку
@@ -180,9 +189,14 @@ def check_theme(rno, th, src, rep):
                 rep.check_file(where, q[k])
         for p in q.get('pics') or []:
             rep.check_file(where, p)
-        for k in ('audio', 'video'):
+        for k in ('audio', 'video', 'minus'):
             if q.get(k):
                 rep.check_file(where, q[k], media=True)
+        if q.get('type') == 'karaoke' and not (q.get('minus') or q.get('audio')):
+            rep.errors.append(f'{where}: караоке без минуса')
+        for line in q.get('kar') or []:
+            if len(line) > 2 and len(line[2]) != len(str(line[1]).split()):
+                rep.errors.append(f'{where}: в строчке караоке {len(str(line[1]).split())} слов, а времён {len(line[2])}')
 
 
 def place_specials(rno, themes):
@@ -225,6 +239,7 @@ def write_question(out, q, i, special):
     lines = [head]
     keys = [k for k in FIELD_ORDER if k in q] + [k for k in q if k not in FIELD_ORDER and k not in ('price', 'type')]
     groups = [('q',), ('a',), ('c',), ('hint',), ('img', 'fx', 'area', 'px', 'tiles', 'aimg'), ('audio', 'video', 'start', 'end', 'aend'),
+              ('minus', 'loop', 'gw', 'kstart', 'kdur'),
               ('pics', 'names'), ('catTheme', 'contest')]
     done = set()
     for g in groups:
@@ -236,12 +251,22 @@ def write_question(out, q, i, special):
         if k in done:
             continue
         if k == 'kar':
-            kar = ',\n'.join(f'{ind}    [{js_num(t)}, {js_str(s)}]' for t, s in q['kar'])
+            kar = ',\n'.join(f'{ind}    [{js_num(x[0])}, {js_str(x[1])}' + (f', [{", ".join(js_num(w) for w in x[2])}]' if len(x) > 2 else '') + ']'
+                             for x in q['kar'])
             lines.append(f'kar: [\n{kar},\n{ind}  ]')
         else:
             lines.append(f'{k}: {js_val(q[k])}')
     body = (',\n' + ind + '  ').join(lines)
     out.append(f'{ind}{{ {body} }},')
+
+
+def dance_songs(rep):
+    """Песни для танцевального баттла — из _work/audio/dance.json (сами файлы, как и вся музыка, лежат вне git)."""
+    f = os.path.join(ROOT, '_work', 'audio', 'dance.json')
+    songs = [e['file'] for e in json.load(open(f, encoding='utf-8'))] if os.path.exists(f) else []
+    for s in songs:
+        rep.check_file('Танцевальный баттл', s, media=True)
+    return '[' + ', '.join(js_str(s) for s in songs) + ']'
 
 
 def build(partial):
@@ -253,9 +278,9 @@ def build(partial):
            '  sounds: {', "    // correct: 'media/correct.mp3',", '  },', '',
            '  /* Фоновая музыка (необязательно; по умолчанию играет media/bgm): lobby, board, think, results, end.',
            "     Пример: music: { board: ['media/bgm/моя.mp3'], think: false }, — false выключает музыку экрана */", '',
-           '  /* Песни для танцевального баттла. Пусто — играет встроенный бит.',
+           '  /* Песни для танцевального баттла (каждый баттл — новая). Пусто — играет встроенный бит.',
            "     Пример: danceSongs: ['media/dance/song1.mp3', 'media/dance/song2.mp3'], */",
-           '  danceSongs: [],', '', '  rounds: [']
+           f'  danceSongs: {dance_songs(rep)},', '', '  rounds: [']
     summary, missing = [], []
     for rno, names in LAYOUT.items():
         picked = []

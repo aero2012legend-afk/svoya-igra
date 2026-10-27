@@ -459,6 +459,15 @@ body.danger::after { content: ""; position: fixed; inset: 0; pointer-events: non
 .eyes { font-size: 5rem; line-height: 1; animation: blink 3.4s infinite; }
 @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
 .shotb { display: flex; gap: .6rem; } .shotb .btn { font-size: 1.2rem; padding: .5rem 1rem; }
+/* задание на экране (цепочка, скороговорка) и караоке-клетки */
+.con-word { font-family: var(--heavy); font-size: 4.4rem; color: var(--gold); text-shadow: 0 0 1.6rem rgba(255, 204, 51, .6); max-width: 100rem; line-height: 1.15; animation: slamC .5s cubic-bezier(.2, 1.6, .4, 1) both; }
+.con-word.long { font-size: 3.4rem; color: #fff; text-shadow: 0 0 1.4rem rgba(255, 255, 255, .45); }
+.kar-song { font-family: var(--heavy); font-size: 3.6rem; color: var(--gold); text-shadow: 0 0 1.6rem rgba(255, 204, 51, .55); max-width: 100rem; line-height: 1.2; }
+.kar-img { max-height: 30vh; max-width: 60rem; border-radius: 1.2rem; box-shadow: 0 1rem 3rem rgba(0, 0, 0, .55); }
+.con.kar.play { gap: .6rem; }
+.con.kar.play .kar { margin-top: 1.2rem; }
+.con.kar::before { content: ""; position: absolute; left: 50%; top: -6rem; width: 80rem; height: 80rem; margin-left: -40rem; z-index: -1; background: radial-gradient(ellipse at 50% 0%, rgba(255, 95, 162, .25), transparent 62%); pointer-events: none; }
+.ov-emoji.mic { animation: micSwing .6s ease-in-out infinite alternate; }
 
 /* танцпол: всё двигается через transform/opacity, слои небольшие */
 #disco { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
