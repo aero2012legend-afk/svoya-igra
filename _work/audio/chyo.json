@@ -140,5 +140,49 @@
   ],
   "gain_db": -2.0,
   "ffmpeg": "volume=-2.0dB,afade=t=in:d=0.3,afade=t=out:st=58.22:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/chyo/r3_600_pokemon_full_minus.mp3",
+  "source": "https://soundcloud.com/xiao-310209886/convert_pokemon-season-1",
+  "title": "«Покемон» — русская ТВ-заставка целиком (для караоке) — минус (без голоса)",
+  "cut": [
+   0.0,
+   59.675
+  ],
+  "demucs": "no_vocals",
+  "ffmpeg": "volume=2.0dB,afade=t=in:d=0.2,afade=t=out:st=58.18:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/chyo/r3_900_chernyplash_full.mp3",
+  "source": "https://soundcloud.com/3apa3a-studio/f2gjqrpxsmni",
+  "title": "«Чёрный плащ» — русская ТВ-заставка целиком (для караоке)",
+  "cut": [
+   0.0,
+   58.03
+  ],
+  "gain_db": -7.1,
+  "ffmpeg": "volume=-7.1dB,afade=t=in:d=0.3,afade=t=out:st=56.53:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/chyo/r3_900_chernyplash_full_minus.mp3",
+  "source": "https://soundcloud.com/3apa3a-studio/f2gjqrpxsmni",
+  "title": "«Чёрный плащ» — русская ТВ-заставка целиком (для караоке) — минус (без голоса)",
+  "cut": [
+   0.0,
+   58.027
+  ],
+  "demucs": "no_vocals",
+  "ffmpeg": "volume=1.0dB,afade=t=in:d=0.2,afade=t=out:st=56.53:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/chyo/r3_1200_catdog_full.mp3",
+  "source": "https://soundcloud.com/user-382946314/liyd4kyohclv",
+  "title": "«Котопёс» — русская ТВ-заставка целиком (для караоке)",
+  "cut": [
+   0.0,
+   41.05
+  ],
+  "gain_db": -6.1,
+  "ffmpeg": "volume=-6.1dB,afade=t=in:d=0.3,afade=t=out:st=39.55:d=1.5,alimiter=limit=0.89:attack=3:release=40"
  }
 ]

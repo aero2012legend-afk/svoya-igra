@@ -1889,7 +1889,7 @@
       }
       case 'kar': {
         const d = curD();
-        return el(`<div class="special con kar play">${head}<div class="sp-info">🎤 Поёт ${nmB(A)}</div>${karHTML(d).replace('class="kar"', 'class="kar big"')}${clock}
+        return el(`<div class="special con kar play">${head}<div class="sp-info">🎤 Поёт ${nmB(A)}${d.q ? ` · <span class="mut">${esc(d.q)}</span>` : ''}</div>${karHTML(d).replace('class="kar"', 'class="kar big"')}${clock}
           <div class="hostbar">${pause}${B2('cnext', 'Стоп — к оценкам ▶', 'gold', '→')}</div></div>`);
       }
       case 'hum': case 'draw': {

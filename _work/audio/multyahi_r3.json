@@ -60,15 +60,15 @@
   "note": "в игре играет целиком (start/end не нужны); голоса нет — слова «Gargoyles» не слышно (проверено Whisper по всей заставке с отделением голоса Demucs); громкость ≈ −15.0 LUFS; на экране исходного видео есть плашки TV-Y7/CC — картинки брать не оттуда"
  },
  {
-  "file": "media/music/multyahi/r3_300_southpark.mp3",
-  "source": "https://soundcloud.com/user-962234403/south-park-oh-my-god-they-killed-kenny-you-bastards-wwwmp3freexbiz",
-  "title": "«Южный парк» (South Park): Стэн и Кайл — «Oh my God, they killed Kenny! You bastards!» (SoundCloud, загрузка «User 962234403», 9 с: ~3 с звука и тишина)",
+  "file": "media/music/multyahi/r3_300_southpark_ru.mp3",
+  "source": "https://archive.org/download/sppilots/003%20-%20Cartman%20Gets%20an%20Anal%20Probe%20-%20Unaired%20Pilot%20Episode.mp4",
+  "title": "«Южный парк» (South Park), русский дубляж пилота (неэфирная версия «Cartman Gets an Anal Probe», архив.org «South Park Pilot Episodes (Russian Dub)»): Стэн «О, боже мой! Они убили Кенни!», Кайл «Сволочь!»",
   "cut": [
-   0.0,
-   3.2
+   947.05,
+   951.1
   ],
-  "gain_db": -6.0,
-  "ffmpeg": "afade=t=in:d=0.03,afade=t=out:st=2.95:d=0.25,volume=-6.0dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "в игре играет целиком (start/end не нужны); громкость ≈ −14.8 LUFS"
+  "gain_db": 0.0,
+  "ffmpeg": "afade=t=in:d=0.15,afade=t=out:st=3.65:d=0.4,volume=0.0dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "русский дубляж: в игре end=2.14 (пауза перед именем «Кенни»; согласная «К» — на 2.26 с), aend=4.0 (после ответа звучит «Кенни! Сволочь!»); проверено Whisper; громкость ≈ −14.8 LUFS; исходник — неэфирная версия пилота (26 мин), реплика на 947.6–950.7 с"
  }
 ]
