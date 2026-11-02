@@ -184,5 +184,16 @@
   ],
   "gain_db": -6.1,
   "ffmpeg": "volume=-6.1dB,afade=t=in:d=0.3,afade=t=out:st=39.55:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/chyo/r3_1200_catdog_full_minus.mp3",
+  "source": "https://soundcloud.com/user-382946314/liyd4kyohclv",
+  "title": "«Котопёс» — русская ТВ-заставка целиком (для караоке) — минус (без голоса)",
+  "cut": [
+   0.0,
+   41.054
+  ],
+  "demucs": "no_vocals",
+  "ffmpeg": "volume=2.0dB,afade=t=in:d=0.2,afade=t=out:st=39.55:d=1.5,alimiter=limit=0.89:attack=3:release=40"
  }
 ]
