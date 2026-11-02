@@ -58,17 +58,5 @@
   "gain_db": -3.9,
   "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=20.8:d=1.2,volume=-3.9dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "оригинал 224,8 с, -10,9 LUFS; первые ~27 с — тихое вступление, рифф начинается на ~27 с; берём 24–46 с; запасные копии: https://soundcloud.com/rzzz06/red-alert-2-soundtrack-hell, https://soundcloud.com/richard-antony-413451394/command-conquer-red-alert-2-1; myinstants hell-march-1.mp3 — 30-секундный отрывок (неясно, RA1 или нет)"
- },
- {
-  "file": "media/music/igrulki/r3_2700_ff7.mp3",
-  "source": "https://soundcloud.com/final-fantasy-soundtracks/final-fantasy-vii-ost-one-winged-angel",
-  "title": "Final Fantasy VII (Square, PlayStation, 1997) — «One-Winged Angel», Нобуо Уэмацу (Final Fantasy Soundtracks, «Final Fantasy VII OST - One Winged Angel», 439,2 с), вход хора «Estuans interius»",
-  "cut": [
-   62.0,
-   86.0
-  ],
-  "gain_db": -2.4,
-  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=22.8:d=1.2,volume=-2.4dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "оригинал 439,2 с (-11,9 LUFS); Whisper: хор «Estuans interius ira vehementi» на 69,4–73,8 с исходника; берём 62–86 с; те же 439,164 с у копий: https://soundcloud.com/radiogames/one-winged-angel и https://soundcloud.com/monkey-d-luffy-644704323/one-winged-angel-final-1"
  }
 ]
