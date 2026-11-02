@@ -2105,8 +2105,9 @@
     if (st) e.addEventListener('loadedmetadata', () => { try { e.currentTime = st; } catch (err) { /* ничего */ } }, { once: true });
     m.stopAt = en || 0;
     e.addEventListener('timeupdate', () => { if (m.stopAt && e.currentTime >= m.stopAt) { e.pause(); toMinus(m); } });
-    // песня короче таймера — играет по кругу, пока идёт время (d.loop)
-    e.addEventListener('ended', () => { if (MP === m && d.loop && !m.stopAt && G.q && G.q.key === m.key && G.q.stage === 'open' && G.q.tr) { try { e.currentTime = st; } catch (err) { /* ничего */ } mediaPlay(); } });
+    // песня короче таймера — играет по кругу, пока идёт время (loop: true/false; по умолчанию — всё, что длиннее 10 секунд)
+    const loop = () => (d.loop != null ? !!d.loop : (e.duration || 0) - st >= 10);
+    e.addEventListener('ended', () => { if (MP === m && loop() && !m.stopAt && G.q && G.q.key === m.key && G.q.stage === 'open' && G.q.tr) { try { e.currentTime = st; } catch (err) { /* ничего */ } mediaPlay(); } });
     e.src = url; m.el = e;
     const web = url.startsWith('blob:') || /^https?:$/.test(location.protocol);
     if (kind === 'audio' && web) {
