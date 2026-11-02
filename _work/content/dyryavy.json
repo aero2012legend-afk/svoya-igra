@@ -255,7 +255,8 @@
         14.15
        ]
       ]
-     ]
+     ],
+     "minus": "media/music/dyryavy/r1_400_rayony_minus.mp3"
     },
     {
      "price": 500,
@@ -270,21 +271,50 @@
      "kar": [
       [
        0.0,
-       "♪ ♪ ♪"
+       "♪ ♪ ♪",
+       [
+        0.0,
+        0.51,
+        1.01
+       ]
       ],
       [
        3.7,
-       "And mother always told me…"
+       "And mother always told me…",
+       [
+        3.6,
+        5.18,
+        5.4,
+        5.72,
+        5.96
+       ]
       ],
       [
        10.6,
-       "'Cause the lie becomes the truth,"
+       "'Cause the lie becomes the truth,",
+       [
+        10.72,
+        11.08,
+        11.26,
+        11.44,
+        11.84,
+        12.0
+       ]
       ],
       [
        12.4,
-       "Billie Jean is not my ___"
+       "Billie Jean is not my ___",
+       [
+        15.22,
+        15.33,
+        15.41,
+        15.46,
+        15.52,
+        15.94
+       ]
       ]
-     ]
+     ],
+     "minus": "media/music/dyryavy/r1_500_billiejean_minus.mp3"
     },
     {
      "price": 600,
@@ -299,15 +329,37 @@
      "kar": [
       [
        0.0,
-       "♪ ♪ ♪"
+       "♪ ♪ ♪",
+       [
+        0.0,
+        0.51,
+        1.01
+       ]
       ],
       [
        10.66,
-       "Knees weak, arms are heavy,"
+       "Knees weak, arms are heavy,",
+       [
+        10.68,
+        11.14,
+        11.48,
+        11.82,
+        12.14
+       ]
       ],
       [
        12.38,
-       "There's vomit on his sweater already, mom's ___"
+       "There's vomit on his sweater already, mom's ___",
+       [
+        12.38,
+        12.74,
+        12.92,
+        13.16,
+        13.4,
+        13.58,
+        14.22,
+        14.63
+       ]
       ]
      ]
     },

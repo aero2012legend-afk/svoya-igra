@@ -148,5 +148,27 @@
   ],
   "demucs": "no_vocals",
   "ffmpeg": "volume=-4.4dB,afade=t=in:d=0.2,afade=t=out:st=59.10:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/dyryavy/r1_400_rayony_minus.mp3",
+  "source": "https://soundcloud.com/paradox-irrinna/rayony-kvartaly",
+  "title": "Звери — Районы-кварталы (до слова «красиво») — минус (без голоса)",
+  "cut": [
+   39.36,
+   98.48
+  ],
+  "demucs": "no_vocals",
+  "ffmpeg": "volume=0.4dB,afade=t=in:d=0.2,afade=t=out:st=57.62:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/dyryavy/r1_500_billiejean_minus.mp3",
+  "source": "https://archive.org/download/billie-jean-single-version/Billie%20Jean%20%28Single%20Version%29.mp3",
+  "title": "Michael Jackson — Billie Jean (Single Version) (до слова «lover»; архив archive.org, сверено с официальным фрагментом) — минус (без голоса)",
+  "cut": [
+   73.02,
+   133.93
+  ],
+  "demucs": "no_vocals",
+  "ffmpeg": "volume=4.0dB,afade=t=in:d=0.2,afade=t=out:st=59.41:d=1.5,alimiter=limit=0.89:attack=3:release=40"
  }
 ]

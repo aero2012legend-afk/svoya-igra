@@ -70,5 +70,17 @@
   "gain_db": 7.4,
   "ffmpeg": "afade=t=in:d=0.05,afade=t=out:st=7.50:d=0.5,volume=7.4dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "без слов; в игре играет целиком; громкость ≈ −15 LUFS"
+ },
+ {
+  "file": "media/music/multyahi/r1_500_shrek.mp3",
+  "source": "https://archive.org/download/y-2mate.com-2001/y2mate.com%20-%20%D0%A8%D1%80%D0%B5%D0%BA%202001.mp3",
+  "title": "«Шрек» (2001), русский дубляж: Лорд Фаркуад перед турниром — «Кто-то из вас сгинет, но эту жертву я готов принять» (archive.org: «Y2mate.com - Шрек 2001.mp3», звуковая дорожка фильма, 86 мин; реплика на 1329.7–1335.0 с)",
+  "cut": [
+   1329.5,
+   1335.7
+  ],
+  "gain_db": 24.3,
+  "ffmpeg": "afade=t=in:d=0.05,afade=t=out:st=5.80:d=0.4,volume=24.3dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в игре играет целиком (start/end не нужны); проверено Whisper medium: в нарезке одна реплика; громкость ≈ −15 LUFS"
  }
 ]
