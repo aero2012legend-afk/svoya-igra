@@ -1110,7 +1110,8 @@
        12.45,
        "Врагам не сдамся, продолжу ___"
       ]
-     ]
+     ],
+     "minus": "media/music/chyo/r3_2100_shaman_full_minus.mp3"
     },
     {
      "price": 2400,
