@@ -12,28 +12,16 @@
   "note": "в игре: end=22.7 (музыка обрывается за ~0.3 с до крика «Ты не пройдёшь!»), aend=27.8 (после ответа крик звучит до конца)"
  },
  {
-  "file": "media/music/kinchiki/r1_400_pirates.mp3",
-  "source": "https://soundcloud.com/klausbadelt/8m67v5-6-18",
-  "title": "«Пираты Карибского моря: Проклятие «Чёрной жемчужины»» — «He's a Pirate», Клаус Бадельт (официальная загрузка композитора)",
+  "file": "media/music/kinchiki/r1_700_bumer.mp3",
+  "source": "https://soundcloud.com/user-282462123/bumer-mobilnik-kota",
+  "title": "«Бумер» (2003) — «Мобильник Кота»: рингтон телефона Кота (Владимир Вдовиченков), мелодия звонка, ставшая главной музыкальной темой фильма (SoundCloud, загрузка aewee «Бумер - Мобильник Кота»; тот же файл на ringon.site; мелодия сверена по хромаграмме с началом трека «Мобильник» Сергея Шнурова из OST «Бумер»)",
   "cut": [
-   5.0,
-   26.6
+   0.04,
+   12.635
   ],
-  "gain_db": 5.1,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=20.4:d=1.2,volume=5.1dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "с момента вступления остинато (в исходнике ~6 с)"
- },
- {
-  "file": "media/music/kinchiki/r1_600_brat2.mp3",
-  "source": "https://soundcloud.com/user-102040547/brat-2-vot-skazhi-mne-amerikanets-v-chyom-sila",
-  "title": "«Брат 2»: монолог Данилы Багрова «…Вот ты обманул кого-то, денег нажил, и чего, ты сильнее стал?.. А тот, кого обманул, за ним правда. Значит, он сильнее. Да?»",
-  "cut": [
-   14.3,
-   29.8
-  ],
-  "gain_db": -1.0,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=14.3:d=1.2,volume=-1.0dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "в игре: end=11.3 (пауза перед «Значит, он сильнее»), aend=13.5 (с «Да?»)"
+  "gain_db": 1.5,
+  "ffmpeg": "afade=t=in:d=0.02,afade=t=out:st=12.54:d=0.05,volume=1.5dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "один полный цикл мелодии (≈12.6 с, в исходнике 16 повторов), без слов; в игре играет по кругу, без start/end"
  },
  {
   "file": "media/music/kinchiki/r1_800_bumer.mp3",

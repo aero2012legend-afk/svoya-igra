@@ -82,5 +82,17 @@
   "gain_db": 24.3,
   "ffmpeg": "afade=t=in:d=0.05,afade=t=out:st=5.80:d=0.4,volume=24.3dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "в игре играет целиком (start/end не нужны); проверено Whisper medium: в нарезке одна реплика; громкость ≈ −15 LUFS"
+ },
+ {
+  "file": "media/music/multyahi/r1_1000_ezhik.mp3",
+  "source": "https://archive.org/download/1982-1_202606/1975%20%D0%95%D0%B6%D0%B8%D0%BA%20%D0%B2%20%D1%82%D1%83%D0%BC%D0%B0%D0%BD%D0%B5%20%5Bviju%20TV1000%20HD%5D.mp4",
+  "title": "«Ёжик в тумане» (1975, Норштейн): из тумана ухает Филин, Ёжик отвечает единственным словом «Псих» (архив.org: «Союзмультфильм. Золотая коллекция HD», файл «1975 Ежик в тумане»; Ёжика озвучила Мария Виноградова)",
+  "cut": [
+   242.0,
+   249.3
+  ],
+  "gain_db": 12.0,
+  "ffmpeg": "afade=t=in:d=0.15,afade=t=out:st=6.90:d=0.4,acompressor=threshold=0.01:ratio=20:attack=3:release=200:makeup=8,volume=12.0dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в игре: end=5.75 (пауза перед словом «Псих», слово тихое — на 247.8–248.15 исходника), aend=6.6 (после ответа звучит «Псих»); тихое слово поднято компрессором acompressor, филин не оглушает"
  }
 ]

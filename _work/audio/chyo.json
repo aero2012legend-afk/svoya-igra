@@ -129,5 +129,16 @@
   ],
   "gain_db": -0.8,
   "ffmpeg": "volume=-0.8dB,afade=t=in:d=0.3,afade=t=out:st=56.20:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/chyo/r3_600_pokemon_full.mp3",
+  "source": "https://soundcloud.com/xiao-310209886/convert_pokemon-season-1",
+  "title": "«Покемон» — русская ТВ-заставка целиком (для караоке)",
+  "cut": [
+   0.0,
+   59.72
+  ],
+  "gain_db": -2.0,
+  "ffmpeg": "volume=-2.0dB,afade=t=in:d=0.3,afade=t=out:st=58.22:d=1.5,alimiter=limit=0.89:attack=3:release=40"
  }
 ]
