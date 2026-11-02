@@ -261,5 +261,27 @@
   ],
   "demucs": "no_vocals",
   "ffmpeg": "volume=-5.7dB,afade=t=in:d=0.2,afade=t=out:st=56.18:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/chyo/r3_2400_jimmy_full.mp3",
+  "source": "https://soundcloud.com/user-382946314/ljimg04u7l7c",
+  "title": "«Приключения Джимми Нейтрона, мальчика-гения» — русская ТВ-заставка целиком (для караоке)",
+  "cut": [
+   1.45,
+   36.33
+  ],
+  "gain_db": -1.6,
+  "ffmpeg": "volume=-1.6dB,afade=t=in:d=0.3,afade=t=out:st=33.37:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/chyo/r3_2400_jimmy_full_minus.mp3",
+  "source": "https://soundcloud.com/user-382946314/ljimg04u7l7c",
+  "title": "«Приключения Джимми Нейтрона, мальчика-гения» — русская ТВ-заставка целиком (для караоке) — минус (без голоса)",
+  "cut": [
+   1.45,
+   36.324
+  ],
+  "demucs": "no_vocals",
+  "ffmpeg": "volume=9.5dB,afade=t=in:d=0.2,afade=t=out:st=33.37:d=1.5,alimiter=limit=0.89:attack=3:release=40"
  }
 ]
