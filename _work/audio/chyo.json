@@ -283,5 +283,49 @@
   ],
   "demucs": "no_vocals",
   "ffmpeg": "volume=9.5dB,afade=t=in:d=0.2,afade=t=out:st=33.37:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/chyo/r3_2700_gummi_full.mp3",
+  "source": "https://soundcloud.com/mariya-yanyushkina/mishki-gammi_russkaya-zastavka",
+  "title": "«Приключения мишек Гамми» — русская ТВ-заставка целиком (для караоке)",
+  "cut": [
+   0.0,
+   64.6
+  ],
+  "gain_db": 0.2,
+  "ffmpeg": "volume=0.2dB,afade=t=in:d=0.3,afade=t=out:st=63.10:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/chyo/r3_2700_gummi_full_minus.mp3",
+  "source": "https://soundcloud.com/mariya-yanyushkina/mishki-gammi_russkaya-zastavka",
+  "title": "«Приключения мишек Гамми» — русская ТВ-заставка целиком (для караоке) — минус (без голоса)",
+  "cut": [
+   0.0,
+   64.598
+  ],
+  "demucs": "no_vocals",
+  "ffmpeg": "volume=4.4dB,afade=t=in:d=0.2,afade=t=out:st=63.10:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/chyo/r3_3000_freak_full.mp3",
+  "source": "https://soundcloud.com/mariya-yanyushkina/frikazoid-opening_rus",
+  "title": "«Фрикозоид» — русская ТВ-заставка целиком (для караоке)",
+  "cut": [
+   0.0,
+   61.77
+  ],
+  "gain_db": -3.5,
+  "ffmpeg": "volume=-3.5dB,afade=t=in:d=0.3,afade=t=out:st=60.27:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/chyo/r3_3000_freak_full_minus.mp3",
+  "source": "https://soundcloud.com/mariya-yanyushkina/frikazoid-opening_rus",
+  "title": "«Фрикозоид» — русская ТВ-заставка целиком (для караоке) — минус (без голоса)",
+  "cut": [
+   0.0,
+   61.765
+  ],
+  "demucs": "no_vocals",
+  "ffmpeg": "volume=6.4dB,afade=t=in:d=0.2,afade=t=out:st=60.27:d=1.5,alimiter=limit=0.89:attack=3:release=40"
  }
 ]

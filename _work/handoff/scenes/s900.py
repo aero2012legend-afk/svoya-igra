@@ -1,80 +1,96 @@
 import sys, math
 sys.path.insert(0, '/home/user/svoya-igra/_work/handoff')
-from narisoval_kid import *
+from kidlib import *
 
-k = Kid(seed=900)
-k.sky_band(46)
-RED, REDD = '#e3242c', '#8a1016'
+k = Kid(seed=9001)
+WINE, WINED = '#8a1236', '#4a0618'
+# небо и бордовый горизонт
+k.fill(rect(-20, -20, W + 40, 500), '#b6e0f5', gap=11, angle=6)
+k.cloud(120, 330, 0.7, '#4a90d9', '#ffffff'); k.cloud(1180, 300, 0.6, '#4a90d9', '#ffffff')
+k.fill([(-20, 470), (W + 20, 462), (W + 20, H + 20), (-20, H + 20)], WINE, gap=11, angle=-6)
+k.fill([(-20, 470), (W + 20, 462), (W + 20, 500), (-20, 506)], '#c2304f', gap=10, angle=-3)
+k.line([(-20, 470), (W + 20, 462)], WINED, w=6, amp=2)
 
-# --- большой дом с окном, где стоит актриса ---
-k.shape([(740, 176), (950, 66), (1166, 176)], '#c9552f', '#7a2a12', w=9, gap=11, smooth=False, amp=2)      # крыша
-k.shape(rect(764, 176, 376, 380), '#f6e08a', '#8a6a1c', w=9, gap=12)                                         # стена
-for (wx, wy, ww, wh) in [(790, 220, 66, 100), (1050, 220, 66, 100)]:                                        # боковые окна
-    k.shape(rect(wx, wy, ww, wh), '#cfe9ff', '#5a4a1c', w=6, gap=10)
-    k.line([(wx + ww / 2, wy), (wx + ww / 2, wy + wh)], '#5a4a1c', w=4, twice=False)
-k.shape(rect(868, 222, 182, 190), '#cfe9ff', '#5a3a12', w=9, gap=11)                                         # окно
-k.shape([(870, 224), (900, 224), (890, 330), (870, 330)], '#f28cb1', None)                                   # шторки
-k.shape([(1048, 224), (1018, 224), (1028, 330), (1048, 330)], '#f28cb1', None)
-# актриса в окне
-k.shape(ell(959, 352, 62, 76, 20), '#1b1b1b', '#000', w=4, gap=9)                                            # волосы
-k.shape(ell(959, 340, 40, 46, 18), '#f6c9a4', '#9b6a40', w=5, gap=9)                                         # лицо
-k.dot(945, 332, 4); k.dot(975, 332, 4)
-k.smile(960, 356, 28, 10, '#d01020', 5)
-k.shape(ell(1000, 262, 12, 12, 10), '#ff8fb0', '#b0456b', w=3, gap=6)                                        # бантик
-k.shape(ell(900, 404, 16, 16, 10), '#f6c9a4', '#9b6a40', w=4, gap=7)                                         # рука на подоконнике
-k.line([(852, 414), (1066, 414)], '#5a3a12', w=12)                                                           # подоконник
-k.shape(rect(930, 470, 60, 90), '#8a5a2b', '#47280e', w=6, gap=10)                                           # дверь
+# --- самолёт (летит вправо) ---
+k.shape([(170, 214), (150, 108), (236, 108), (320, 196)], '#e85a5a', '#8a1f1f', w=7, gap=10, smooth=False, amp=1.8)          # хвост
+k.shape([(380, 262), (300, 392), (420, 396), (560, 292)], '#dde4ee', '#59647a', w=7, gap=10, smooth=False, amp=1.8)         # крыло
+k.shape([(176, 206), (260, 186), (520, 188), (720, 208), (800, 252), (720, 290), (500, 304), (260, 300), (186, 270)],
+        '#f4f7fb', '#59647a', w=8, gap=12, smooth=True, amp=2)                                                               # корпус
+k.line([(220, 262), (760, 266)], '#e85a5a', w=9, amp=1.5, twice=False)
+for wx in (300, 360, 520, 580, 640):
+    k.shape(ell(wx, 232, 17, 19, 10), '#bfe3ff', '#456', w=4, gap=7)
+# девочка у окна боится летать
+GX, GY = 440, 232
+k.shape(ell(GX, GY - 6, 40, 46, 14), '#3a2410', '#1a0a00', w=4, gap=8)
+k.shape(ell(GX, GY, 29, 31, 14), SKIN, SKIND, w=4, gap=8)
+face(k, GX, GY + 2, 29, 'sad', cheeks=True)
+k.shape(ell(GX, GY, 40, 42, 14), None, '#456', w=6, gap=8) if False else None
+# окно вокруг неё
+k.line(ell(GX, GY, 41, 43, 16), '#456', w=7, closed=True, amp=1.2)
+# пилот в кабине
+PX, PY = 726, 234
+k.shape(ell(PX, PY, 21, 22, 12), SKIN, SKIND, w=4, gap=7)
+k.shape([(PX - 23, PY - 4), (PX - 18, PY - 22), (PX, PY - 28), (PX + 18, PY - 22), (PX + 23, PY - 4), (PX + 8, PY - 12), (PX - 8, PY - 12)], '#2a4a9a', '#12295a', w=3, gap=6, smooth=False)
+k.dot(PX - 8, PY, 3); k.dot(PX + 8, PY, 3)
+k.smile(PX, PY + 8, 14, 6, '#c0392b', 3)
+k.line(ell(PX, PY, 25, 26, 14), '#456', w=6, closed=True, amp=1, twice=False)
+# мысль девочки — про пилота
+bubble(k, 440, 78, 120, 62, tail_to=(440, 186))
+k.shape(ell(440, 82, 36, 38, 14), SKIN, SKIND, w=4, gap=7)
+k.shape([(402, 76), (410, 46), (440, 36), (470, 46), (478, 76), (458, 62), (422, 62)], '#2a4a9a', '#12295a', w=4, gap=7, smooth=False)
+k.dot(428, 84, 4); k.dot(452, 84, 4); k.smile(440, 98, 22, 9, '#c0392b', 3)
+k.shape(star5(440, 51, 8), '#ffd43b', '#c79a00', w=2, gap=4, smooth=False)
 
-# --- домик слева и мольберт с холстом ---
-k.shape([(14, 340), (100, 262), (186, 340)], '#b8442a', '#6a2010', w=8, gap=10, smooth=False, amp=2)
-k.shape(rect(30, 340, 140, 130), '#f4b6c2', '#a04a62', w=8, gap=11)
-k.shape(rect(52, 372, 44, 44), '#cfe9ff', '#5a3a12', w=5, gap=9)
-k.shape(rect(116, 392, 36, 78), '#8a5a2b', '#47280e', w=5, gap=9)
-k.shape(rect(138, 270, 22, 40), '#9a6a4a', '#47280e', w=5, gap=9)                                            # труба
-# мольберт
-k.line([(268, 380), (232, 540)], '#7a4a1c', w=12); k.line([(338, 380), (372, 540)], '#7a4a1c', w=12)
-k.line([(303, 380), (303, 545)], '#7a4a1c', w=10)
-k.solid(rect(212, 214, 184, 170), '#ffffff')
-k.shape(rect(212, 214, 184, 170), None, '#5a3a12', w=9)
-k.shape(ell(270, 280, 24, 24, 12), '#ffd43b', '#c79a00', w=4, gap=7)                                         # на холсте — солнышко
-k.line([(226, 350), (262, 330), (300, 352), (340, 328), (382, 350)], '#2f6fd6', w=9)
-k.shape([(330, 240), (370, 240), (350, 296)], '#46a84f', '#2a7a2e', w=4, gap=8, smooth=False)
+# --- часы (стрелки: без цифр, только чёрточки) ---
+CX_, CY_, CR = 1090, 130, 82
+k.shape(ell(CX_, CY_, CR, CR, 22), '#ffffff', '#c0392b', w=11, gap=12)
+for i in range(12):
+    a = math.radians(i * 30)
+    k.line([(CX_ + math.sin(a) * (CR - 20), CY_ - math.cos(a) * (CR - 20)), (CX_ + math.sin(a) * (CR - 8), CY_ - math.cos(a) * (CR - 8))], '#333', w=5, amp=0.4, twice=False)
+ha = math.radians(7 * 30 + 22 * 0.5); ma = math.radians(22 * 6)
+k.line([(CX_, CY_), (CX_ + math.sin(ha) * 36, CY_ - math.cos(ha) * 36)], '#222', w=9, amp=0.5, twice=False)
+k.line([(CX_, CY_), (CX_ + math.sin(ma) * 56, CY_ - math.cos(ma) * 56)], '#222', w=6, amp=0.5, twice=False)
+k.dot(CX_, CY_, 7)
 
-# --- море алых цветов (до самого окна второго этажа) ---
-pts = []
-for i in range(124):
-    y = 470 + 240 * (i / 124) ** 0.8 + k.J(14)
-    x = k.r.uniform(-10, 1290)
-    pts.append((x, y))
-pts.sort(key=lambda p: p[1])
-def flower(x, y):
-    r = 18 + (y - 460) / 240 * 18
-    k.line([(x, y + r * 0.6), (x + k.J(10), y + r + 46)], '#2f8a3a', w=7, amp=1.6, twice=False)
-    k.line([(x, y + r + 20), (x + 26, y + r + 6)], '#2f8a3a', w=6, amp=1.2, twice=False)                 # листик
-    k.shape(ell(x, y, r, r, 14), RED, REDD, w=4, gap=7)
-    k.line([(x - r * 0.4, y - r * 0.1), (x, y + r * 0.3), (x + r * 0.45, y - r * 0.2)], REDD, w=4, amp=0.8, twice=False)
-for (x, y) in pts:
-    flower(x, y)
+# --- шато с башенками и погребом, на горизонте ---
+k.shape(rect(560, 372, 190, 96), '#e8d6a8', '#7a6430', w=7, gap=11)
+for tx in (548, 738):
+    k.shape(rect(tx, 340, 44, 128), '#dcc590', '#7a6430', w=6, gap=10)
+    k.shape([(tx - 8, 340), (tx + 22, 286), (tx + 52, 340)], '#c9552f', '#7a2a12', w=6, gap=9, smooth=False, amp=1.5)
+k.shape([(560, 372), (655, 330), (750, 372)], '#c9552f', '#7a2a12', w=6, gap=9, smooth=False, amp=1.5)
+k.shape([(630, 468), (630, 420), (655, 402), (680, 420), (680, 468)], '#5a3a1c', '#2a1608', w=5, gap=8, smooth=False)
+k.shape(rect(570, 396, 30, 36), '#9fd0ee', '#456', w=4, gap=7); k.shape(rect(712, 396, 30, 36), '#9fd0ee', '#456', w=4, gap=7)
+# бочка (погреб)
+k.shape(ell(820, 438, 34, 40, 14), '#a8682c', '#5a3410', w=6, gap=9)
+k.line([(788, 424), (852, 424)], '#5a3410', w=5, amp=0.8, twice=False); k.line([(788, 452), (852, 452)], '#5a3410', w=5, amp=0.8, twice=False)
 
-# --- художник (палка-палка-огуречик, берет, палитра) ---
-px, py = 520, 300
-k.line([(px - 36, py - 170 + 170), (px - 52, py + 232)], '#222', w=9)                                      # ноги
-k.line([(px + 6, py + 118), (px + 44, py + 232)], '#222', w=9)
-k.shape([(px - 4, py + 28), (px - 56, py + 140), (px + 56, py + 140)], '#3a6fd8', '#1c3f94', w=6, gap=10, smooth=False)   # халат
-k.line([(px - 22, py + 56), (px - 100, py + 20), (px - 132, py - 30)], '#222', w=8)                         # рука с кистью
-k.line([(px - 132, py - 30), (px - 150, py - 62)], '#a0622a', w=7, twice=False)
-k.dot(px - 152, py - 66, 6, '#e3242c')
-k.line([(px + 20, py + 60), (px + 72, py + 90)], '#222', w=8)                                               # рука с палитрой
-k.shape(ell(px + 96, py + 96, 44, 30, 14, rot=-10), '#d9b27a', '#7a5a2a', w=5, gap=8)
-for (dx, dy, c) in [(70, 88, '#e3242c'), (92, 80, '#ffd43b'), (114, 90, '#2f6fd6'), (96, 106, '#46a84f')]:
-    k.dot(px + dx, py + dy, 6, c)
-k.shape(ell(px, py - 12, 30, 32, 16), '#f6c9a4', '#9b6a40', w=6, gap=9)                                    # голова
-k.shape(ell(px, py - 38, 36, 14, 14), '#e3242c', '#8a1016', w=5, gap=8)                                    # берет
-k.shape(ell(px + 14, py - 50, 18, 9, 10), '#e3242c', '#8a1016', w=4, gap=7)
-k.dot(px - 10, py - 14, 4); k.dot(px + 12, py - 14, 4)
-k.smile(px + 1, py + 2, 24, 9, '#c0392b', 4)
-# передний ряд цветов поверх ног художника
-for (x, y) in [(470, 640), (560, 655), (500, 690), (610, 676), (430, 676)]:
-    flower(x, y)
+# --- Эйфелева башня вдалеке справа (по-детски: треугольник с крестиками) ---
+k.line([(990, 466), (1036, 330), (1082, 466)], '#555a66', w=9, amp=1.2)
+k.line([(1036, 330), (1036, 290)], '#555a66', w=7, amp=0.6, twice=False)
+for (y, hw) in [(420, 22), (380, 14)]:
+    k.line([(1036 - hw, y), (1036 + hw, y)], '#555a66', w=7, amp=0.6, twice=False)
+k.line([(1010, 440), (1062, 400)], '#555a66', w=5, amp=0.6, twice=False); k.line([(1062, 440), (1010, 400)], '#555a66', w=5, amp=0.6, twice=False)
 
-k.save('/tmp/narisoval/900', 'media/img/narisoval/r3_900_rozy.webp')
+# --- плетёное кресло и столик с чашкой (уютное кафе) ---
+k.shape(ell(190, 596, 62, 18, 14), '#e8c98a', '#7a5a22', w=6, gap=9)
+k.line([(190, 610), (190, 690)], '#7a5a22', w=9, amp=1, twice=False); k.line([(150, 690), (230, 690)], '#7a5a22', w=8, amp=1, twice=False)
+k.shape(rect(172, 560, 36, 26), '#ffffff', '#555', w=4, gap=7)
+k.line([(208, 568), (222, 570), (220, 580), (208, 582)], '#555', w=4, amp=0.6, twice=False)
+k.line([(180, 548), (176, 532)], '#bbb', w=4, amp=0.8, twice=False); k.line([(196, 548), (200, 530)], '#bbb', w=4, amp=0.8, twice=False)  # пар
+# кресло
+k.shape(ell(380, 560, 52, 62, 16), '#d9a85a', '#6a4a14', w=7, gap=8)
+for i in range(-2, 3):
+    k.line([(380 - 44 + i * 20, 508), (380 + 22 + i * 20, 612)], '#8a5a1a', w=4, amp=0.6, twice=False)
+    k.line([(380 + 44 + i * 20, 508), (380 - 22 + i * 20, 612)], '#8a5a1a', w=4, amp=0.6, twice=False)
+k.shape(rect(318, 624, 124, 22), '#d9a85a', '#6a4a14', w=6, gap=8)
+k.line([(330, 646), (322, 700)], '#6a4a14', w=8, amp=1, twice=False); k.line([(430, 646), (440, 700)], '#6a4a14', w=8, amp=1, twice=False)
+
+# --- бокал бордового вина ---
+BX, BY = 930, 700
+k.shape([(BX - 70, BY - 230), (BX + 70, BY - 230), (BX + 62, BY - 150), (BX + 24, BY - 110), (BX - 24, BY - 110), (BX - 62, BY - 150)], '#f3e6ee', '#6a3a5a', w=7, gap=12, smooth=True)
+k.shape([(BX - 63, BY - 178), (BX + 63, BY - 178), (BX + 56, BY - 150), (BX + 24, BY - 116), (BX - 24, BY - 116), (BX - 56, BY - 150)], '#6a0a2a', '#3a0614', w=4, gap=7, smooth=True)
+k.line([(BX, BY - 110), (BX, BY - 26)], '#6a3a5a', w=9, amp=1, twice=False)
+k.shape(ell(BX, BY - 18, 62, 14, 14), '#f3e6ee', '#6a3a5a', w=6, gap=9)
+k.line([(BX - 40, BY - 214), (BX - 46, BY - 160)], '#ffffff', w=8, amp=0.8, twice=False)
+
+k.save('/tmp/narisoval/900', 'media/img/narisoval/r3_900_provans.webp')

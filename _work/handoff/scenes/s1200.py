@@ -1,71 +1,72 @@
 import sys, math
 sys.path.insert(0, '/home/user/svoya-igra/_work/handoff')
-from narisoval_kid import *
+from kidlib import *
 
-k = Kid(seed=1200)
-k.sky_band(46, '#9ad3f2')
-k.cloud(250, 130, 1.0, '#6f9fd8')
-k.cloud(760, 100, 0.8, '#6f9fd8')
+k = Kid(seed=1201)
+# вечер, дождь, мокрый асфальт
+k.fill(rect(-20, -20, W + 40, 600), '#8c9bc4', gap=11, angle=7)
+k.fill([(-20, 552), (W + 20, 546), (W + 20, H + 20), (-20, H + 20)], '#5d6272', gap=12, angle=-5)
+k.line([(-20, 552), (W + 20, 546)], '#363a46', w=7, amp=2)
 
-# --- обрыв: земля слева, пропасть справа ---
-EDGE = 1040
-k.shape([(EDGE, 470), (1310, 470), (1310, 740), (1010, 740), (1046, 650), (1018, 585), (1052, 525)], '#44536f', None, gap=12)   # пропасть
-k.shape([(-20, 470), (EDGE, 470), (1052, 525), (1018, 585), (1046, 650), (1010, 740), (-20, 740)], '#a67c52', '#5b3a1c', w=9, gap=13)  # скала
-for (x0, y0, x1, y1) in [(120, 560, 210, 600), (420, 640, 520, 610), (700, 560, 800, 590), (880, 650, 960, 620)]:
-    k.line([(x0, y0), (x1, y1)], '#5b3a1c', w=6, amp=2, twice=False)
-k.line([(-20, 470), (EDGE, 470)], '#3a7a2a', w=14)                                                  # трава по краю
-# туман над пропастью
-for (cx, cy, s) in [(1130, 560, 0.9), (1210, 640, 0.8), (1120, 700, 0.7)]:
-    k.cloud(cx, cy, s, '#dfe5ee', '#c9d1de')
+# тучи
+for (cx, cy, s) in [(260, 80, 1.5), (700, 60, 1.7), (1100, 90, 1.4)]:
+    k.cloud(cx, cy, s, '#4a5a7a', '#9aa3b8')
 
-# --- конь (боком, скачет вправо) ---
-def horse(x, y, s, body, bodyd, mane, pose=0):
-    T = Xf(x, y, s)
-    far = shade(body, -0.12)
-    legs = [
-        ([(50, -60), (95, -35), (132, -4)], far), ([(-50, -60), (-92, -34), (-130, -6)], far),
-        ([(35, -58), (62, -26), (52, 2)], body), ([(-35, -58), (-62, -26), (-80, 2)], body)]
-    if pose:
-        legs = [([(50, -60), (80, -28), (70, 2)], far), ([(-50, -60), (-78, -30), (-92, 2)], far),
-                ([(35, -58), (88, -44), (128, -14)], body), ([(-35, -58), (-98, -40), (-136, -12)], body)]
-    for pts, col in legs[:2]:
-        k.line(T(pts), col, w=19 * s, amp=1.5)
-    k.line(T([(-86, -110), (-132, -122), (-164, -92), (-152, -44)]), mane, w=20 * s, amp=2)             # хвост
-    k.shape(T(ell(0, -95, 90, 47, 24)), body, bodyd, w=8, gap=11)                                         # туловище
-    k.shape(T([(52, -125), (88, -184), (130, -198), (124, -150), (94, -92)]), body, bodyd, w=7, gap=10)   # шея
-    k.shape(T(ell(152, -196, 44, 23, 16, rot=28)), body, bodyd, w=7, gap=10)                              # голова
-    k.shape(T([(122, -212), (134, -240), (146, -212)]), body, bodyd, w=5, gap=8, smooth=False)            # ухо
-    k.dot(*T([(150, -204)])[0], 5 * s, '#111')
-    k.dot(*T([(190, -186)])[0], 3.5 * s, '#111')
-    for t in range(6):                                                                                   # грива
-        bx, by = 56 + t * 14, -128 - t * 12
-        k.line(T([(bx, by), (bx - 16, by - 20)]), mane, w=9 * s, amp=1, twice=False)
-    for pts, col in legs[2:]:
-        k.line(T(pts), col, w=19 * s, amp=1.5)
-    for pts, col in legs:
-        k.dot(*T([pts[-1]])[0], 10 * s, '#2a2a2a')                                                       # копыта
+# дома на заднем плане (в окне — девочка)
+k.shape(rect(830, 250, 440, 300), '#d9cbb0', '#6a5a3a', w=8, gap=12)
+window_grid(k, 860, 280, 4, 3, ww=62, wh=70, gx=30, gy=34, lit=0.5, on='#ffe27a', off='#4a5a7a', frame='#6a5a3a')
+# девочка в освещённом окне (занавеска, телефон экраном вниз)
+k.shape(rect(1040, 280, 62, 70), '#ffe27a', '#6a5a3a', w=5, gap=9)
+k.shape(ell(1071, 332, 16, 17, 10), SKIN, SKIND, w=3, gap=6)
+k.shape([(1054, 320), (1058, 304), (1071, 298), (1084, 304), (1088, 320), (1080, 314), (1062, 314)], '#6a3a1c', '#3a1c08', w=3, gap=6, smooth=False)
+k.dot(1065, 332, 2.5); k.dot(1077, 332, 2.5)
+k.shape(rect(260, 330, 120, 220), '#c4c0b8', '#5a564e', w=7, gap=11)
+window_grid(k, 276, 350, 2, 3, ww=40, wh=44, gx=20, gy=18, lit=0.45, frame='#5a564e')
 
-horse(330, 456, 0.9, '#c9ccd1', '#6b6f78', '#555a63', 1)
-horse(585, 463, 0.95, '#2f2f33', '#000000', '#000000', 0)
-horse(850, 470, 1.0, '#8a5a2b', '#47280e', '#2a1608', 1)
+# фонари — «фонари для нас не гаснут»
+lamp(k, 180, 560, 330, 1.1); lamp(k, 790, 560, 310, 1.0)
 
-# --- возница в санях с кнутом (слева) ---
-k.shape(rect(58, 428, 190, 44), '#e23b3b', '#7a1010', w=7, gap=10)
-k.line([(40, 498), (140, 506), (240, 498), (270, 470)], '#5a3a12', w=10)                              # полозья
-k.line([(80, 472), (80, 498)], '#5a3a12', w=7, twice=False); k.line([(200, 472), (200, 498)], '#5a3a12', w=7, twice=False)
-px, py = 150, 430
-k.line([(px, py), (px, py - 90)], '#222', w=9)
-k.shape(ell(px, py - 118, 26, 26, 14), '#f6c9a4', '#9b6a40', w=5, gap=8)
-k.shape(ell(px, py - 140, 32, 16, 12), '#7a4a1c', '#3a200a', w=5, gap=8)                              # шапка
-k.dot(px - 8, py - 120, 3.5); k.dot(px + 10, py - 120, 3.5)
-k.line([(px, py - 80), (px + 50, py - 120), (px + 86, py - 160)], '#222', w=8)                         # рука с кнутом
-k.line([(px, py - 80), (px - 40, py - 40)], '#222', w=8)
-k.line([(px + 86, py - 160), (px + 170, py - 215), (px + 280, py - 245), (px + 380, py - 215),
-        (px + 440, py - 250), (px + 500, py - 232)], '#222', w=5, amp=3, twice=False)              # кнут
-k.line([(px + 500, py - 232), (px + 520, py - 262), (px + 490, py - 270)], '#222', w=4, amp=1, twice=False)
+# лужа с кругами, в которую он влетел
+PX, PY = 520, 640
+k.shape(ell(PX, PY, 190, 40, 20), '#a9c8f0', '#3a6aa8', w=7, gap=9)
+k.line(ell(PX, PY + 2, 120, 22, 16), '#ffffff', w=4, closed=True, amp=1, twice=False)
+k.line(ell(PX, PY + 2, 70, 12, 14), '#ffffff', w=4, closed=True, amp=1, twice=False)
+k.shape(ell(PX + 60, PY + 8, 16, 10, 8), '#ffe566', None, gap=6)  # отражение фонаря
 
-# --- ветер ---
-for (x0, y0) in [(30, 200), (90, 262), (700, 170)]:
-    k.line([(x0, y0), (x0 + 60, y0 - 10), (x0 + 110, y0 + 10), (x0 + 170, y0)], '#7fb5e8', w=6, amp=2, twice=False)
+# мальчик в толстовке, без зонта, телефон в руке
+bx, by = 500, 632
+hx, hy, R = person(k, bx, by, 1.18, shirt='#2f4a8a', shirtd='#142a5a', pants='#22252e', armL=(-52, 62), armR=(88, -22),
+                   mood='sad', hair='#3a2410', legs=((-26, 0), (34, -6)), look=(-4, 6))
+# капюшон за головой
+k.line(ell(hx, hy + 4, R * 1.28, R * 1.25, 18, a0=150, a1=390), '#142a5a', w=14, amp=1.4, twice=False)
+# телефон в правой руке: экран с красной трубкой — звонки без ответа
+phx, phy = bx + 88 * 1.18 + 12, by - 188 * 1.18 + 10 - 22 * 1.18
+k.shape(rect(phx - 24, phy - 52, 48, 84), '#1f1f2a', '#000', w=5, gap=9)
+k.shape(rect(phx - 18, phy - 44, 36, 62), '#bfe6ff', None, gap=6)
+k.line([(phx - 10, phy - 18), (phx - 2, phy - 28), (phx + 10, phy - 14)], '#d01818', w=7, amp=0.5, twice=False)
+for r_ in (22, 34):
+    k.line(ell(phx, phy - 68, r_, r_, 10, a0=200, a1=340), '#d01818', w=4, amp=0.6, twice=False)       # «звонит» — дуги
+# кроссовки: мокрые, с каплями
+for (sx, sy, fl) in [(bx - 28, by + 6, False), (bx + 40, by - 2, False)]:
+    sneaker(k, sx, sy, 0.42, '#f6f6fb', '#445', flip=fl)
+    for dx in (-30, 10, 44):
+        k.shape(drop(sx + dx, sy - 70 + (dx % 7), 6), '#4aa8ff', '#2a6ac0', w=2, gap=4)
+# брызги
+for (dx, dy) in [(-140, -10), (-110, -30), (150, -20), (170, 0), (120, -40)]:
+    k.shape(drop(PX + dx, PY + dy - 20, 8), '#79b4ff', '#2a6ac0', w=3, gap=5)
 
-k.save('/tmp/narisoval/1200', 'media/img/narisoval/r3_1200_koni.webp')
+# сломанный зонт валяется (ему он не нужен)
+k.line(ell(760, 636, 80, 56, 14, a0=180, a1=360), '#c0392b', w=9, amp=1.4)
+k.line([(680, 636), (840, 636)], '#7a1a12', w=5, amp=0.8, twice=False)
+for ang in (210, 250, 290, 330):
+    a = math.radians(ang)
+    k.line([(760, 636), (760 + 80 * math.cos(a), 636 + 56 * math.sin(a))], '#7a1a12', w=4, amp=0.6, twice=False)
+k.line([(760, 636), (836, 690)], '#5a3a1c', w=7, amp=1, twice=False)
+k.line([(836, 690), (852, 676), (868, 688)], '#5a3a1c', w=7, amp=0.8, twice=False)
+
+# ДОЖДЬ поверх всего
+for i in range(150):
+    x = k.r.uniform(-30, 1300); y = k.r.uniform(-30, 700); L = k.r.uniform(26, 44)
+    k.line([(x, y), (x - L * 0.28, y + L)], '#3f78d6', w=4.5, amp=0.4, twice=False, smooth=False)
+
+k.save('/tmp/narisoval/1200', 'media/img/narisoval/r3_1200_krossy.webp')
