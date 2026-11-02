@@ -24,18 +24,6 @@
   "note": "один полный цикл мелодии (≈12.6 с, в исходнике 16 повторов), без слов; в игре играет по кругу, без start/end"
  },
  {
-  "file": "media/music/kinchiki/r1_800_bumer.mp3",
-  "source": "https://soundcloud.com/user857032020/ost-2004",
-  "title": "«Бумер» (2003) — Сергей Шнуров, «Никого не жалко» (OST «Бумер»), припев ×2 (со слов «Никого не жалко, никого…»)",
-  "cut": [
-   36.5,
-   57.0
-  ],
-  "gain_db": -4.0,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=19.3:d=1.2,volume=-4.0dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "слов «бумер» в тексте нет"
- },
- {
   "file": "media/music/kinchiki/r1_1000_requiem.mp3",
   "source": "https://soundcloud.com/nonesuchrecords/kronos-quartet-clint-mansell",
   "title": "«Реквием по мечте» — «Lux Aeterna», Клинт Мэнселл / Kronos Quartet (официальная загрузка Nonesuch Records; вступление главной темы)",

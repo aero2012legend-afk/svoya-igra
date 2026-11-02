@@ -195,5 +195,60 @@
   ],
   "demucs": "no_vocals",
   "ffmpeg": "volume=2.0dB,afade=t=in:d=0.2,afade=t=out:st=39.55:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/chyo/r3_1500_ben10_full.mp3",
+  "source": "https://soundcloud.com/user-382946314/pxnyyfdjls77",
+  "title": "«Бен 10» — русская ТВ-заставка целиком (для караоке)",
+  "cut": [
+   0.0,
+   57.24
+  ],
+  "gain_db": 5.1,
+  "ffmpeg": "volume=5.1dB,afade=t=in:d=0.3,afade=t=out:st=55.74:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/chyo/r3_1500_ben10_full_minus.mp3",
+  "source": "https://soundcloud.com/user-382946314/pxnyyfdjls77",
+  "title": "«Бен 10» — русская ТВ-заставка целиком (для караоке) — минус (без голоса)",
+  "cut": [
+   0.0,
+   57.237
+  ],
+  "demucs": "no_vocals",
+  "ffmpeg": "volume=9.4dB,afade=t=in:d=0.2,afade=t=out:st=55.74:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/chyo/r3_1800_kim_full.mp3",
+  "source": "https://soundcloud.com/user-382946314/avdzsngfycvb",
+  "title": "«Ким Пять-с-плюсом» — русская ТВ-заставка целиком (для караоке)",
+  "cut": [
+   0.0,
+   57.98
+  ],
+  "gain_db": 12.0,
+  "ffmpeg": "volume=12.0dB,afade=t=in:d=0.3,afade=t=out:st=56.48:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/chyo/r3_1800_kim_full_minus.mp3",
+  "source": "https://soundcloud.com/user-382946314/avdzsngfycvb",
+  "title": "«Ким Пять-с-плюсом» — русская ТВ-заставка целиком (для караоке) — минус (без голоса)",
+  "cut": [
+   0.0,
+   57.98
+  ],
+  "demucs": "no_vocals",
+  "ffmpeg": "volume=12.0dB,afade=t=in:d=0.2,afade=t=out:st=56.48:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/chyo/r3_2100_shaman_full.mp3",
+  "source": "https://archive.org/download/OpeningRussianostShamanKing/OpeningRussianostShamanKing.mp3",
+  "title": "«Шаман Кинг» — русская ТВ-заставка целиком (для караоке)",
+  "cut": [
+   0.0,
+   57.68
+  ],
+  "gain_db": -12.8,
+  "ffmpeg": "volume=-12.8dB,afade=t=in:d=0.3,afade=t=out:st=56.18:d=1.5,alimiter=limit=0.89:attack=3:release=40"
  }
 ]
