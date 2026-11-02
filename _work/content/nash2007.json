@@ -13,139 +13,7 @@
      "img": "media/img/nash2007/r2_200_umbrella_q.jpg",
      "fx": "blur",
      "aimg": "media/img/nash2007/r2_200_umbrella_a.jpg",
-     "audio": "media/music/nash2007/r2_200_umbrella.mp3",
-     "kar": [
-      [
-       0.0,
-       "Uh -huh.",
-       [
-        0.0,
-        0.42
-       ]
-      ],
-      [
-       1.46,
-       "Uh -huh.",
-       [
-        1.86,
-        1.92
-       ]
-      ],
-      [
-       2.2,
-       "Cheer. Uh -huh.",
-       [
-        2.6,
-        3.08,
-        3.08
-       ]
-      ],
-      [
-       3.46,
-       "Uh -huh.",
-       [
-        3.86,
-        4.28
-       ]
-      ],
-      [
-       4.88,
-       "Good girl going bad.",
-       [
-        5.28,
-        5.46,
-        5.78,
-        6.08
-       ]
-      ],
-      [
-       6.48,
-       "Uh -huh.",
-       [
-        6.88,
-        7.02
-       ]
-      ],
-      [
-       7.02,
-       "Uh -huh.",
-       [
-        7.24,
-        7.46
-       ]
-      ],
-      [
-       7.46,
-       "Take three.",
-       [
-        7.46,
-        7.72
-       ]
-      ],
-      [
-       8.86,
-       "Action. Uh -huh.",
-       [
-        9.26,
-        9.26,
-        9.26
-       ]
-      ],
-      [
-       9.72,
-       "Uh -huh.",
-       [
-        10.12,
-        10.38
-       ]
-      ],
-      [
-       10.38,
-       "Ho! No clouds in my stones.",
-       [
-        10.38,
-        10.9,
-        11.2,
-        11.56,
-        11.78,
-        12.12
-       ]
-      ],
-      [
-       12.66,
-       "Let it rain.",
-       [
-        13.06,
-        13.2,
-        13.46
-       ]
-      ],
-      [
-       13.46,
-       "I'll hide the rain in the bank.",
-       [
-        13.84,
-        14.02,
-        14.06,
-        14.28,
-        14.44,
-        14.62,
-        14.82
-       ]
-      ],
-      [
-       14.84,
-       "Coming down in the cow dung.",
-       [
-        15.24,
-        15.24,
-        15.6,
-        15.7,
-        15.9,
-        16.04
-       ]
-      ]
-     ]
+     "audio": "media/music/nash2007/r2_200_umbrella.mp3"
     },
     {
      "price": 400,
@@ -174,36 +42,7 @@
       28
      ],
      "aimg": "media/img/nash2007/r2_600_bilan_a.jpg",
-     "audio": "media/music/nash2007/r2_600_bilan.mp3",
-     "kar": [
-      [
-       9.98,
-       "Yeah",
-       [
-        10.38
-       ]
-      ],
-      [
-       12.02,
-       "Even when the thundering storm begins",
-       [
-        12.42,
-        12.98,
-        13.3,
-        13.64,
-        14.34,
-        14.88
-       ]
-      ],
-      [
-       15.54,
-       "i'll be",
-       [
-        15.94,
-        16.5
-       ]
-      ]
-     ]
+     "audio": "media/music/nash2007/r2_600_bilan.mp3"
     },
     {
      "price": 800,
@@ -219,8 +58,7 @@
       98,
       23
      ],
-     "audio": "media/music/nash2007/r2_800_linkin.mp3",
-     "kar": []
+     "audio": "media/music/nash2007/r2_800_linkin.mp3"
     },
     {
      "price": 1000,
@@ -395,7 +233,46 @@
      "img": "media/img/nash2007/r2_1800_crazy_q.jpg",
      "fx": "negative",
      "aimg": "media/img/nash2007/r2_1800_crazy_a.jpg",
-     "audio": "media/music/nash2007/r2_1800_crazy.mp3"
+     "audio": "media/music/nash2007/r2_1800_crazy.mp3",
+     "kar": [
+      [
+       0.0,
+       "yeah i was out of time but",
+       [
+        0.0,
+        0.5,
+        0.56,
+        0.82,
+        1.2,
+        1.62,
+        2.36
+       ]
+      ],
+      [
+       3.4,
+       "it wasn't because i didn't know enough",
+       [
+        3.8,
+        3.98,
+        4.24,
+        4.6,
+        4.72,
+        5.08,
+        5.36
+       ]
+      ],
+      [
+       7.94,
+       "i just knew too much",
+       [
+        8.34,
+        9.06,
+        9.32,
+        9.5,
+        10.2
+       ]
+      ]
+     ]
     },
     {
      "price": 2000,
