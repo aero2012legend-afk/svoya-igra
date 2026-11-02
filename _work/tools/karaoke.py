@@ -15,7 +15,8 @@
            Пишет файл рядом с audio (…_minus.mp3), запись в _work/audio/ТЕМА.json и поле minus в вопросе.
   check  — проверка без вывода текста песни: строчки, слова, времена, сомнительные места.
 
-Опции: --lang ru|en (язык песни, по умолчанию ru), --prompt "…" (подсказка Whisper: начало текста).
+Опции: --lang ru|en (язык песни, по умолчанию ru), --prompt "…" (подсказка Whisper: начало текста),
+       --model large-v3 (точнее на пении, но медленнее; по умолчанию medium).
 Тексты песен в консоль не печатаются — только счётчики и время."""
 import argparse, json, os, re, subprocess, sys, tempfile, wave
 import numpy as np
@@ -87,10 +88,13 @@ def vocals_of(audio, fr=0.0, to=None):
     return np.frombuffer(w.readframes(w.getnframes()), np.int16).astype(np.float32) / 32768, fr
 
 
+MODEL = 'medium'  # --model large-v3 точнее на пении, но в 3–4 раза медленнее
+
+
 def transcribe(audio, lang, prompt=None, fr=0.0, to=None):
     a, off = vocals_of(audio, fr, to)
     from faster_whisper import WhisperModel
-    m = WhisperModel('medium', device='cpu', compute_type='int8', cpu_threads=4, download_root='/opt/models/whisper')
+    m = WhisperModel(MODEL, device='cpu', compute_type='int8', cpu_threads=4, download_root='/opt/models/whisper')
     segs, _ = m.transcribe(a, language=lang, word_timestamps=True, vad_filter=False, initial_prompt=prompt,
                            condition_on_previous_text=False)
     words = []
@@ -296,7 +300,10 @@ def main():
     ap.add_argument('--from', dest='fr', type=float, default=0.0)
     ap.add_argument('--to', type=float)
     ap.add_argument('--len', type=float)
+    ap.add_argument('--model', default='medium', help='medium или large-v3')
     a = ap.parse_args()
+    global MODEL
+    MODEL = a.model
     {'align': cmd_align, 'full': cmd_full, 'minus': cmd_minus, 'check': cmd_check}[a.mode](a)
 
 
