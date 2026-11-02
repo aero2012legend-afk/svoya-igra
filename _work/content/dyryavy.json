@@ -361,7 +361,8 @@
         14.63
        ]
       ]
-     ]
+     ],
+     "minus": "media/music/dyryavy/r1_600_lose_minus.mp3"
     },
     {
      "price": 700,
@@ -376,21 +377,51 @@
      "kar": [
       [
        0.0,
-       "♪ ♪ ♪"
+       "♪ ♪ ♪",
+       [
+        0.0,
+        0.51,
+        1.01
+       ]
       ],
       [
        3.99,
-       "To drag me away from you,"
+       "To drag me away from you,",
+       [
+        4.0,
+        4.38,
+        4.56,
+        4.92,
+        5.74,
+        6.22
+       ]
       ],
       [
        8.83,
-       "A hundred men or more could ever do,"
+       "A hundred men or more could ever do,",
+       [
+        8.86,
+        8.94,
+        9.34,
+        9.72,
+        10.06,
+        10.62,
+        10.94,
+        11.4
+       ]
       ],
       [
        13.05,
-       "I bless the ___"
+       "I bless the ___",
+       [
+        13.05,
+        13.19,
+        13.6,
+        13.87
+       ]
       ]
-     ]
+     ],
+     "minus": "media/music/dyryavy/r1_700_africa_minus.mp3"
     },
     {
      "price": 800,
@@ -405,21 +436,47 @@
      "kar": [
       [
        0.0,
-       "♪ ♪ ♪"
+       "♪ ♪ ♪",
+       [
+        0.0,
+        0.51,
+        1.01
+       ]
       ],
       [
        4.92,
-       "Willst du bis der Tod euch scheidet,"
+       "Willst du bis der Tod euch scheidet,",
+       [
+        5.1,
+        5.44,
+        5.66,
+        6.14,
+        6.66,
+        6.96,
+        7.34
+       ]
       ],
       [
        8.43,
-       "treu ihr sein für alle Tage?"
+       "treu ihr sein für alle Tage?",
+       [
+        8.38,
+        8.88,
+        9.28,
+        9.88,
+        10.54,
+        11.1
+       ]
       ],
       [
        12.3,
-       "___!"
+       "___!",
+       [
+        14.05
+       ]
       ]
-     ]
+     ],
+     "minus": "media/music/dyryavy/r1_800_duhast_minus.mp3"
     },
     {
      "price": 900,
@@ -434,17 +491,41 @@
      "kar": [
       [
        0.19,
-       "Dog goes woof, cat goes meow…"
+       "Dog goes woof, cat goes meow…",
+       [
+        0.0,
+        1.04,
+        1.56,
+        2.72,
+        2.88,
+        3.42
+       ]
       ],
       [
        8.39,
-       "Cow goes moo, frog goes croak,"
+       "Cow goes moo, frog goes croak,",
+       [
+        8.38,
+        8.52,
+        9.04,
+        10.02,
+        10.4,
+        10.96
+       ]
       ],
       [
        12.11,
-       "and the elephant goes ___"
+       "and the elephant goes ___",
+       [
+        12.2,
+        12.44,
+        12.96,
+        13.8,
+        14.3
+       ]
       ]
-     ]
+     ],
+     "minus": "media/music/dyryavy/r1_900_fox_minus.mp3"
     },
     {
      "price": 1000,
@@ -459,21 +540,54 @@
      "kar": [
       [
        0.0,
-       "♪ ♪ ♪"
+       "♪ ♪ ♪",
+       [
+        0.0,
+        0.51,
+        1.01
+       ]
       ],
       [
        6.74,
-       "I'm just a poor boy,"
+       "I'm just a poor boy,",
+       [
+        6.46,
+        7.1,
+        7.42,
+        7.62,
+        7.86
+       ]
       ],
       [
        9.86,
-       "He's just a poor boy from a poor family,"
+       "He's just a poor boy from a poor family,",
+       [
+        10.04,
+        10.28,
+        10.6,
+        10.82,
+        11.1,
+        11.42,
+        11.8,
+        12.04,
+        12.26
+       ]
       ],
       [
        12.64,
-       "Spare him his life from this ___"
+       "Spare him his life from this ___",
+       [
+        13.36,
+        13.58,
+        13.76,
+        14.0,
+        14.2,
+        14.52,
+        14.6
+       ]
       ]
-     ]
+     ],
+     "minus": "media/music/dyryavy/r1_1000_queen_minus.mp3"
     }
    ]
   }

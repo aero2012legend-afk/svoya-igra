@@ -170,5 +170,60 @@
   ],
   "demucs": "no_vocals",
   "ffmpeg": "volume=4.0dB,afade=t=in:d=0.2,afade=t=out:st=59.41:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/dyryavy/r1_600_lose_minus.mp3",
+  "source": "https://archive.org/download/flac-eminem-lose-yourself-soundtrack-version-225ba8d9/Eminem%20-%20Lose%20Yourself%20%28Soundtrack%20Version%29.mp3",
+  "title": "Eminem — Lose Yourself (Soundtrack Version) (до слова «spaghetti»; архив archive.org, сверено с официальным фрагментом) — минус (без голоса)",
+  "cut": [
+   44.0,
+   103.6
+  ],
+  "demucs": "no_vocals",
+  "ffmpeg": "volume=-2.5dB,afade=t=in:d=0.2,afade=t=out:st=58.10:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/dyryavy/r1_700_africa_minus.mp3",
+  "source": "https://archive.org/download/1982_toto_iv/%5B1982%5D%20Toto%20-%20Toto%20IV/10%20-%20Africa.mp3",
+  "title": "Toto — Africa (до слова «rains»; архив archive.org, альбом Toto IV, темп сверен с официальным фрагментом) — минус (без голоса)",
+  "cut": [
+   75.35,
+   134.19
+  ],
+  "demucs": "no_vocals",
+  "ffmpeg": "volume=9.0dB,afade=t=in:d=0.2,afade=t=out:st=57.34:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/dyryavy/r1_800_duhast_minus.mp3",
+  "source": "https://archive.org/download/rammstein-du-hast-2023-remaster/Rammstein%20-%20Du%20hast%20%282023%20Remaster%29.flac",
+  "title": "Rammstein — Du hast (2023 Remaster) (до слова «Nein»; архив archive.org) — минус (без голоса)",
+  "cut": [
+   88.0,
+   147.02
+  ],
+  "demucs": "no_vocals",
+  "ffmpeg": "volume=-5.4dB,afade=t=in:d=0.2,afade=t=out:st=57.52:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/dyryavy/r1_900_fox_minus.mp3",
+  "source": "https://archive.org/download/gs_ylvis-the-fox-what-does-the-fox-say/1-01%20The%20Fox%20%28What%20Does%20the%20Fox%20Say%20%29.mp3",
+  "title": "Ylvis — The Fox (What Does the Fox Say?) (до слова «toot»; архив archive.org, оригинальный сингл) — минус (без голоса)",
+  "cut": [
+   7.85,
+   67.12
+  ],
+  "demucs": "no_vocals",
+  "ffmpeg": "volume=-2.9dB,afade=t=in:d=0.2,afade=t=out:st=57.77:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/dyryavy/r1_1000_queen_minus.mp3",
+  "source": "https://archive.org/download/07-queen-bohemian-rhapsody/07%20Queen%20-%20Bohemian%20Rhapsody.mp3",
+  "title": "Queen — Bohemian Rhapsody (до слова «monstrosity»; архив archive.org, студийная запись 1975) — минус (без голоса)",
+  "cut": [
+   196.0,
+   255.57
+  ],
+  "demucs": "no_vocals",
+  "ffmpeg": "volume=-1.9dB,afade=t=in:d=0.2,afade=t=out:st=58.07:d=1.5,alimiter=limit=0.89:attack=3:release=40"
  }
 ]

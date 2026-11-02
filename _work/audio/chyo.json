@@ -118,5 +118,16 @@
   "gain_db": -7.9,
   "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=15.30:d=1.2,volume=-7.9dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "SoundCloud 3apa3a-studio «Дисней клуб - Черный плащ» (58.0 с); слово «винта» начинается на ~14.15 с файла (23.66 исходника), end=14.00, aend=15.10; проверено Whisper+demucs; -15.1 LUFS"
+ },
+ {
+  "file": "media/music/chyo/r3_300_chip_full.mp3",
+  "source": "https://soundcloud.com/user-382946314/ts3p7x4aoxbd",
+  "title": "«Чип и Дейл спешат на помощь» — русская ТВ-заставка целиком (для караоке)",
+  "cut": [
+   0.0,
+   57.7
+  ],
+  "gain_db": -0.8,
+  "ffmpeg": "volume=-0.8dB,afade=t=in:d=0.3,afade=t=out:st=56.20:d=1.5,alimiter=limit=0.89:attack=3:release=40"
  }
 ]
