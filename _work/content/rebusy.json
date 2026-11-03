@@ -175,7 +175,8 @@
      "img": "media/img/frazy/fraza_3000_pyl.webp",
      "fx": "deblur"
     }
-   ]
+   ],
+   "noAuction": true
   }
  ]
 }
