@@ -204,3 +204,44 @@ def zigzag_path(k, pts, color='#ffd43b', w=5):
     for i in range(len(pts) - 1):
         if i % 2 == 0:
             k.line([pts[i], pts[i + 1]], color, w=w, amp=0.8, twice=False, smooth=False)
+
+
+# ---------- «Я так видел» (risunki): подпись «ВАСЯ 6 ЛЕТ» и тетрадная клетка ----------
+_GLYPHS = {
+    'В': [[(0, 0), (0, 1)], [(0, 0), (0.45, 0.03), (0.56, 0.2), (0.46, 0.46), (0, 0.5)], [(0, 0.5), (0.5, 0.54), (0.62, 0.76), (0.5, 0.97), (0, 1)]],
+    'А': [[(0, 1), (0.3, 0), (0.6, 1)], [(0.12, 0.66), (0.48, 0.66)]],
+    'С': [[(0.56, 0.16), (0.36, 0.0), (0.12, 0.12), (0.0, 0.5), (0.12, 0.88), (0.36, 1.0), (0.56, 0.84)]],
+    'Я': [[(0.56, 0), (0.56, 1)], [(0.56, 0.0), (0.16, 0.0), (0.02, 0.24), (0.16, 0.48), (0.56, 0.52)], [(0.36, 0.5), (0.0, 1)]],
+    '6': [[(0.52, 0.06), (0.22, 0.2), (0.06, 0.55), (0.1, 0.9), (0.3, 1.0), (0.5, 0.86), (0.46, 0.62), (0.26, 0.5), (0.08, 0.62)]],
+    'Л': [[(0.0, 1.0), (0.24, 0.0), (0.56, 0.0), (0.56, 1.0)]],
+    'Е': [[(0.5, 0.0), (0.0, 0.0), (0.0, 1.0), (0.5, 1.0)], [(0.0, 0.5), (0.4, 0.5)]],
+    'Т': [[(0.0, 0.0), (0.6, 0.0)], [(0.3, 0.0), (0.3, 1.0)]],
+}
+
+
+def signature(k, x, base, h=30, color='#767676', text='ВАСЯ 6 ЛЕТ', align='right'):
+    """Детская подпись «ВАСЯ 6 ЛЕТ» дрожащими штрихами. align='right': x — правый край, 'left': x — левый. base — нижняя линия букв."""
+    adv, sp = 0.9 * h, 0.7 * h
+    width = sum(sp if ch == ' ' else adv for ch in text) - (adv - 0.6 * h)
+    x0 = x - width if align == 'right' else x
+    for ch in text:
+        if ch == ' ':
+            x0 += sp
+            continue
+        for stroke in _GLYPHS[ch]:
+            pts = [(x0 + px * h + k.J(0.8), base - h + py * h + k.J(0.8)) for px, py in stroke]
+            k.line(pts, color, w=max(3.0, h * 0.11), amp=0.7, step=8, twice=False)
+        x0 += adv
+
+
+def grid_paper(k, step=40, color='#c3d5ee', margin_x=1170, margin_color='#e9a3a3'):
+    """Тетрадная клетка (тонкие ровные линии БЕЗ восковой фактуры) под всем рисунком + красное поле. Вызывать один раз, до или после рисования."""
+    segs = ''.join(f'M{x},0V{H}' for x in range(step // 2, W, step)) + ''.join(f'M0,{y}H{W}' for y in range(step // 2, H, step))
+    g = f'<path d="{segs}" stroke="{color}" stroke-width="2" fill="none"/>'
+    if margin_x:
+        g += f'<path d="M{margin_x},0V{H}" stroke="{margin_color}" stroke-width="3" fill="none"/>'
+    orig = k.svg
+
+    def svg():
+        return orig().replace('<g filter="url(#crayon)">', g + '<g filter="url(#crayon)">', 1)
+    k.svg = svg
