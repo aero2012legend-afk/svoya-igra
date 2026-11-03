@@ -41,7 +41,9 @@
 | 1800 | Michelin — рисунок оставить, текст переписать | ГОТОВО (q, c, hint переписаны в JSON; из hint убраны «звёзды ресторанам») |
 | 2000 | Lada — как есть | ОСТАВЛЕНО |
 
-Старые картинки (удалить после замены): r2_200_mcdonalds, r2_400_apple, r2_600_nike, r2_800_cocacola, r2_1000_adidas, r2_1400_starbucks, r2_1600_kfc (.webp в media/img/takvidel/). r2_1200_chupachups, r2_1800_michelin, r2_2000_lada — НЕ трогать.
+Старые картинки — ВСЕ УДАЛЕНЫ: r2_200_mcdonalds, r2_400_apple, r2_600_nike, r2_800_cocacola, r2_1000_adidas, r2_1400_starbucks, r2_1600_kfc (.webp в media/img/takvidel/). r2_1200_chupachups, r2_1800_michelin, r2_2000_lada — остались (не трогать).
+
+**ИТОГ: обе задачи выполнены полностью, `python3 _work/tools/build.py` проходит без ошибок по этим темам.**
 
 ## Журнал
 - Для «Я так видел» в kidlib.py добавлены `signature(k, x, base, h, color, align)` («ВАСЯ 6 ЛЕТ» штрихами) и `grid_paper(k)` (тетрадная клетка под рисунком + красное поле). Сцены risunki: `_work/handoff/scenes/r<цена>.py` → /tmp/takvidel/<цена>.png и media/img/takvidel/r2_<цена>_<бренд>.webp. Сохранение вопроса: scratchpad `w/put_r.py` (замена по цене) — можно просто править _work/content/risunki.json.
