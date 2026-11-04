@@ -25,8 +25,9 @@ def tts(text, path, voice='ru-RU-DmitryNeural', rate='-6%', pitch='-4Hz'):
     for k, part in enumerate(parts):
         f = os.path.join(tmp, f'p{k}.mp3')
         for attempt in range(25):
+            # темп и высоту меняем потом в ffmpeg: с параметрами rate/pitch сервис отказывает чаще
             r = subprocess.run(['/opt/aienv/bin/edge-tts', '--proxy', os.environ.get('HTTPS_PROXY', ''), '--voice', voice,
-                                f'--rate={rate}', f'--pitch={pitch}', '--text', part, '--write-media', f], capture_output=True, text=True)
+                                '--text', part, '--write-media', f], capture_output=True, text=True)
             if r.returncode == 0 and os.path.exists(f) and os.path.getsize(f) > 1000:
                 break
             time.sleep(3)
@@ -40,7 +41,10 @@ def tts(text, path, voice='ru-RU-DmitryNeural', rate='-6%', pitch='-4Hz'):
         for i, f in enumerate(files):
             fh.write(f"file '{f}'\n")
             if i + 1 < len(files): fh.write(f"file '{sil}'\n")
-    ff(['-f', 'concat', '-safe', '0', '-i', lst, '-ar', '24000', '-ac', '1', path])
+    tempo = 1 + float(rate.rstrip('%')) / 100
+    semi = float(pitch.rstrip('Hz')) / 12            # «-6Hz» ≈ полтона вниз — грубо, но для окраски хватает
+    k = 2 ** (semi / 12)
+    ff(['-f', 'concat', '-safe', '0', '-i', lst, '-af', f'asetrate=24000*{k:.4f},aresample=24000,atempo={tempo / k:.4f}', '-ar', '24000', '-ac', '1', path])
 
 
 def read(path):

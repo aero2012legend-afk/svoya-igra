@@ -1,0 +1,26 @@
+[
+ {
+  "file": "media/music/narisoval/r3_300_kon.mp3",
+  "source": "https://soundcloud.com/shout_111/ukwqqzdsfslp",
+  "title": "Любэ — «Конь» (1994)",
+  "cut": [
+   11.1,
+   23.4
+  ],
+  "gain_db": 6.4,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.10:d=1.2,volume=6.4dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "зачин «Выйду ночью в поле с конём, ночкой тёмной тихо пойдём» (SoundCloud shout_111, оригинал, 3:46)"
+ },
+ {
+  "file": "media/music/narisoval/r3_600_happy.mp3",
+  "source": "https://soundcloud.com/teenage-kicks-1/happy-pharrell-williams",
+  "title": "Pharrell Williams — Happy (2013)",
+  "cut": [
+   24.1,
+   36.5
+  ],
+  "gain_db": -6.7,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.20:d=1.2,volume=-6.7dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "припев «Because I'm happy, clap along if you feel like a room without a roof»; запись на SoundCloud, 3:54 (Teenage Kicks)"
+ }
+]
