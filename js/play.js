@@ -164,7 +164,7 @@
     if (!name) { if (nm) { nm.classList.add('err'); nm.focus(); } return; }
     myName = name; ls('sviq.name', name); joinSent = Date.now();
     const msg = () => ({ t: 'join', n: name, team: team || null, pr: myPrefs() });
-    send(msg(), true); vib(20); wake();
+    send(msg(), true); vib(20); wake(); setTimeout(sendMyAva, 2500);
     const n = $('#jnote'); if (n) n.textContent = 'Подключаемся к игре…';
     setTimeout(() => { if (!myEnt()) send(msg(), true); }, 4000);
   }
@@ -176,6 +176,28 @@
       <button class="go" id="prgo">Готово ✓</button><div class="s">Можно ничего не отмечать — тогда только вопросы и безопасные конкурсы</div></div>`);
     if (fresh) PREFS.forEach(([k]) => { const b = $(`[data-pf="${k}"]`); if (b) b.classList.toggle('on', !!draftPr[k]); });
   }
+  /* ----- аватарка: селфи или смешная картинка, уходит на телевизор ----- */
+  const AVAS = ['🦄', '🐸', '🐵', '🦖', '🤡', '👽', '🐷', '🐔', '🦆', '🐙', '🧛', '🤠', '🥸', '😎', '🤖', '👻', '🐼', '🦊', '🐻', '🦁', '🐯', '🦉', '🐳', '🍔'];
+  const AVKEY = 'sviq.ava' + SFX;
+  function avaHTML() {
+    const a = ls(AVKEY) || '';
+    const cur = a.startsWith('data:') ? `<div class="avcur" style="background-image:url('${a}')"></div>` : `<div class="avcur">${a.startsWith('e:') ? esc(a.slice(2)) : '🙂'}</div>`;
+    return `<div class="avbox"><div class="t sm">Твоя аватарка на экране</div><div class="avrow">${cur}<button class="go sm" id="avcam">📸 Селфи</button></div>
+      <div class="avgrid">${AVAS.map(x => `<button data-av="${x}">${x}</button>`).join('')}</div><input type="file" id="avfile" accept="image/*" capture="user" hidden></div>`;
+  }
+  function setMyAva(v) { ls(AVKEY, v); send({ t: 'ava', v }); vib(20); sig = ''; render(); }
+  function sendMyAva() { const v = ls(AVKEY); if (v) send({ t: 'ava', v }); }
+  app.addEventListener('change', e => {
+    if (e.target.id !== 'avfile' || !e.target.files || !e.target.files[0]) return;
+    const img = new Image(), url = URL.createObjectURL(e.target.files[0]);
+    img.onload = () => {
+      const S2 = 96, cv = document.createElement('canvas'); cv.width = cv.height = S2;
+      const m = Math.min(img.width, img.height), cx = cv.getContext('2d');
+      cx.drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, S2, S2); URL.revokeObjectURL(url);
+      setMyAva(cv.toDataURL('image/jpeg', 0.72));
+    };
+    img.src = url;
+  });
   function savePrefs() {
     const v = {}; PREFS.forEach(([k]) => { if (draftPr && draftPr[k]) v[k] = 1; });
     ls(PRKEY, JSON.stringify(v)); draftPr = null; surveyOpen = false;
@@ -220,7 +242,7 @@
     switch (S.phase) {
       case 'lobby': {
         const pr = myPrefs() || {}, list = PREFS.filter(p => pr[p[0]]).map(p => p[1] + ' ' + p[2]).join(' · ');
-        return center('🎮', 'Ты в игре!', `Ждём, когда ведущий начнёт.<br>Игроков: ${S.ents.length}`) + `<div class="mypr">Готов(а): ${list || 'только к вопросам'} · <button class="lnk" id="prchg">изменить</button></div>`;
+        return center('🎮', 'Ты в игре!', `Ждём, когда ведущий начнёт.<br>Игроков: ${S.ents.length}`) + avaHTML() + `<div class="mypr">Готов(а): ${list || 'только к вопросам'} · <button class="lnk" id="prchg">изменить</button></div>`;
       }
       case 'trans': return center('✨', esc(S.round || '…'), 'Смотри на экран');
       case 'board': return S.chooser === eid ? center('⭐', 'Твой выбор!', 'Скажи ведущему тему и цену') : center('🎯', 'Выбирает вопрос', ch ? esc(ch.n) : '');
@@ -338,7 +360,8 @@
         return center(c.i, `Выступает ${entN(cur)}`, pr);
       }
       case 'kar': return s ? center('🎤', 'ПОЙ!', 'Слова — на экране. Жги! 🔥') : center('🎤', `Поёт ${entN(c.a)}`, 'Слушай — потом оценишь 👍 или 👎');
-      case 'hum': case 'draw': return c.a === eid ? wordCard(q, c) : center(c.i, esc(c.n), `${entB(c.a)} ${c.id === 'hum' ? 'мычит песню' : 'рисует'} — угадывай вслух!`);
+      case 'draw': return c.a === eid ? padHTML(q) : center(c.i, esc(c.n), `${entB(c.a)} рисует — смотри на экран и угадывай вслух!`);
+      case 'hum': return c.a === eid ? wordCard(q, c) : center(c.i, esc(c.n), `${entB(c.a)} мычит песню — угадывай вслух!`);
       case 'arm': return s ? center('💪', 'ДАВИ!', 'Локоть не отрывать!') : center('💪', 'Армрестлинг', vs);
       case 'balance': return s ? center('🦩', 'Стой на одной ноге!', 'Глаза закрыты, руками ни за что не держаться') : center('🦩', 'Цапля', vs);
       case 'chain': return center('🔗', esc(c.word || 'Цепочка'), s ? 'Слово на последнюю букву предыдущего — 5 секунд, без повторов' : vs);
@@ -360,8 +383,37 @@
     }
     return center(c.i || '🎁', esc(c.n || ''), vs);
   }
+  /* ----- «Художник»: рисуешь пальцем, штрихи летят на телевизор ----- */
+  const PCOL = ['#222222', '#e53935', '#1e88e5', '#43a047', '#fdd835', '#fb8c00', '#8e24aa', '#795548'];
+  const pad = { k: null, col: '#222222', w: 1, cur: null, sid: 0, buf: [], t: 0 };
+  function padHTML(q) {
+    const w = priv && priv.k === q.k && priv.word;
+    return `<div class="padw"><div class="padword">🤫 <b>${w ? esc(w) : '…'}</b> — рисуй, без букв!</div><canvas id="pad"></canvas>
+      <div class="padbar">${PCOL.map(c => `<button class="pc ${c === pad.col ? 'on' : ''}" data-pc="${c}" style="--c:${c}"></button>`).join('')}
+      <button class="pw" data-pw="${pad.w === 2 ? 1 : 2}">${pad.w === 2 ? '✏️ тонко' : '🖌 толсто'}</button><button class="pclr" id="pclr">🗑</button></div></div>`;
+  }
+  function padInit(q) {
+    const cv = $('#pad'); if (!cv || cv.dataset.on) return;
+    cv.dataset.on = 1; if (pad.k !== q.k) { pad.k = q.k; pad.sid = 0; }
+    const r = cv.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
+    cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.width * 0.75 * dpr); cv.style.height = (r.width * 0.75) + 'px';
+    const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.lineCap = cx.lineJoin = 'round';
+    const pos = e => { const b = cv.getBoundingClientRect(); return [Math.max(0, Math.min(999, Math.round((e.clientX - b.left) / b.width * 1000))), Math.max(0, Math.min(999, Math.round((e.clientY - b.top) / b.height * 1000)))]; };
+    const seg = (a, b) => { cx.strokeStyle = pad.col; cx.lineWidth = (pad.w === 2 ? 16 : 6) * cv.width / 1200; cx.beginPath(); cx.moveTo(a[0] * cv.width / 1000, a[1] * cv.height / 1000); cx.lineTo(b[0] * cv.width / 1000, b[1] * cv.height / 1000); cx.stroke(); };
+    cv.addEventListener('pointerdown', e => { e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (err) { /* ничего */ } const p = pos(e); pad.cur = { i: ++pad.sid, last: p }; pad.buf = [p]; seg(p, p); flushSoon(); });
+    cv.addEventListener('pointermove', e => { if (!pad.cur) return; const p = pos(e), l = pad.cur.last; if (Math.abs(p[0] - l[0]) + Math.abs(p[1] - l[1]) < 4) return; seg(l, p); pad.cur.last = p; pad.buf.push(p); flushSoon(); });
+    const up = () => { if (!pad.cur) return; padFlush(); pad.cur = null; };
+    cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  }
+  function flushSoon() { if (!pad.t) pad.t = setTimeout(padFlush, 90); }
+  function padFlush() {
+    clearTimeout(pad.t); pad.t = 0; if (!pad.cur || !pad.buf.length) return;
+    const pts = pad.buf; pad.buf = [pts[pts.length - 1]]; // следующий кусок начинается с последней точки — линия без разрывов
+    send({ t: 'draw', k: pad.k, i: pad.cur.i, c: pad.col, w: pad.w, p: [].concat(...pts) });
+  }
   function afterBuild(eid) {
     const q = S.q, c = q && q.con;
+    if (S.phase === 'q' && c && c.id === 'draw' && c.st === 'play' && c.a === eid) padInit(q);
     if (S.phase === 'q' && c && c.id === 'react' && c.st === 'play' && c.go && side(c, eid) && rx.g === c.gid && !rx.at && !rx.sent) {
       requestAnimationFrame(() => requestAnimationFrame(() => { if (rx.g === c.gid && !rx.at) rx.at = performance.now(); }));
     }
@@ -513,6 +565,11 @@
     if (t.closest('#prgo')) return savePrefs();
     if (t.closest('#prchg')) { surveyOpen = true; draftPr = null; sig = ''; render(); return; }
     if (t.closest('#bribe')) return doBribe();
+    const pcb = t.closest('[data-pc]'); if (pcb) { pad.col = pcb.dataset.pc; app.querySelectorAll('.pc').forEach(b => b.classList.toggle('on', b === pcb)); return; }
+    const pwb = t.closest('[data-pw]'); if (pwb) { pad.w = +pwb.dataset.pw; pwb.dataset.pw = pad.w === 2 ? 1 : 2; pwb.textContent = pad.w === 2 ? '✏️ тонко' : '🖌 толсто'; return; }
+    if (t.closest('#pclr')) { const cv = $('#pad'); if (cv) { const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); } send({ t: 'draw', k: pad.k, clr: 1 }); vib(20); return; }
+    const avb = t.closest('[data-av]'); if (avb) { setMyAva('e:' + avb.dataset.av); return; }
+    if (t.closest('#avcam')) { const f = $('#avfile'); if (f) f.click(); return; }
     const q = S && S.q;
     if (t.closest('#coinbtn') && q) return press('coin' + q.k, { t: 'coin', k: q.k });
     if (t.closest('#spinbtn') && q) return press('spin' + q.k, { t: 'spin', k: q.k });

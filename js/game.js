@@ -293,7 +293,17 @@
       case 'tap': return conTap(eid, d.k, d.n, d.g, d.fin);
       case 'react': return conReact(eid, d.k, d.ms, d.g);
       case 'strike': return finStrike(eid, d.v);
+      case 'ava': return setAva(eid, d.v);
+      case 'draw': return conDraw(eid, d);
     }
+  }
+  // аватарка игрока: эмодзи («e:🐸») или маленькое фото JPEG (data:), приходит с телефона
+  const AVAS = ['🦄', '🐸', '🐵', '🦖', '🤡', '👽', '🐷', '🐔', '🦆', '🐙', '🧛', '🤠', '🥸', '😎', '🤖', '👻', '🐼', '🦊', '🐻', '🦁', '🐯', '🦉', '🐳', '🍔'];
+  function setAva(eid, v) {
+    const e = ent(eid); v = String(v || '');
+    if (!e || !(/^e:.{1,8}$/u.test(v) || (/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(v) && v.length < 24000))) return;
+    if (e.av === v) return;
+    e.av = v; Sound.play('pop'); save(); renderScores();
   }
   function setPrefs(ph, v) {
     if (!v || typeof v !== 'object') return false;
@@ -432,7 +442,7 @@
   }
   function renderStage() {
     const st = $('#stage'), sig = stageSig();
-    if (sig !== curSig) { curSig = sig; st.innerHTML = ''; const v = build(); if (v) st.appendChild(v); if (G.phase === 'q') { mediaAttach(); picAttach(); karLoop(); fitQ(); } else if (G.phase === 'board') fitThemes(); }
+    if (sig !== curSig) { curSig = sig; st.innerHTML = ''; const v = build(); if (v) st.appendChild(v); if (G.phase === 'q') { mediaAttach(); picAttach(); karLoop(); fitQ(); drawAll(); } else if (G.phase === 'board') fitThemes(); }
     if (G.phase === 'lobby') updLobby();
     else if (G.phase === 'board') updBoard();
     else if (G.phase === 'q') updQ();
@@ -457,13 +467,19 @@
     G.ents.forEach((e, idx) => {
       let c = Array.from(box.children).find(ch => ch.dataset.id === e.id);
       if (!c) {
-        c = el('<div class="ent"><span class="k"></span><span class="dot"></span><div class="bd"></div><div class="n"></div><div class="s"></div><div class="mem"></div></div>');
+        c = el('<div class="ent"><span class="k"></span><span class="dot"></span><div class="av"></div><div class="bd"></div><div class="n"></div><div class="s"></div><div class="mem"></div></div>');
         c.dataset.id = e.id; c.dataset.sv = e.score; $('.s', c).textContent = fmt(e.score);
       }
       if (box.children[idx] !== c) box.insertBefore(c, box.children[idx] || null);
       c.style.setProperty('--c', e.color);
       $('.k', c).textContent = idx < 10 ? String((idx + 1) % 10) : '';
       $('.n', c).textContent = e.name;
+      const av = $('.av', c), sig = e.av || '';
+      if (av.dataset.v !== sig) {
+        av.dataset.v = sig; c.classList.toggle('hasav', !!sig);
+        av.textContent = sig.startsWith('e:') ? sig.slice(2) : '';
+        av.style.backgroundImage = sig.startsWith('data:') ? `url("${sig}")` : '';
+      }
       $('.dot', c).classList.toggle('on', isOnline(e.id)); $('.dot', c).classList.toggle('p2p', p2p(e.id));
       $('.mem', c).textContent = G.mode === 'teams' ? members(e.id).join(', ') : '';
       $('.bd', c).textContent = (G.chooser === e.id && G.phase !== 'lobby' ? '⭐' : '') + (G.fz[e.id] ? '❄️' : '') + (G.x2[e.id] ? '✖️2' : '') + (G.sh[e.id] ? '🛡️' : '') + (G.bo[e.id] ? '✨' : '');
@@ -561,9 +577,9 @@
     return b;
   }
   // значок темы: своё поле icon в questions.js или подбор по названию
-  const THEME_ICONS = [[/кин/i, '🎬'], [/мулт|мульт/i, '📺'], [/игр/i, '🎮'], [/алкаш|напит/i, '🍺'], [/ребус/i, '🧩'], [/еда/i, '🍕'], [/живот/i, '🐾'],
-    [/двор/i, '⚽'], [/лиц/i, '👀'], [/мем/i, '😂'], [/плейлист|песн|2007|караоке|думали/i, '🎤'], [/сериал/i, '🍿'], [/наук|духот/i, '🧪'], [/мешап/i, '🧬'],
-    [/книж|литер/i, '📚'], [/технол/i, '📱'], [/человек/i, '🫀'], [/видел|нарисов/i, '🖍️'], [/космос/i, '🚀'], [/взросл/i, '💼'], [/эмодзи/i, '🤔'],
+  const THEME_ICONS = [[/двор/i, '⚽'], [/нарисов|видел/i, '🖍️'], [/еда/i, '🍕'], [/кин/i, '🎬'], [/мулт|мульт/i, '📺'], [/игр/i, '🎮'], [/алкаш|напит/i, '🍺'],
+    [/ребус/i, '🧩'], [/живот/i, '🐾'], [/лиц/i, '👀'], [/мем/i, '😂'], [/плейлист|песн|2007|караоке|думали/i, '🎤'], [/сериал/i, '🍿'], [/наук|духот/i, '🧪'],
+    [/мешап/i, '🧬'], [/книж|литер/i, '📚'], [/технол/i, '📱'], [/человек/i, '🫀'], [/космос/i, '🚀'], [/взросл/i, '💼'], [/эмодзи/i, '🤔'],
     [/цитат/i, '💬'], [/фразеол/i, '🗣️'], [/тупиц/i, '🤪']];
   function themeIcon(th) { if (th.icon) return th.icon; const m = THEME_ICONS.find(([re]) => re.test(th.name || '')); return m ? m[1] : ''; }
   // названия тем на плотном табло: как можно крупнее, но так, чтобы каждое влезло в свою плашку (длинные ужимаются)
@@ -1867,6 +1883,30 @@
     const w = c[ws], wt = c.rt[ws], other = ws === 'a' ? fb : fa;
     snap(); conFinish({ [w]: c.stake }, w, `${entName(w)} быстрее${wt > 0 ? `: ${wt} мс` : ''}${other ? ' — соперник нажал раньше времени' : ''}!`);
   }
+  /* ----- «Художник»: штрихи с телефона рисуются на экране сразу ----- */
+  const DRAW = { key: null, strokes: [] };
+  function conDraw(eid, d) {
+    const q = G.q, c = q && q.con; if (!c || c.id !== 'draw' || c.step !== 'play' || eid !== c.a || !d || d.k !== q.key) return;
+    if (DRAW.key !== q.key) { DRAW.key = q.key; DRAW.strokes = []; }
+    if (d.clr) { DRAW.strokes = []; return drawAll(); }
+    const pts = Array.isArray(d.p) ? d.p.slice(0, 600).map(v => Math.max(0, Math.min(999, +v || 0))) : []; if (pts.length < 2) return;
+    let st = DRAW.strokes.find(x => x.i === d.i);
+    if (!st) { st = { i: d.i, c: /^#[0-9a-f]{6}$/i.test(d.c) ? d.c : '#222222', w: d.w === 2 ? 2 : 1, p: [] }; DRAW.strokes.push(st); }
+    const from = st.p.length; st.p.push(...pts); drawStroke(st, Math.max(0, from - 2));
+  }
+  function drawStroke(st, from) {
+    const cv = $('#drawcv'); if (!cv) return; const cx = cv.getContext('2d'), W = cv.width, H = cv.height, p = st.p;
+    cx.strokeStyle = st.c; cx.lineWidth = st.w === 2 ? 16 : 6; cx.lineCap = cx.lineJoin = 'round';
+    cx.beginPath(); cx.moveTo(p[from] * W / 1000, p[from + 1] * H / 1000);
+    for (let k = from; k + 1 < p.length; k += 2) cx.lineTo(p[k] * W / 1000, p[k + 1] * H / 1000);
+    if (p.length - from <= 2) cx.lineTo(p[from] * W / 1000 + 0.1, p[from + 1] * H / 1000);
+    cx.stroke();
+  }
+  function drawAll() {
+    const cv = $('#drawcv'); if (!cv) return; const cx = cv.getContext('2d');
+    cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height);
+    if (DRAW.key === (G.q && G.q.key)) DRAW.strokes.forEach(st => drawStroke(st, 0));
+  }
   function conGuess(eid) {
     const q = G.q, c = q && q.con; if (!c || !SHOWC.includes(c.id) || c.step !== 'play' || !ent(eid) || eid === c.a) return;
     snap(); conFinish({ [c.a]: c.stake, [eid]: c.stake }, eid, `${entName(eid)} угадывает ${c.id === 'hum' ? c.word : `«${c.word}»`}! Очки — обоим`);
@@ -1998,8 +2038,9 @@
           <div class="hostbar">${pause}${B2('cnext', 'Стоп — к оценкам ▶', 'gold', '→')}</div></div>`);
       }
       case 'hum': case 'draw': {
-        const others = G.ents.filter(e => e.id !== c.a);
-        return el(`<div class="special con">${head}<div class="sp-info">${nmB(A)} ${c.id === 'hum' ? 'мычит песню — угадывайте вслух!' : 'рисует слово — угадывайте вслух!'}</div>${clock}<div class="sp-hint">Кто угадал первым?</div>${pickerHTML(others, 'cguess')}
+        const others = G.ents.filter(e => e.id !== c.a), drawing = c.id === 'draw';
+        return el(`<div class="special con ${drawing ? 'drawc' : ''}">${head}<div class="sp-info">${nmB(A)} ${drawing ? 'рисует на телефоне — угадывайте вслух!' : 'мычит песню — угадывайте вслух!'}</div>
+          ${drawing ? '<div class="drawrow"><canvas id="drawcv" width="1200" height="900"></canvas><div class="drawside">' + clock + '</div></div>' : clock}<div class="sp-hint">Кто угадал первым?</div>${pickerHTML(others, 'cguess')}
           <div class="hostbar">${pause}${B2('cword', '🔄 Другое задание')}${B2('cnone', 'Никто не угадал', 'bad')}</div></div>`);
       }
       case 'arm': {
@@ -2562,7 +2603,7 @@
     if (G.phase === 'final' && G.fin && G.fin.stage === 'bet' && G.fin.part.includes(id)) items.push(['💰 Ставка в финале', 'finbet']);
     if (q && q.stage === 'bonus' && q.con && q.con.step === 'who') items.push(['🎁 Играет в конкурсе', 'cwho']);
     if (q && q.stage === 'bonus' && q.con && q.con.step === 'pick' && conEligibleB(q.con).some(x => x.id === id)) items.push(['⚔ Соперник в конкурсе', 'cpick']);
-    items.push(['⭐ Выбирает вопрос', 'm-chooser'], ['＋100', 'm-plus'], ['－100', 'm-minus'], ['✎ Изменить счёт', 'm-score'], ['✎ Переименовать', 'ren']);
+    items.push(['⭐ Выбирает вопрос', 'm-chooser'], ['＋100', 'm-plus'], ['－100', 'm-minus'], ['✎ Изменить счёт', 'm-score'], ['✎ Переименовать', 'ren'], ['🎲 Аватарка', 'm-ava']);
     PREFS.forEach(([k, ic, nm]) => items.push([`${ic} ${nm}: ${entPref(id, k) ? '✓ да' : '— нет'}`, 'm-pr', k]));
     if (['lobby', 'board', 'end'].includes(G.phase)) items.push(['🗑 Удалить', 'del']);
     const m = el(`<div class="emenu"><div class="em-h" style="--c:${e.color}">${esc(e.name)}</div>${items.map(([t, a, k]) => `<button data-act="${a}" data-id="${esc(id)}"${k ? ` data-k="${k}"` : ''}>${t}</button>`).join('')}</div>`);
@@ -2718,6 +2759,7 @@
       case 'm-plus': return adjScore(ds.id, 100);
       case 'm-minus': return adjScore(ds.id, -100);
       case 'm-score': return editScore(ds.id);
+      case 'm-ava': { const e = ent(ds.id); if (!e) return; const cur = (e.av || '').slice(2); e.av = 'e:' + pick(AVAS.filter(x => x !== cur)); Sound.play('pop'); return changed(); }
       case 'm-pr': { const e = ent(ds.id); if (!e || !ds.k) return; snap(); const v = !entPref(e.id, ds.k); e.pr = Object.assign({}, e.pr, { [ds.k]: v ? 1 : 0 }); return changed(); }
       case 'lobby': return toLobby();
       case 'skipround': return skipRound();
@@ -2804,5 +2846,5 @@
   setInterval(() => { renderScores(); if (G.phase === 'lobby') updLobby(); }, 4000);
   setInterval(() => { if (client) client.publish(T('hb'), 1, false); const hb = JSON.stringify({ hb: 1 }); for (const pid in peers) dcRaw(pid, hb); }, 10000); // сердцебиение для телефонов
   mediaInit();
-  window.__svi = { get G() { return G; }, get MP() { return MP; }, get karA() { return karA; }, get disco() { return discoOn; }, get djSong() { return djSong; }, act, judge, reveal, nextAction, spaceAction, force: FORCE, pubState, pickEvent, conOk: (id, a) => conOk(CX[id], a) };
+  window.__svi = { conDraw, setAva, get G() { return G; }, get MP() { return MP; }, get karA() { return karA; }, get disco() { return discoOn; }, get djSong() { return djSong; }, act, judge, reveal, nextAction, spaceAction, force: FORCE, pubState, pickEvent, conOk: (id, a) => conOk(CX[id], a) };
 })();

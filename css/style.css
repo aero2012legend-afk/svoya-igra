@@ -720,3 +720,18 @@ body.lite #sky canvas { display: none; }
 @keyframes breathe { 0%, 100% { box-shadow: 0 .4rem 1.2rem rgba(0, 0, 0, .45), inset 0 .25rem 0 rgba(255, 255, 255, .2), inset 0 -.35rem 0 rgba(0, 0, 30, .3); }
   50% { box-shadow: 0 .4rem 1.2rem rgba(0, 0, 0, .45), 0 0 1.2rem color-mix(in srgb, var(--neon) 35%, transparent), inset 0 .25rem 0 rgba(255, 255, 255, .26), inset 0 -.35rem 0 rgba(0, 0, 30, .3); } }
 body.lite .cell:not(.played):not(.blank) { animation: cellIn .7s cubic-bezier(.2, .9, .3, 1.25) backwards; }
+/* ---------- аватарки и живые карточки игроков ---------- */
+.ent { background: linear-gradient(160deg, color-mix(in srgb, var(--c) 30%, #0b1550), #0a1450 70%); transition: transform .3s, box-shadow .3s; }
+.ent .av { display: none; }
+.ent.hasav { padding-left: 4.6rem; text-align: left; }
+.ent.hasav .av { display: flex; position: absolute; left: .55rem; top: 50%; width: 3.5rem; height: 3.5rem; margin-top: -1.75rem; border-radius: 50%; align-items: center; justify-content: center;
+  font-size: 2.2rem; line-height: 1; background: #0b1550 center / cover no-repeat; border: .2rem solid var(--c); box-shadow: 0 0 .9rem color-mix(in srgb, var(--c) 60%, transparent); animation: avBob 3.2s ease-in-out infinite; }
+@keyframes avBob { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg) translateY(-.15rem); } }
+.ent.answering .av { animation: avBob .5s ease-in-out infinite; }
+#scores.many .ent.hasav { padding-left: 3.4rem; } #scores.many .ent.hasav .av { width: 2.6rem; height: 2.6rem; margin-top: -1.3rem; font-size: 1.6rem; left: .4rem; }
+body.lite .ent.hasav .av { animation: none; }
+
+/* «Художник»: холст с рисунком с телефона */
+.con.drawc { gap: .6rem; }
+.drawrow { display: flex; align-items: center; gap: 2rem; }
+#drawcv { width: 56rem; height: 42rem; border-radius: 1.2rem; background: #fff; box-shadow: 0 1rem 3rem rgba(0, 0, 0, .55), 0 0 0 .3rem rgba(255, 255, 255, .25); }

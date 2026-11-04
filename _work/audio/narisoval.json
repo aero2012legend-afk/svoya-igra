@@ -82,5 +82,29 @@
   "gain_db": 0.8,
   "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.00:d=1.2,volume=0.8dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "припев «Welcome to the Hotel California, such a lovely place» (archive.org, официальный аудио-трек 40th Anniversary Expanded Edition, 6:31; restore: http_proxy=$HTTPS_PROXY)"
+ },
+ {
+  "file": "media/music/narisoval/r3_1500_tatu.mp3",
+  "source": "https://soundcloud.com/russian-top-music/tatu-nas-ne-dogonyat",
+  "title": "t.A.T.u. — Нас не догонят (2001)",
+  "cut": [
+   35.9,
+   48.2
+  ],
+  "gain_db": -6.0,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.10:d=1.2,volume=-6.0dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "припев «Небо уронит, ночь на ладони, нас не догонят» (SoundCloud russian-top-music, 3:20)"
+ },
+ {
+  "file": "media/music/narisoval/r3_1800_chaif.mp3",
+  "source": "https://soundcloud.com/stanislav-kudriavtzev/argentina-yamayka-50",
+  "title": "Чайф — Аргентина — Ямайка 5:0",
+  "cut": [
+   31.9,
+   43.9
+  ],
+  "gain_db": -6.4,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=10.80:d=1.2,volume=-6.4dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "припев «Какая боль, какая боль, Аргентина — Ямайка пять ноль» (SoundCloud Stanislav Kudriavtzev, 3:19)"
  }
 ]

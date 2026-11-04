@@ -129,6 +129,20 @@ body.disco::before { content: ""; position: fixed; inset: -50%; z-index: -1; bac
 body.disco #app { animation: dflash .484s infinite; }
 @keyframes dflash { 0% { background: rgba(255, 255, 255, .1); } 30% { background: transparent; } }
 #netbar { display: none; position: fixed; left: 0; right: 0; top: 0; z-index: 10; padding: calc(8px + env(safe-area-inset-top)) 14px 8px; background: #b3263a; color: #fff; font-size: 15px; font-weight: 700; text-align: center; box-shadow: 0 4px 14px rgba(0, 0, 0, .4); }
+/* рисовалка и аватарки */
+.padw { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; }
+.padword { font-size: 18px; text-align: center; }
+#pad { width: 100%; max-width: 520px; background: #fff; border-radius: 14px; touch-action: none; box-shadow: 0 4px 16px rgba(0, 0, 0, .4); }
+.padbar { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.padbar .pc { width: 34px; height: 34px; border-radius: 50%; border: 3px solid rgba(255, 255, 255, .4); background: var(--c); }
+.padbar .pc.on { border-color: #fff; transform: scale(1.15); }
+.padbar .pw, .padbar .pclr { font: inherit; font-size: 15px; padding: 6px 10px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, .35); background: rgba(255, 255, 255, .1); color: #fff; }
+.avbox { margin-top: 14px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.avrow { display: flex; align-items: center; gap: 12px; }
+.avcur { width: 64px; height: 64px; border-radius: 50%; background: #0b1550 center / cover no-repeat; border: 3px solid #ffcc33; display: flex; align-items: center; justify-content: center; font-size: 38px; }
+.go.sm { font-size: 16px; padding: 10px 14px; width: auto; }
+.avgrid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; max-width: 420px; }
+.avgrid button { font-size: 26px; background: rgba(255, 255, 255, .08); border: 0; border-radius: 10px; padding: 4px 0; }
 </style>
 </head>
 <body>
