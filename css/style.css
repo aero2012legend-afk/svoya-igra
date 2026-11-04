@@ -732,6 +732,6 @@ body.lite .cell:not(.played):not(.blank) { animation: cellIn .7s cubic-bezier(.2
 body.lite .ent.hasav .av { animation: none; }
 
 /* «Художник»: холст с рисунком с телефона */
-.con.drawc { gap: .6rem; }
+.con.drawc { gap: .35rem; } .con.drawc .con-head { transform: scale(.8); } .con.drawc .picker .pk { padding: .4rem 1.2rem; }
 .drawrow { display: flex; align-items: center; gap: 2rem; }
-#drawcv { width: 56rem; height: 42rem; border-radius: 1.2rem; background: #fff; box-shadow: 0 1rem 3rem rgba(0, 0, 0, .55), 0 0 0 .3rem rgba(255, 255, 255, .25); }
+#drawcv { width: 44rem; height: 33rem; border-radius: 1.2rem; background: #fff; box-shadow: 0 1rem 3rem rgba(0, 0, 0, .55), 0 0 0 .3rem rgba(255, 255, 255, .25); }

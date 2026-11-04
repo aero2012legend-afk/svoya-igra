@@ -106,5 +106,17 @@
   "gain_db": -6.4,
   "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=10.80:d=1.2,volume=-6.4dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "припев «Какая боль, какая боль, Аргентина — Ямайка пять ноль» (SoundCloud Stanislav Kudriavtzev, 3:19)"
+ },
+ {
+  "file": "media/music/narisoval/r3_2700_aha.mp3",
+  "source": "https://soundcloud.com/rykumi/a-ha-take-on-me-official-video-2",
+  "title": "a-ha — Take On Me (1985)",
+  "cut": [
+   55.8,
+   68.0
+  ],
+  "gain_db": 2.7,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.00:d=1.2,volume=2.7dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "припев «Take on me, take on me, take me on» (SoundCloud Rykumi, 3:48; позиция по Whisper ~56.6)"
  }
 ]

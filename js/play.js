@@ -409,7 +409,7 @@
   function padFlush() {
     clearTimeout(pad.t); pad.t = 0; if (!pad.cur || !pad.buf.length) return;
     const pts = pad.buf; pad.buf = [pts[pts.length - 1]]; // следующий кусок начинается с последней точки — линия без разрывов
-    send({ t: 'draw', k: pad.k, i: pad.cur.i, c: pad.col, w: pad.w, p: [].concat(...pts) });
+    send({ t: 'draw', k: pad.k, i: pad.cur.i, c: pad.col, w: pad.w, xy: [].concat(...pts) });
   }
   function afterBuild(eid) {
     const q = S.q, c = q && q.con;

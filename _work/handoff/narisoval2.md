@@ -18,3 +18,6 @@ Whisper: только без --vocals (demucs слишком медленный)
 | 3000 | Eagles — Hotel California | готов (n3000) | готово 104.3-116.5 (archive.org, hotel.mp3 с SC — НЕ ТА песня) | ГОТОВО |
 
 В конце: удалить старые webp r3_300_pchelovod, 600_malinovaya, 900_provans, 1200_krossy, 1500_devyatka, 1800_tehno, 2100_eksponat, 2400_sinij, 2700_kometa, 3000_yunost; проверить, что в JSON нет ссылок на них; python3 _work/tools/build.py; review.py. Не использовать «Старый», работу, Касперского.
+
+
+**ИТОГ: ВСЕ 10 вопросов готовы (рисунок + aaudio + запись в _work/audio/narisoval.json + JSON), старые webp удалены, build.py без ошибок по теме.** Если 1500 (тАТу, 35.9-48.2) или 2700 (a-ha, 55.8-68.0) или 1800 (Чайф, 31.9-43.9) звучат не с первой фразы припева — подвинуть cut через mk.py (тайминги по Whisper приблизительные).

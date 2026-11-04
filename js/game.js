@@ -1889,7 +1889,7 @@
     const q = G.q, c = q && q.con; if (!c || c.id !== 'draw' || c.step !== 'play' || eid !== c.a || !d || d.k !== q.key) return;
     if (DRAW.key !== q.key) { DRAW.key = q.key; DRAW.strokes = []; }
     if (d.clr) { DRAW.strokes = []; return drawAll(); }
-    const pts = Array.isArray(d.p) ? d.p.slice(0, 600).map(v => Math.max(0, Math.min(999, +v || 0))) : []; if (pts.length < 2) return;
+    const pts = Array.isArray(d.xy) ? d.xy.slice(0, 600).map(v => Math.max(0, Math.min(999, +v || 0))) : []; if (pts.length < 2) return;
     let st = DRAW.strokes.find(x => x.i === d.i);
     if (!st) { st = { i: d.i, c: /^#[0-9a-f]{6}$/i.test(d.c) ? d.c : '#222222', w: d.w === 2 ? 2 : 1, p: [] }; DRAW.strokes.push(st); }
     const from = st.p.length; st.p.push(...pts); drawStroke(st, Math.max(0, from - 2));
@@ -1919,6 +1919,7 @@
     const q = G.q, c = q && q.con; if (!c || !['ready', 'play'].includes(c.step)) return;
     const C = CX[c.id] || {}, priv = SHOWC.includes(c.id); if (!priv && c.id !== 'chain' && c.id !== 'tongue') return;
     c.word = drawCard(C.deck);
+    if (c.id === 'draw') { DRAW.strokes = []; drawAll(); } // новое слово — чистый лист
     if (priv) { sendPrivate(c.a, { k: q.key, word: c.word }); save(); publishHost(false); toast('🔄 Новое задание ушло на телефон'); }
     else { Sound.play('roll'); changed(); }
   }
