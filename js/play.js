@@ -341,7 +341,7 @@
       case 'hum': case 'draw': return c.a === eid ? wordCard(q, c) : center(c.i, esc(c.n), `${entB(c.a)} ${c.id === 'hum' ? 'мычит песню' : 'рисует'} — угадывай вслух!`);
       case 'arm': return s ? center('💪', 'ДАВИ!', 'Локоть не отрывать!') : center('💪', 'Армрестлинг', vs);
       case 'balance': return s ? center('🦩', 'Стой на одной ноге!', 'Глаза закрыты, руками ни за что не держаться') : center('🦩', 'Цапля', vs);
-      case 'chain': return center('🔗', esc(c.word || 'Цепочка'), s ? 'Называй по очереди — 5 секунд на слово, без повторов' : vs);
+      case 'chain': return center('🔗', esc(c.word || 'Цепочка'), s ? 'Слово на последнюю букву предыдущего — 5 секунд, без повторов' : vs);
       case 'laugh': return s === 'a' ? center('🤪', 'СМЕШИ!', `Рассмеши ${entB(c.b)} — только без рук`) : s === 'b' ? center('😐', 'НЕ СМЕЙСЯ!', 'Держи лицо 30 секунд') : center('😂', 'Не засмейся', vs);
       case 'tongue': return s ? center('👅', 'Три раза подряд!', esc(c.word || '')) : center('👅', 'Скороговорка', `${entB(c.a)} читает с экрана`);
       case 'shot': return s ? center('🥃', 'Руки за спину!', 'Стопку — только без рук!') : center('🥃', 'Стопка без рук', vs);
@@ -371,13 +371,15 @@
     return `<div class="hint">🤫 ${priv.hint ? `Подсказка: <b>${esc(priv.hint)}</b>` : 'Подсказки нет — судья шепнёт её лично'}</div>`;
   }
   function bribeOK(eid) {
-    const q = S && S.q; if (!q || (q.bb || []).includes(eid)) return false;
+    const q = S && S.q; if (!q || (q.bb || []).includes(eid) || (q.hw && q.hw[eid])) return false;
     if (q.ow) return q.ow === eid && ['read', 'open', 'timeup'].includes(q.st);
     return ['read', 'open', 'ans'].includes(q.st) && !(q.tr || []).includes(eid);
   }
   function bribeHTML(eid) {
     const q = S.q;
-    if (!bribeOK(eid)) return (q.bb || []).includes(eid) ? '<div class="bribe done">🤫 Подсказка получена</div>' : '';
+    if ((q.bb || []).includes(eid)) return '<div class="bribe done">🤫 Подсказка получена</div>';
+    if (q.hw && q.hw[eid]) { const n = q.hw[eid]; return `<div class="bribe done">💰 Подсказка снова будет через ${n} ${n === 1 ? 'вопрос' : n < 5 ? 'вопроса' : 'вопросов'}</div>`; }
+    if (!bribeOK(eid)) return '';
     return `<button class="bribe" id="bribe">💰 Подкупить судью · −${fmt(q.bc)}</button>`;
   }
   function aucState(me) {

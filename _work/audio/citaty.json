@@ -66,5 +66,16 @@
   "gain_db": 27.9,
   "ffmpeg": "highpass=f=70,acompressor=threshold=-40dB:ratio=3:attack=8:release=200,afade=t=in:d=0.05,afade=t=out:st=11.15:d=0.3,volume=27.9dB,alimiter=limit=0.85:attack=5:release=50:level=disabled",
   "note": "в файле: куски 0–1.75 / 1.75–3.75 / 3.75–6.0 (повтор концовки 10-й серии) / 6.0–7.9 / 7.9–9.135 (до «Где пастор» включительно; «Где» с 8.48, «пастор» кончается ~9.12) / 9.135–9.475 (вставка тишины из паузы после «Шлаг», 676.72–677.06) / 9.475–11.45 («Шлаг» с ~9.49, «Штирлиц?» кончается ~11.1); в игре end=9.3 (в середине вставки), aend=11.3; сжатие acompressor и gain 27.9 дБ — исходник очень тихий (−43 LUFS)"
+ },
+ {
+  "file": "media/music/citaty/r3_300_nupogodi.mp3",
+  "source": "https://archive.org/download/serg1911_gmail_16/09_%D0%9D%D1%83%20%D0%BF%D0%BE%D0%B3%D0%BE%D0%B4%D0%B8.mp4",
+  "title": "«Ну, погоди!» (мультфильм, выпуск 9): Волк (Анатолий Папанов) — «Ну, заяц, погоди!» (archive.org, serg1911_gmail_16, файл 09)",
+  "cut": [
+   546.0,
+   555.0
+  ],
+  "ffmpeg": "afade=t=in:d=0.05,afade=t=out:st=8.60:d=0.35,loudnorm=I=-15:TP=-1.5:LRA=11",
+  "note": "в файле фраза с ~4.0 до ~8.1 с"
  }
 ]

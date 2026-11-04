@@ -29,7 +29,7 @@
   function newState() {
     return {
       v: 1, room: Net.code(5), key: Net.code(10, 'abcdefghijkmnpqrstuvwxyz23456789'), broker: 0,
-      mode: 'solo', ents: [], phones: {}, set: { timer: 20, atime: 15, bribe: 50, ftimer: 45 },
+      mode: 'solo', ents: [], phones: {}, set: { timer: 20, atime: 10, bribe: 50, ftimer: 45, v: 2 },
       started: false, resume: null, round: 0, played: {}, chooser: null, phase: 'lobby', q: null, fin: null, fz: {}, x2: {}, sh: {}, bo: {},
     };
   }
@@ -42,7 +42,9 @@
     return false;
   }
   function fixup() {
-    G.set = Object.assign({ timer: 20, atime: 15, bribe: 50, ftimer: 45 }, G.set);
+    G.set = Object.assign({ timer: 20, atime: 10, bribe: 50, ftimer: 45 }, G.set);
+    if (!G.set.v) { if (G.set.atime === 15) G.set.atime = 10; G.set.v = 2; } // раньше по умолчанию было 15 секунд
+    G.hint = G.hint || {}; G.qn = G.qn || 0;
     G.fz = G.fz || {}; G.x2 = G.x2 || {}; G.sh = G.sh || {}; G.bo = G.bo || {};
     const q = G.q;
     if (q) {
@@ -175,7 +177,7 @@
   }
   function pubQ(q) {
     const o = {
-      k: q.key, th: themeOf(q), p: q.price, ty: q.type, st: q.stage, ow: q.owner, an: q.ans, tr: q.tried, bb: q.bribed, bc: bribeCost(q),
+      k: q.key, th: themeOf(q), p: q.price, ty: q.type, st: q.stage, ow: q.owner, an: q.ans, tr: q.tried, bb: q.bribed, bc: bribeCost(q), hw: Object.fromEntries(G.ents.map(e => [e.id, hintWait(e.id)]).filter(x => x[1] > 0)),
       stake: q.stake, vic: q.victim, tm: { l: r1(q.tl), r: !!q.tr, tot: q.tot || G.set.timer },
       au: q.auc ? { b: q.auc.bids, ps: q.auc.passed } : null,
     };
@@ -1016,7 +1018,7 @@
     const key = `${G.round}-${t}-${i}`, d = qd(G.round, t, i);
     if (G.played[key] || !d) return;
     snap(); busy = true; Sound.play('select');
-    G.played[key] = true;
+    G.played[key] = true; G.qn = (G.qn || 0) + 1;
     const type = ['cat', 'auction', 'trap', 'bonus', 'karaoke'].includes(d.type) ? d.type : 'normal';
     const tot = isMediaQ(d) ? Math.max(G.set.timer, 30) : G.set.timer; // на музыку и видео — не меньше 30 секунд
     G.q = { key, r: G.round, t, i, price: +d.price || 0, type, stage: 'intro', tried: [], bribed: [], blog: [], ans: null, owner: null, stake: null, tl: tot, tot, tr: false, victim: null, auc: null, trap: null, con: null, result: null, al: null, ar: false, aup: false, tw: 0 };
@@ -1153,8 +1155,10 @@
   }
 
   /* ----- подкуп судьи ----- */
+  const HINT_GAP = 5; // подсказку можно брать раз в столько вопросов — у каждого свой счётчик
+  const hintWait = eid => (G.hint && G.hint[eid] != null ? Math.max(0, HINT_GAP - (G.qn - G.hint[eid])) : 0);
   function canBribe(eid) {
-    const q = G.q; if (G.phase !== 'q' || !q || q.bribed.includes(eid)) return false;
+    const q = G.q; if (G.phase !== 'q' || !q || q.bribed.includes(eid) || hintWait(eid) > 0) return false;
     if (q.owner) return q.owner === eid && ['read', 'open', 'timeup'].includes(q.stage);
     return ['read', 'open', 'ans'].includes(q.stage) && !q.tried.includes(eid);
   }
@@ -1163,21 +1167,20 @@
     if (!canBribe(eid)) { const j = !q.bribed.includes(eid) && ent(eid) ? joke('noBribe', entName(eid)) : ''; if (j) toast('💰 ' + j); return; } // опоздал с подкупом
     snap();
     const cost = bribeCost(q), hint = curD().hint || '';
-    q.bribed.push(eid); q.blog.push({ e: eid, h: !!hint }); addScore(eid, -cost);
+    q.bribed.push(eid); q.blog.push({ e: eid, h: !!hint }); addScore(eid, -cost); G.hint[eid] = G.qn;
     sendPrivate(eid, { k: q.key, hint, cost });
-    const wasRun = q.tr; if (wasRun) stopTimer();
-    changed();
-    await overlay('bribe', { name: entName(eid), cost, hint: !!hint });
-    if (wasRun && G.q === q && q.stage === 'open' && !q.tr) startTimer();
+    Sound.play('pop'); changed(); // тихо: на телевизоре подсказку не показываем, ведущий видит её на пульте
   }
 
   /* ----- ловушка: ангел или дьявол ----- */
   const taxMax = p => Math.min(1000, Math.max(100, p * 2));
-  const jackMax = p => Math.min(2000, Math.max(200, Math.round(p * 1.5 / 50) * 50));
+  const JACK = [[1000, 3000], [2000, 4000], [3000, 6000]];
+  const jackRange = () => JACK[Math.min(JACK.length - 1, Math.max(0, G.round || 0))];
+  const jackGen = () => { const [lo, hi] = jackRange(); return lo + 100 * Math.floor(Math.random() * ((hi - lo) / 100 + 1)); };
   const half = p => r10(p / 2);
   // у всех событий равные шансы
   const ANGEL = [
-    { id: 'jackpot', icon: '💰', name: 'Джекпот', desc: p => `Бесплатные очки! Крутим барабан: от 100 до ${fmt(jackMax(p))}.` },
+    { id: 'jackpot', icon: '💰', name: 'Джекпот', desc: () => `Бесплатные очки! Крутим барабан: от ${fmt(jackRange()[0])} до ${fmt(jackRange()[1])}.` },
     { id: 'convince', icon: '🗣️', name: 'Уговори судью', desc: () => 'Назови сумму (на телефоне) и уговаривай судью 30 секунд. Даст или не даст — решает судья.' },
     { id: 'ltruth', icon: '😇', name: 'Лёгкая правда', desc: p => `Честно ответь на вопрос — ${sgn(half(p))}. Отказ без штрафа.` },
     { id: 'ldare', icon: '🙂', name: 'Лёгкое задание', desc: p => `Выполни простое задание — ${sgn(half(p))}. Отказ без штрафа.` },
@@ -1192,7 +1195,7 @@
     { id: 'bdare', icon: '🔥', name: 'Смелое задание', desc: p => `Выполни — и штрафа не будет. Отказ: ${sgn(-p)}.` },
     { id: 'poem', icon: '📜', name: 'Стих на табуретке', desc: p => `Встань на стул и с выражением зачитай поздравление Старому — текст на телефоне. Отказ: ${sgn(-p)}.` },
     { id: 'dshot', icon: '🥃', name: 'Штрафная стопка', need: 'drink', desc: p => `Выпей стопку до дна! Отказ: ${sgn(-p)}.` },
-    { id: 'dsing', icon: '🎤', name: 'Спой!', need: 'sing', desc: p => `Остальные выбирают песню — ты поёшь без музыки 10 секунд. Отказ: ${sgn(-p)}.` },
+    { id: 'dsing', icon: '🎤', name: 'Спой!', need: 'sing', desc: p => `Игра выбирает песню — споёшь её без музыки 15 секунд (слова можно путать, главное — с душой). Отказ: ${sgn(-p)}.` },
     { id: 'ddance', icon: '💃', name: 'Танец позора', need: 'dance', desc: p => `20 секунд танца под музыку в центре комнаты. Отказ: ${sgn(-p)}.` },
     { id: 'freeze', icon: '❄️', name: 'Заморозка', desc: () => 'Кнопка не работает в этом и следующем вопросе.' },
     { id: 'casino', icon: '🎰', name: 'Казино', desc: p => `Ставка на монетку: удвоишь или потеряешь. Струсил — штраф ${sgn(-p)}.` },
@@ -1307,7 +1310,8 @@
   function prepEvent(ev, q) {
     const T = q.trap, others = G.ents.filter(e => e.id !== q.victim), p = q.price;
     if (ev.id === 'tax') T.amt = 50 * (1 + Math.floor(Math.random() * (taxMax(p) / 50)));
-    if (ev.id === 'jackpot') T.amt = 50 * (2 + Math.floor(Math.random() * (jackMax(p) / 50 - 1)));
+    if (ev.id === 'jackpot') T.amt = jackGen();
+    if (ev.id === 'dsing') T.song = drawCard('hum');
     if (ev.id === 'swap') T.target = others.length ? pick(others).id : null;
     if (ev.id === 'robin') { const lead = others.length ? others.reduce((a, b) => (b.score > a.score ? b : a)) : null; T.target = lead && lead.score > ((ent(q.victim) || {}).score || 0) ? lead.id : null; }
     if (['ltruth', 'ldare', 'btruth', 'bdare'].includes(ev.id)) T.card = drawCard(ev.id);
@@ -1349,7 +1353,7 @@
       case 'btruth': return card + yesno('✓ Ответил · без штрафа', `✗ Отказался ${sgn(-p)}`);
       case 'bdare': return card + yesno('✓ Выполнил · без штрафа', `✗ Отказался ${sgn(-p)}`);
       case 'dshot': return task('🥃 Стопку — до дна!') + yesno('✓ Выпил · без штрафа', `✗ Отказался ${sgn(-p)}`);
-      case 'dsing': return task('🎤 Остальные выбирают песню — поёшь без музыки!') + `<div class="bigclock" id="cvclock">10</div><div class="hostbar">${btn('sggo', '🎤 Старт 10 сек', 'gold')}</div>` + yesno('✓ Спел · без штрафа', `✗ Отказался ${sgn(-p)}`);
+      case 'dsing': return task(`🎤 Песня: ${T.song || '…'}`) + `<div class="bigclock" id="cvclock">15</div><div class="hostbar">${btn('sggo', '🎤 Старт 15 сек', 'gold')}${btn('sgnew', '🔄 Другая песня')}</div>` + yesno('✓ Спел · без штрафа', `✗ Отказался ${sgn(-p)}`);
       case 'ddance': return `<div class="bigclock" id="cvclock">20</div><div class="hostbar">${btn('ddgo', '💃 Музыка! 20 секунд', 'gold')}</div>` + yesno('✓ Станцевал · без штрафа', `✗ Отказался ${sgn(-p)}`);
       case 'freeze': return `<div class="hostbar">${btn('freeze', '❄️ Заморозить', 'gold')}</div>`;
       case 'casino': {
@@ -1381,7 +1385,7 @@
     const isAngelTask = ['ltruth', 'ldare'].includes(ev);
     switch (v) {
       case 'jackpot':
-        lock(true); await spinSlot($('#slot'), () => '+' + fmt(50 * (2 + Math.floor(Math.random() * (jackMax(p) / 50 - 1)))), '+' + fmt(T.amt)); lock(false);
+        lock(true); await spinSlot($('#slot'), () => '+' + fmt(jackGen()), '+' + fmt(T.amt)); lock(false);
         snap(); addScore(vic, T.amt); FX.rain('💰', 30); return trapRes(`${ve.name}: +${fmt(T.amt)} 💰`, true);
       case 'cvgo': return startConvince(30, false);
       case 'cvc': {
@@ -1392,7 +1396,8 @@
       }
       case 'cvyes': { if (!T.ask) return; snap(); addScore(vic, T.ask); Sound.play('tada'); return trapRes(`Судья растаял: ${sgn(T.ask)} 🥹`, true); }
       case 'cvno': snap(); return trapRes(T.ask ? `Судья непреклонен: ${sgn(T.ask)} не будет 😐` : 'Судья непреклонен 😐');
-      case 'sggo': Sound.play('sing'); return startConvince(10, false);
+      case 'sggo': Sound.play('sing'); return startConvince(15, false);
+      case 'sgnew': T.song = drawCard('hum'); Sound.play('roll'); curSig = null; return changed();
       case 'yes':
         snap(); if (isAngelTask) { addScore(vic, half(p)); return trapRes(`Молодец! ${sgn(half(p))}`, true); }
         return trapRes('Смело! Штрафа нет 😎', true);
@@ -1466,7 +1471,7 @@
     { id: 'stare', icon: '👁️', name: 'Гляделки', stake: true, duel: 'up', lose: '😑 Моргнул(а)', rules: 'Смотрите друг другу в глаза. Кто первым моргнул, засмеялся или отвёл взгляд — проиграл. Победитель получает ставку.' },
     { id: 'arm', icon: '💪', name: 'Армрестлинг', stake: true, duel: 'win', pickWord: 'соперника по армрестлингу', rules: 'Локти на стол, ладони в замок, свободная рука за спиной. По команде ведущего — давите! Победитель получает ставку.' },
     { id: 'balance', icon: '🦩', name: 'Цапля', stake: true, duel: 'up', lose: '🦶 Опустил(а) ногу', rules: 'Встаньте на одну ногу и закройте глаза. Кто первым коснулся пола второй ногой, открыл глаза или за что-то схватился — проиграл. Победитель получает ставку.' },
-    { id: 'chain', icon: '🔗', name: 'Цепочка', stake: true, duel: 'lose', lose: '🐢 Запнулся(ась)', deck: 'chain', rules: 'По очереди называете слова на тему с экрана — на ответ 5 секунд, повторяться нельзя. Кто запнулся или повторился — проиграл. Начинает тот, кто открыл клетку.' },
+    { id: 'chain', icon: '🔗', name: 'Цепочка', stake: true, duel: 'lose', lose: '🐢 Запнулся(ась)', deck: 'chain', rules: 'Как игра в города, только на тему с экрана: первый называет слово из темы, второй — слово из той же темы на последнюю букву предыдущего, и так по очереди. На ответ 5 секунд, повторяться нельзя. Кто запнулся или повторился — проиграл. Начинает тот, кто открыл клетку.' },
     { id: 'laugh', icon: '😂', name: 'Не засмейся', stake: true, pickWord: 'того, кого будешь смешить', rules: '30 секунд смешишь соперника: рожи, голоса, шутки — только без рук. Засмеялся или улыбнулся — ставка твоя. Выстоял — ставка его.' },
     { id: 'toast', icon: '🥂', name: 'Тост-баттл', perf: 30, deck: 'toast', each: true, pl: 'Стиль', pickWord: 'соперника по тостам', rules: 'Каждый говорит тост в честь именинника — 30 секунд и в стиле, который выпал. Потом голосование: победителю — по 100 очков за голос.' },
     { id: 'parody', icon: '🎭', name: 'Пародия-баттл', need: 'act', perf: 20, deck: 'parody', each: true, pl: 'Персонаж', pickWord: 'соперника по пародиям', rules: 'Каждому выпадает свой персонаж — 20 секунд говорите и ведёте себя как он. Потом голосование: победителю — по 100 очков за голос.' },
