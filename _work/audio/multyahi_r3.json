@@ -25,15 +25,15 @@
  },
  {
   "file": "media/music/multyahi/r3_2400_naruto.mp3",
-  "source": "https://www.dailymotion.com/video/xbzkjs",
-  "title": "«Наруто» (Naruto, 2002), опенинг 1 «R★O★C★K★S» группы Hound Dog (запись заставки, Dailymotion «Naruto (Opening 1)», manganihon, 84 с, TV-версия): вступление и первая строка куплета",
+  "source": "https://soundcloud.com/animeofficial/rocks-hound-dog-naruto-openings-1",
+  "title": "«Наруто» (Naruto, 2002), опенинг 1 «R★O★C★K★S» группы Hound Dog (SoundCloud animeofficial, полная студийная версия, 292 с): гитарное вступление и начало куплета",
   "cut": [
-   1.9,
-   22.7
+   8.0,
+   30.0
   ],
-  "gain_db": 0.7,
-  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=20.00:d=0.8,volume=0.7dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "в игре играет целиком (start/end не нужны); японский вокал без слова «Naruto» (проверено Whisper по всей TV-версии); громкость ≈ −15.0 LUFS; запасной источник — SoundCloud https://soundcloud.com/animeofficial/rocks-hound-dog-naruto-openings-1 (полная версия, 292 с, другая аранжировка вступления)"
+  "gain_db": -4.7,
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=20.80:d=1.2,volume=-4.7dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "в игре играет целиком (start/end не нужны); перенарезано из студийной версии (прежняя нарезка с Dailymotion «подлагивала»); проверено: нет пауз и повторов; японский вокал, слова «Naruto» нет"
  },
  {
   "file": "media/music/multyahi/r3_2700_kolobki.mp3",
@@ -48,18 +48,6 @@
   "note": "в игре играет целиком (start/end не нужны); проверено Whisper: в нарезке ровно две реплики; громкость ≈ −15.2 LUFS; при пересоздании скачивается весь фильм (≈68 МБ, hls-380)"
  },
  {
-  "file": "media/music/multyahi/r3_3000_gargoyles.mp3",
-  "source": "https://www.dailymotion.com/video/xpj9ti",
-  "title": "«Гаргульи» (Gargoyles, Disney, 1994): заставка первого сезона (запись заставки, Dailymotion «Gargoyles S1 Intro», Scott See, 62 с): вступление и первая тема; без дикторского текста",
-  "cut": [
-   0.0,
-   24.0
-  ],
-  "gain_db": -4.1,
-  "ffmpeg": "afade=t=in:d=0.15,afade=t=out:st=23.00:d=1.0,volume=-4.1dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "в игре играет целиком (start/end не нужны); голоса нет — слова «Gargoyles» не слышно (проверено Whisper по всей заставке с отделением голоса Demucs); громкость ≈ −15.0 LUFS; на экране исходного видео есть плашки TV-Y7/CC — картинки брать не оттуда"
- },
- {
   "file": "media/music/multyahi/r3_300_southpark_ru.mp3",
   "source": "https://archive.org/download/sppilots/003%20-%20Cartman%20Gets%20an%20Anal%20Probe%20-%20Unaired%20Pilot%20Episode.mp4",
   "title": "«Южный парк» (South Park), русский дубляж пилота (неэфирная версия «Cartman Gets an Anal Probe», архив.org «South Park Pilot Episodes (Russian Dub)»): Стэн «О, боже мой! Они убили Кенни!», Кайл «Сволочь!»",
@@ -70,5 +58,17 @@
   "gain_db": 0.0,
   "ffmpeg": "afade=t=in:d=0.15,afade=t=out:st=3.65:d=0.4,volume=0.0dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "в игре end=3.0 (пауза после «Они убили Кенни!», перед ответным воплем «Сволочь!» на 3.47 с), aend=4.0; проверено Whisper («О Боже мой! Они убили Кенни! Сволочь!»); громкость ≈ −14.8 LUFS; исходник — неэфирная версия пилота (26 мин), реплики на 947.6–950.7 с"
+ },
+ {
+  "file": "media/music/multyahi/r3_3000_xmen.mp3",
+  "source": "https://www.dailymotion.com/video/x8x3h0e",
+  "title": "«Люди Икс» (X-Men: The Animated Series, 1992) — заглавная тема без слов (Dailymotion «X-Men: The Animated Series - Intro», Tomatazos, 60 с)",
+  "cut": [
+   0.0,
+   24.0
+  ],
+  "gain_db": -8.4,
+  "ffmpeg": "afade=t=in:d=0.2,afade=t=out:st=22.80:d=1.2,volume=-8.4dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "без слов; в игре играет целиком (start/end не нужны); громкость ≈ −15 LUFS"
  }
 ]
