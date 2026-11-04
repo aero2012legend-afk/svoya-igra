@@ -57,8 +57,13 @@ def ff(args):
 
 
 def separate(wav, tmp):
-    """Demucs: wav → (голос, музыка без голоса). Примерно минута счёта на минуту звука."""
-    import tempfile
+    """Demucs: wav → (голос, музыка без голоса). Примерно минута счёта на минуту звука.
+    Результат кэшируется в /tmp/demucs_cache по содержимому wav — второй раз тот же кусок не считается."""
+    import tempfile, shutil
+    key = hashlib.md5(open(wav, 'rb').read()).hexdigest()[:16]
+    cd = os.path.join('/tmp/demucs_cache', key)
+    if os.path.exists(os.path.join(cd, 'no_vocals.wav')):
+        return os.path.join(cd, 'vocals.wav'), os.path.join(cd, 'no_vocals.wav')
     od = tempfile.mkdtemp(dir=tmp)
     subprocess.run(['/opt/aienv/bin/python', '-m', 'demucs', '--two-stems=vocals', '-n', 'htdemucs', '-o', od, wav],
                    check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -67,6 +72,9 @@ def separate(wav, tmp):
         for f in fs:
             if f in ('vocals.wav', 'no_vocals.wav'):
                 found[f] = os.path.join(r, f)
+    os.makedirs(cd, exist_ok=True)
+    for f, path in found.items():
+        shutil.copy(path, os.path.join(cd, f))
     return found['vocals.wav'], found['no_vocals.wav']
 
 
@@ -80,6 +88,11 @@ def make(e, out):
         raw = os.path.join(tmp, 'raw.wav')
         ff(['-ss', str(cut[0]), '-t', f'{cut[1] - cut[0]:.3f}', '-i', src, '-vn', '-ac', '2', '-ar', '44100', raw])
         voc, music = separate(raw, tmp)
+        if e['demucs'] == 'guide':
+            # «полуминус» для караоке: музыка + тихий голос-ориентир (guide_db, по умолчанию −10 дБ)
+            g = float(e.get('guide_db', -10))
+            fc = f'[1:a]volume={g}dB[v];[0:a][v]amix=inputs=2:normalize=0:duration=longest,{chain(e)}'
+            return ff(['-i', music, '-i', voc, '-filter_complex', fc] + ENC + [out])
         return ff(['-i', voc if e['demucs'] == 'vocals' else music, '-af', chain(e)] + ENC + [out])
     if 'source2' in e and 'mario' in e['file']:
         # три звука монетки со сдвигом 0 / 0.25 / 0.5 с (+6 дБ) и первая фраза темы со сдвигом 1.55 с
