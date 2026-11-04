@@ -256,7 +256,7 @@
       case 'q': return S.q ? qHTML(eid, me) : '';
       case 'results': {
         const rank = S.ents.slice().sort((a, b) => b.s - a.s), pos = rank.findIndex(e => e.id === eid) + 1, R = S.res || {};
-        if ((R.lo || []).includes(eid)) return center('🆘', 'Шанс на реабилитацию!', `Ты в отстающих, но Старый добрый.<br>Задание: <b>${esc((R.a || {})[eid] || 'смотри на экран')}</b>`);
+        if ((R.lo || []).includes(eid)) return center('🆘', 'Шанс на реабилитацию!', `Ты в отстающих, но именинник добрый.<br>Задание: <b>${esc((R.a || {})[eid] || 'смотри на экран')}</b>`);
         return center(pos === 1 ? '👑' : '📊', 'Промежуточные итоги', `Ты на <b>${pos}</b>-м месте из ${rank.length}<br>Счёт: ${fmt(me.s)}`);
       }
     }

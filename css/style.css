@@ -139,6 +139,8 @@ body.danger::after { content: ""; position: fixed; inset: 0; pointer-events: non
 #bgclock.paused { opacity: .45; animation: none; }
 /* печать вопроса: ещё не напечатанное — невидимое, но занимает место */
 .qtext .twr { color: transparent; text-shadow: none; }
+.qtext .twcut { color: #ffcc33; font-size: .8em; margin-left: .2em; animation: twblink 1s steps(2) infinite; }
+@keyframes twblink { 50% { opacity: .35; } }
 .timer.warn i { background: linear-gradient(90deg, #ff9f1a, var(--gold)); }
 .timer.danger i { background: linear-gradient(90deg, var(--red), #ff8a3d); animation: pulse .4s infinite alternate; }
 .timer.paused { opacity: .55; }

@@ -1,0 +1,8 @@
+[
+ {
+  "file": "media/music/dvor/r2_1000_tom_sneeze.mp3",
+  "missing": true,
+  "title": "Чих Тома из «Тома и Джерри» (aaudio к вопросу «Научная Духота» 1000, ACHOO-синдром)",
+  "description": "Нужен короткий (1–3 с) звук чиха кота Тома из мультсериала «Том и Джерри» (классика Ханны-Барберы), без речи. SoundCloud/myinstants/dailymotion/archive.org перебраны — отдельного клипа нет. Идея: взять серию с чихом (напр. с перцем) на archive.org (прямая ссылка archive.org/download/...), найти момент и вырезать cut_audio.sh; затем добавить поля source/cut и aaudio: media/music/dvor/r2_1000_tom_sneeze.mp3 в вопрос 1000."
+ }
+]

@@ -4,3 +4,4 @@
 Осталось: Человек (lit.json) 600 (щекотка), 1000 (нос и уши), 1200 (рост утром), 2000 (икота Осборна 68 лет); SD-картинки в /tmp/nauka2/g1 (икота), g2 (щекотка); картинки: нос/уши /tmp/nauka2/t5/x_5.jpg, рост /tmp/nauka2/t4/x_3.jpg.
 Звук чиха Тома (Наука 1000, aaudio): источник не найден (SoundCloud/myinstants/dailymotion перебраны) — см. _work/audio/dvor.json (missing).
 Скрипты: scratchpad put.py / a1.py.
+Человек 1000,1200,2000 готовы; остался 600 (щекотка, /tmp/nauka2/g2*)
