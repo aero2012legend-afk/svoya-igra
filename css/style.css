@@ -735,3 +735,10 @@ body.lite .ent.hasav .av { animation: none; }
 .con.drawc { gap: .35rem; } .con.drawc .con-head { transform: scale(.8); } .con.drawc .picker .pk { padding: .4rem 1.2rem; }
 .drawrow { display: flex; align-items: center; gap: 2rem; }
 #drawcv { width: 44rem; height: 33rem; border-radius: 1.2rem; background: #fff; box-shadow: 0 1rem 3rem rgba(0, 0, 0, .55), 0 0 0 .3rem rgba(255, 255, 255, .25); }
+
+/* QR-код Wi-Fi рядом с кодом игры */
+.qrrow { display: flex; align-items: flex-end; gap: 1.4rem; justify-content: center; }
+.wifibox:empty { display: none; }
+.wifibox { display: flex; flex-direction: column; align-items: center; gap: .3rem; padding: .7rem; border-radius: 1rem; background: #fff; color: #0b1550; }
+.wifibox canvas { width: 11rem; height: 11rem; image-rendering: pixelated; }
+.wifibox .wfh { font-weight: 900; font-size: 1.1rem; } .wifibox .wfn { font-weight: 800; font-size: 1rem; max-width: 11rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

@@ -99,6 +99,7 @@
     let txt = '';
     if (client && !linked() && Date.now() - offSince > 1500) txt = '📡 Нет связи — переподключаемся… Нажми, чтобы обновить';
     else if (linked() && S && Date.now() - lastMsg > 20000) txt = '⏳ Экран игры не отвечает… Нажми, чтобы обновить';
+    else if (online && !rtcOpen && myEnt() && Date.now() - joinedAt > 15000) txt = '📶 Связь идёт через интернет и может тормозить. Подключись к Wi-Fi — тому же, что у компьютера с игрой';
     if (nb.textContent !== txt) nb.textContent = txt;
     nb.style.display = txt ? 'block' : 'none';
   }
@@ -106,6 +107,7 @@
   async function wake() {
     try { if ('wakeLock' in navigator && !document.hidden && !wl) { wl = await navigator.wakeLock.request('screen'); wl.addEventListener('release', () => { wl = null; }); } } catch (e) { /* не поддерживается */ }
   }
+  let joinedAt = Date.now();
   const myEnt = () => { if (!S || !S.ents) return null; const id = (S.pm && S.pm[pid]) || pid; return S.ents.some(e => e.id === id) ? id : null; };
   const myMe = () => { const id = myEnt(); return id ? S.ents.find(e => e.id === id) : null; };
   const entO = id => S.ents.find(e => e.id === id);

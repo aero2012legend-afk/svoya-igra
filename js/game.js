@@ -509,7 +509,7 @@
     const opt = (k, vals, f) => `<select data-set="${k}">${vals.map(v => `<option value="${v}">${f(v)}</option>`).join('')}</select>`;
     return el(`<div class="lobby"><div class="lb-left">
       <div class="lb-logo">${esc(PACK.title)}</div><div class="lb-sub">${esc(PACK.subtitle || '')}</div>
-      <div class="qrbox"><canvas id="qr" width="8" height="8"></canvas></div>
+      <div class="qrrow"><div class="wifibox" id="wifibox"></div><div class="qrbox"><canvas id="qr" width="8" height="8"></canvas></div></div>
       <div class="scan">📱 Наведи камеру телефона на код</div><div class="joinurl" id="joinurl"></div>
       <div class="roomcode">Код комнаты: <b id="roomcode"></b></div><div class="netstat" id="netstat"></div>
     </div><div class="lb-right">
@@ -523,7 +523,7 @@
         <label>Время в финале ${opt('ftimer', [30, 45, 60, 90], v => v + ' сек')}</label>
       </div>
       <div class="mrow"><button class="btn" data-act="mdir">📁 Папка с музыкой и видео</button><span id="mstat"></span></div>
-      <div class="lb-actions"><button class="btn" data-act="pult">🔑 Пульт ведущего</button><button class="btn gold big" data-act="start">${G.started ? '▶ Продолжить игру' : '▶ Начать игру'}</button></div>
+      <div class="lb-actions"><button class="btn" data-act="wifi">📶 Wi-Fi для гостей</button><button class="btn" data-act="pult">🔑 Пульт ведущего</button><button class="btn gold big" data-act="start">${G.started ? '▶ Продолжить игру' : '▶ Начать игру'}</button></div>
     </div></div>`);
   }
   function updLobby() {
@@ -542,11 +542,29 @@
     if (ns) ns.innerHTML = netOnline ? `<span class="on">●</span> Связь есть · сервер ${esc(Net.brokerName(G.broker))}` : `● Подключаемся к серверу ${esc(Net.brokerName(G.broker))}…`;
     $$('[data-set]').forEach(s => { if (document.activeElement !== s) s.value = String(G.set[s.dataset.set]); });
     const ms = $('#mstat'); if (ms) { const h = mediaStatus(); if (ms.dataset.h !== h) { ms.innerHTML = h; ms.dataset.h = h; } }
+    const wb = $('#wifibox'), wf = wifiGet(), wsig = wf ? wf.s + '\n' + wf.p : '';
+    if (wb && wb.dataset.s !== wsig) {
+      wb.dataset.s = wsig;
+      wb.innerHTML = wf ? `<div class="wfh">① Сначала Wi-Fi</div><canvas id="wqr" width="8" height="8"></canvas><div class="wfn">${esc(wf.s)}</div>` : '';
+      if (wf) drawQR($('#wqr'), `WIFI:T:${wf.p ? 'WPA' : 'nopass'};S:${wifiEsc(wf.s)};${wf.p ? `P:${wifiEsc(wf.p)};` : ''};`);
+    }
     const qr = $('#qr'), url = playUrl();
     if (qr && qr.dataset.url !== url) {
       drawQR(qr, url); qr.dataset.url = url;
       const u = new URL(url); $('#joinurl').textContent = u.host + u.pathname; $('#roomcode').textContent = G.room;
     }
+  }
+  // Wi-Fi для гостей: имя сети и пароль хранятся только на этом компьютере (в игру и на телефоны не уходят)
+  const WIFIKEY = 'svoyaigra.wifi';
+  function wifiGet() { try { const v = JSON.parse(localStorage.getItem(WIFIKEY) || 'null'); return v && v.s ? v : null; } catch (e) { return null; } }
+  const wifiEsc = v => String(v).replace(/([\\;,:"])/g, '\\$1');
+  async function wifiSetup() {
+    const cur = wifiGet() || { s: '', p: '' };
+    const sname = await ask('📶 Название Wi-Fi сети (пусто — убрать QR-код)', cur.s); if (sname === null) return;
+    if (!sname.trim()) { try { localStorage.removeItem(WIFIKEY); } catch (e) { /* ничего */ } return updLobby(); }
+    const pass = await ask('🔑 Пароль Wi-Fi (пусто — сеть без пароля)', cur.p); if (pass === null) return;
+    try { localStorage.setItem(WIFIKEY, JSON.stringify({ s: sname.trim(), p: pass })); } catch (e) { /* приватный режим */ }
+    toast('📶 QR-код Wi-Fi появился рядом с кодом игры'); updLobby();
   }
   function drawQR(cv, text) {
     if (typeof qrcode !== 'function') return;
@@ -2760,6 +2778,7 @@
       case 'm-plus': return adjScore(ds.id, 100);
       case 'm-minus': return adjScore(ds.id, -100);
       case 'm-score': return editScore(ds.id);
+      case 'wifi': return wifiSetup();
       case 'm-ava': { const e = ent(ds.id); if (!e) return; const cur = (e.av || '').slice(2); e.av = 'e:' + pick(AVAS.filter(x => x !== cur)); Sound.play('pop'); return changed(); }
       case 'm-pr': { const e = ent(ds.id); if (!e || !ds.k) return; snap(); const v = !entPref(e.id, ds.k); e.pr = Object.assign({}, e.pr, { [ds.k]: v ? 1 : 0 }); return changed(); }
       case 'lobby': return toLobby();
