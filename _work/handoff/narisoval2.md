@@ -13,8 +13,8 @@ Whisper: только без --vocals (demucs слишком медленный)
 | 1500 | тАТу — Нас не догонят (2001) | готов (n1500) | src/tatu.mp3 (SC russian-top-music/tatu-nas-ne-dogonyat); припев ~27-45 с | нет |
 | 1800 | Чайф — Аргентина-Ямайка 5:0 | НЕТ | src/chaif.mp3 (SC stanislav-kudriavtzev/argentina-yamayka-50), слова не распознаны | нет |
 | 2100 | Scorpions — Wind of Change | готов | готово 20.9-33.3 | ГОТОВО |
-| 2400 | Кино — Группа крови | готов (n2400) | src/kino.mp3 (SC kino-119988254/gruppa-krovi) | нет |
+| 2400 | Кино — Группа крови | готов | готово 64.0-78.6 | ГОТОВО |
 | 2700 | a-ha — Take On Me | готов (n2700) | src/aha.mp3 (SC rykumi/a-ha-take-on-me-official-video-2) | нет |
-| 3000 | Eagles — Hotel California | готов (n3000) | src/hotel.mp3 (474 с, SC zlskftpbm4iv/the-eagles-hotel-california — проверить, что оригинал); припев «Welcome to the Hotel California» | нет |
+| 3000 | Eagles — Hotel California | готов (n3000) | готово 104.3-116.5 (archive.org, hotel.mp3 с SC — НЕ ТА песня) | ГОТОВО |
 
 В конце: удалить старые webp r3_300_pchelovod, 600_malinovaya, 900_provans, 1200_krossy, 1500_devyatka, 1800_tehno, 2100_eksponat, 2400_sinij, 2700_kometa, 3000_yunost; проверить, что в JSON нет ссылок на них; python3 _work/tools/build.py; review.py. Не использовать «Старый», работу, Касперского.

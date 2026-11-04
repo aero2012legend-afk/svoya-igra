@@ -70,5 +70,17 @@
   "gain_db": -5.2,
   "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=13.40:d=1.2,volume=-5.2dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "припев «Группа крови на рукаве, порядковый номер на рукаве, пожелай мне удачи в бою» (SoundCloud kino-119988254, 4:07)"
+ },
+ {
+  "file": "media/music/narisoval/r3_3000_hotel.mp3",
+  "source": "https://archive.org/download/hotel-california-40th-anniversary-expanded-edition/Eagles%20-%20Hotel%20California%20%28Official%20Audio%29.mp3",
+  "title": "Eagles — Hotel California (1976)",
+  "cut": [
+   104.3,
+   116.5
+  ],
+  "gain_db": 0.8,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.00:d=1.2,volume=0.8dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "припев «Welcome to the Hotel California, such a lovely place» (archive.org, официальный аудио-трек 40th Anniversary Expanded Edition, 6:31; restore: http_proxy=$HTTPS_PROXY)"
  }
 ]
