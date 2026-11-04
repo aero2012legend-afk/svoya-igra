@@ -786,7 +786,7 @@
   function hostButtons(q) {
     const B = (a, label, cls, k) => `<button class="btn ${cls || ''}" data-act="${a}">${label}${k ? `<kbd>${k}</kbd>` : ''}</button>`;
     const J = B('ok', '✓ Верно', 'ok', 'Enter') + B('bad', '✗ Неверно', 'bad', '⌫'), d = curD();
-    const M = isMediaQ(d) ? B('media', d.video ? '⏯ Видео' : '⏯ Музыка', '', 'P') : '';
+    const M = isMediaQ(d) || (q.stage === 'reveal' && d.aaudio) ? B('media', d.video ? '⏯ Видео' : '⏯ Музыка', '', 'P') : '';
     const P = d.type === 'mashup' && !q.mp && (q.owner ? ['read', 'open', 'timeup'].includes(q.stage) : q.stage === 'ans') ? B('mp1', '¼ Угадан №1', 'half') + B('mp2', '¼ Угадан №2', 'half') : '';
     if (q.stage === 'read') return B('timer', '▶ Старт', 'gold', 'Пробел') + (q.owner ? J + P : '') + M + B('reveal', '👁 Ответ', '', 'A');
     if (q.stage === 'open') return B('timer', q.tr ? '⏸ Пауза' : '▶ Продолжить', '', 'Пробел') + (q.owner ? J + P : '') + M + B('reveal', '👁 Ответ', '', 'A');
@@ -1088,8 +1088,15 @@
     const q = G.q; if (G.phase !== 'q' || !q || !['read', 'open', 'ans', 'timeup'].includes(q.stage)) return;
     stopTimer(); stopAT(); q.stage = 'reveal'; if (silent !== true) Sound.play('flip'); changed();
     const d = curD();
+    if (d.aaudio) return answerAudio(q, d); // после ответа звучит своя вставка (отрывок песни, цитата, звук)
     if (MP && MP.el && MP.key === q.key && +d.aend > +d.end) { MP.stopAt = +d.aend; try { MP.el.currentTime = +d.end || 0; } catch (e) { /* ещё не загрузилось */ } mediaPlay(); } // песня продолжается — все слышат пропущенное
     else if (MP && MP.started) mediaPlay(); // после ответа пусть доиграет
+  }
+  // звук после ответа (aaudio): играет целиком, вместо музыки вопроса
+  async function answerAudio(q, d) {
+    mediaStop();
+    await mediaPrep(q, { audio: d.aaudio, loop: false });
+    if (G.q === q && q.stage === 'reveal') mediaPlay();
   }
   function backToBoard() {
     if (G.phase !== 'q' || !G.q || busy) return;
@@ -2054,7 +2061,7 @@
   }
   const mediaList = () => {
     const s = new Set();
-    PACK.rounds.forEach(r => (r.themes || []).forEach(th => (th.questions || []).forEach(x => { if (x.audio) s.add(x.audio); if (x.video) s.add(x.video); })));
+    PACK.rounds.forEach(r => (r.themes || []).forEach(th => (th.questions || []).forEach(x => { ['audio', 'video', 'minus', 'aaudio'].forEach(k => { if (x[k]) s.add(x[k]); }); })));
     (PACK.danceSongs || []).forEach(x => { if (x) s.add(x); });
     return Array.from(s);
   };

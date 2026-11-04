@@ -15,8 +15,8 @@ CONTENT = os.path.join(ROOT, '_work', 'content')
 
 LAYOUT = {
     1: ['Кинчики', 'Мултяхи', 'Игрульки', 'Я не Алкаш', 'Ребусы', 'Еда и напитки', 'Животные',
-        'Дворовые игры', 'Угадай актёра по части лица', 'Мемасики', 'Дырявый плейлист'],
-    2: ['Кинчики', 'Мултяхи', 'Игрульки', 'Сериалы', 'Научная Духота', 'Мешап АГтёрский', 'Литература',
+        'Дворовые игры', 'Угадай кто, по части лица', 'Мемасики', 'Дырявый плейлист'],
+    2: ['Кинчики', 'Мултяхи', 'Игрульки', 'Сериалы', 'Научная Духота', 'Мешап известных людишек', 'Книжный червь',
         'Технологии', 'Человек', 'Я так видел', 'Наш 2007'],
     3: ['Кинчики', 'Мултяхи', 'Игрульки', 'Космос', 'Взрослая жизнь', 'Я нарисовал песню', 'Базара нет...',
         'Цитаты для ОЛДОВ', 'Фразеологизмы', 'Я тупица', 'Чё думали не будет?'],
@@ -29,7 +29,7 @@ SPECIALS = [('auction', 2), ('cat', 2), ('trap', 4), ('bonus', 6)]
 # Аукцион — только на самом трудном вопросе перед медалями: на лёгком ва-банк слишком легко удвоить счёт.
 SLOTS = {'auction': (6, 6), 'cat': (1, 6), 'trap': (0, 6), 'bonus': (0, 6)}
 FXS = {'blur', 'deblur', 'pixel', 'zoom', 'crop', 'tiles', 'silhouette', 'negative', 'mirror'}
-FIELD_ORDER = ['q', 'a', 'c', 'hint', 'img', 'fx', 'area', 'px', 'tiles', 'aimg', 'audio', 'video', 'start', 'end', 'aend',
+FIELD_ORDER = ['q', 'a', 'c', 'hint', 'img', 'fx', 'area', 'px', 'tiles', 'aimg', 'audio', 'video', 'start', 'end', 'aend', 'aaudio',
                'minus', 'loop', 'gw', 'kstart', 'kdur', 'kar', 'pics', 'names', 'catTheme', 'contest']
 EXTRAS = [  # ключ в extras.json, комментарий в questions.js
     ('angelTruth', 'Ловушка «Ангел» → «Правда»: вопросы, на которые надо ответить честно'),
@@ -83,6 +83,7 @@ HEADER = r"""/* ================================================================
      audio  — звук: 'media/music/тема/файл.mp3';  video — видео: 'media/video/тема/файл.mp4'
      start, end — с какой и по какую секунду играть файл (необязательно)
      aend   — после «Показать ответ» звук доиграет от end до aend (чтобы все услышали слово)
+     aaudio — звук, который играет после ответа (или когда никто не ответил): отрывок песни, цитата из фильма
      kar    — караоке: [[секунда, 'строчка', [секунды слов]], …] — третье поле (необязательно)
               даёт подсветку точно по словам; строчки после end скрыты до ответа,
               пропущенное слово пишется как ___ (или {слово}: до ответа видно пустое место)
@@ -194,7 +195,7 @@ def check_theme(rno, th, src, rep):
                 rep.check_file(where, q[k])
         for p in q.get('pics') or []:
             rep.check_file(where, p)
-        for k in ('audio', 'video', 'minus'):
+        for k in ('audio', 'video', 'minus', 'aaudio'):
             if q.get(k):
                 rep.check_file(where, q[k], media=True)
         if q.get('type') == 'karaoke' and not (q.get('minus') or q.get('audio')):
@@ -245,7 +246,7 @@ def write_question(out, q, i, special):
         head += f", type: {js_str(typ)}"
     lines = [head]
     keys = [k for k in FIELD_ORDER if k in q] + [k for k in q if k not in FIELD_ORDER and k not in ('price', 'type')]
-    groups = [('q',), ('a',), ('c',), ('hint',), ('img', 'fx', 'area', 'px', 'tiles', 'aimg'), ('audio', 'video', 'start', 'end', 'aend'),
+    groups = [('q',), ('a',), ('c',), ('hint',), ('img', 'fx', 'area', 'px', 'tiles', 'aimg'), ('audio', 'video', 'start', 'end', 'aend'), ('aaudio',),
               ('minus', 'loop', 'gw', 'kstart', 'kdur'),
               ('pics', 'names'), ('catTheme', 'contest')]
     done = set()
