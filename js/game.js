@@ -327,7 +327,79 @@
 
   /* ================= отрисовка ================= */
   function changed() { save(); publish(); render(); }
-  function render() { renderTop(); renderStage(); renderScores(); musicSync(); if (!['q', 'final'].includes(G.phase)) bgClock(null); }
+  function render() { renderTop(); renderStage(); renderScores(); musicSync(); sceneSync(); if (!['q', 'final'].includes(G.phase)) bgClock(null); }
+
+  /* ----- небо: у раунда своя палитра и время суток (светило идёт по дуге по мере игры), погода на холсте ----- */
+  const SKY = { el: null, cv: null, cx: null, parts: [], kind: '', raf: 0, t: 0, next: 0, shoot: null };
+  function sceneSync() {
+    const fin = G.phase === 'final' || G.phase === 'end', r = fin ? 'f' : String(Math.min(3, (G.round || 0) + 1));
+    if (document.body.dataset.rnd !== r) document.body.dataset.rnd = r;
+    try { Sound.setRound(fin ? 3 : +r); } catch (e) { /* старый sound.js */ }
+    let p = 0;
+    if (!fin && G.phase !== 'lobby' && R()) { let tot = 0, done = 0; (R().themes || []).forEach((th, t) => (th.questions || []).forEach((x, i) => { tot++; if (G.played[`${G.round}-${t}-${i}`]) done++; })); p = tot ? done / tot : 0; }
+    if (!SKY.el) {
+      SKY.el = el('<div id="sky"><canvas></canvas><div class="orb"></div><div class="flash"></div></div>'); $('#bg').appendChild(SKY.el);
+      SKY.cv = $('canvas', SKY.el); SKY.cx = SKY.cv.getContext('2d');
+    }
+    const orb = $('.orb', SKY.el), ok = r === '1' ? 'sun' : r === '2' ? 'dusk' : 'moon';
+    orb.className = 'orb ' + ok; orb.style.display = r === 'f' ? 'none' : '';
+    orb.style.setProperty('--ox', (8 + 84 * p).toFixed(1) + '%'); orb.style.setProperty('--oy', (40 - 28 * Math.sin(Math.PI * p)).toFixed(1) + '%');
+    const kind = r === '1' ? 'snow' : r === '2' ? (p < 0.5 ? 'leaves' : 'rain') : r === '3' ? 'night' : 'storm';
+    if (kind !== SKY.kind) { SKY.kind = kind; SKY.parts = []; }
+    if (!SKY.raf) SKY.raf = requestAnimationFrame(skyLoop);
+  }
+  function skyLoop(now) {
+    SKY.raf = 0;
+    const cv = SKY.cv, cx = SKY.cx; if (!cv) return;
+    if (document.body.classList.contains('lite') || document.hidden) { setTimeout(() => { if (!SKY.raf) SKY.raf = requestAnimationFrame(skyLoop); }, 1000); return; }
+    const W = Math.round(innerWidth / 2), H = Math.round(innerHeight / 2); // половинное разрешение — экономим видеокарту
+    if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; SKY.parts = []; }
+    const dt = Math.min(0.05, (now - (SKY.t || now)) / 1000); SKY.t = now;
+    const k = SKY.kind, P = SKY.parts, rnd = Math.random;
+    const want = { snow: 90, leaves: 26, rain: 130, night: 110, storm: 170 }[k] || 0;
+    while (P.length < want) {
+      const night = k === 'night';
+      P.push({ x: rnd() * W, y: night ? rnd() * H * 0.75 : rnd() * H - H, v: rnd(), a: rnd() * 6.28, s: 0.5 + rnd(), fly: night && P.length > 80 });
+    }
+    cx.clearRect(0, 0, W, H);
+    for (const o of P) {
+      if (k === 'snow') {
+        o.y += (14 + 18 * o.v) * dt; o.x += Math.sin(now / 1400 + o.a) * 10 * dt;
+        cx.fillStyle = 'rgba(255,255,255,' + (0.35 + 0.4 * o.v).toFixed(2) + ')'; cx.beginPath(); cx.arc(o.x, o.y, 0.8 + 1.4 * o.s, 0, 6.28); cx.fill();
+      } else if (k === 'leaves') {
+        o.y += (16 + 14 * o.v) * dt; o.x += (Math.sin(now / 900 + o.a) * 22 + 8) * dt; o.a += dt * (0.8 + o.v);
+        cx.save(); cx.translate(o.x, o.y); cx.rotate(o.a); cx.fillStyle = ['#ff8a3c', '#e8552c', '#ffc23d', '#b8422a'][Math.floor(o.s * 2.6) % 4]; cx.globalAlpha = 0.55;
+        cx.beginPath(); cx.ellipse(0, 0, 4.5 * o.s, 2.2 * o.s, 0, 0, 6.28); cx.fill(); cx.restore();
+      } else if (k === 'rain' || k === 'storm') {
+        o.y += (260 + 160 * o.v) * dt; o.x -= 60 * dt;
+        cx.strokeStyle = 'rgba(180,200,255,' + (k === 'storm' ? 0.38 : 0.25) + ')'; cx.lineWidth = 1; cx.beginPath(); cx.moveTo(o.x, o.y); cx.lineTo(o.x + 3, o.y - 9 - 6 * o.v); cx.stroke();
+      } else if (k === 'night') {
+        if (o.fly) { // светлячки
+          o.x += Math.cos(o.a) * 12 * dt; o.y += Math.sin(o.a) * 9 * dt; o.a += (rnd() - 0.5) * 2 * dt;
+          const g = 0.35 + 0.35 * Math.sin(now / 500 + o.v * 9); cx.fillStyle = `rgba(200,255,120,${g.toFixed(2)})`; cx.beginPath(); cx.arc(o.x, o.y, 1.6, 0, 6.28); cx.fill();
+          cx.fillStyle = `rgba(200,255,120,${(g * 0.18).toFixed(2)})`; cx.beginPath(); cx.arc(o.x, o.y, 5, 0, 6.28); cx.fill();
+          if (o.x < 0 || o.x > W) o.a = Math.PI - o.a; if (o.y < H * 0.3 || o.y > H) o.a = -o.a;
+          continue;
+        }
+        const tw = 0.25 + 0.5 * (0.5 + 0.5 * Math.sin(now / (500 + 900 * o.v) + o.a));
+        cx.fillStyle = `rgba(255,255,255,${tw.toFixed(2)})`; cx.fillRect(o.x, o.y, o.s > 1.2 ? 1.6 : 1, o.s > 1.2 ? 1.6 : 1);
+        continue;
+      }
+      if (o.y > H + 10) { o.y = -10 - rnd() * 40; o.x = rnd() * (W + 60); }
+    }
+    // падающая звезда ночью и молния в грозу
+    if (now > SKY.next) {
+      SKY.next = now + 5000 + Math.random() * 9000;
+      if (k === 'night') SKY.shoot = { x: Math.random() * W * 0.7 + W * 0.2, y: Math.random() * H * 0.3, t: now };
+      if (k === 'storm') { const f = $('.flash', SKY.el); f.classList.remove('on'); void f.offsetWidth; f.classList.add('on'); }
+    }
+    if (SKY.shoot && k === 'night') {
+      const q = (now - SKY.shoot.t) / 900;
+      if (q < 1) { const x = SKY.shoot.x - q * 160, y = SKY.shoot.y + q * 70; const g = cx.createLinearGradient(x, y, x + 50, y - 22); g.addColorStop(0, 'rgba(255,255,255,.9)'); g.addColorStop(1, 'rgba(255,255,255,0)'); cx.strokeStyle = g; cx.lineWidth = 1.5; cx.beginPath(); cx.moveTo(x, y); cx.lineTo(x + 50, y - 22); cx.stroke(); }
+      else SKY.shoot = null;
+    }
+    SKY.raf = requestAnimationFrame(skyLoop);
+  }
   // фоновая музыка: в лобби, на табло и в итогах; во время вопроса — тишина, чтобы слышать игроков
   let musicMode;
   function musicSync() {
@@ -476,17 +548,24 @@
     const b = el(`<div class="boardwrap"><div class="board ${big ? 'big' : ''}" style="grid-template-columns:minmax(${big ? 13 : 15}rem,1.55fr) repeat(${maxQ},1fr);grid-template-rows:repeat(${r.themes.length},1fr)"></div></div>`);
     const g = b.firstElementChild, html = [];
     r.themes.forEach((th, t) => {
-      html.push(`<div class="theme" style="animation-delay:${intro ? t * 0.06 : 0}s">${esc(th.name)}</div>`);
+      const ic = themeIcon(th);
+      html.push(`<div class="theme" style="animation-delay:${intro ? t * 0.06 : 0}s;--sd:${(t * 0.53 % 7).toFixed(2)}s">${ic ? `<span class="ti">${ic}</span>` : ''}<span class="tn">${esc(th.name)}</span></div>`);
       for (let i = 0; i < maxQ; i++) {
         const x = (th.questions || [])[i];
         if (!x) { html.push('<div class="cell blank"></div>'); continue; }
         const delay = intro ? 0.3 + t * 0.05 + i * 0.07 : (t + i) * 0.015, md = medalOf(r, t, i); // бонус спрятан: выглядит как обычная клетка
-        html.push(`<div class="cell ${md ? 'medal m' + md : ''} ${G.played[`${G.round}-${t}-${i}`] ? 'played' : ''}" data-act="cell" data-t="${t}" data-i="${i}" style="animation-delay:${delay.toFixed(2)}s">${md ? `<i>${MEDALS[md][0]}</i>` : ''}<span>${esc(x.price)}</span></div>`);
+        html.push(`<div class="cell ${md ? 'medal m' + md : ''} ${G.played[`${G.round}-${t}-${i}`] ? 'played' : ''}" data-act="cell" data-t="${t}" data-i="${i}" style="--d:${delay.toFixed(2)}s;--bd:${((t * 7 + i * 3) % 11 * 0.45).toFixed(2)}s">${md ? `<i>${MEDALS[md][0]}</i>` : ''}<span>${esc(x.price)}</span></div>`);
       }
     });
     g.innerHTML = html.join('');
     return b;
   }
+  // значок темы: своё поле icon в questions.js или подбор по названию
+  const THEME_ICONS = [[/кин/i, '🎬'], [/мулт|мульт/i, '📺'], [/игр/i, '🎮'], [/алкаш|напит/i, '🍺'], [/ребус/i, '🧩'], [/еда/i, '🍕'], [/живот/i, '🐾'],
+    [/двор/i, '⚽'], [/лиц/i, '👀'], [/мем/i, '😂'], [/плейлист|песн|2007|караоке|думали/i, '🎤'], [/сериал/i, '🍿'], [/наук|духот/i, '🧪'], [/мешап/i, '🧬'],
+    [/книж|литер/i, '📚'], [/технол/i, '📱'], [/человек/i, '🫀'], [/видел|нарисов/i, '🖍️'], [/космос/i, '🚀'], [/взросл/i, '💼'], [/эмодзи/i, '🤔'],
+    [/цитат/i, '💬'], [/фразеол/i, '🗣️'], [/тупиц/i, '🤪']];
+  function themeIcon(th) { if (th.icon) return th.icon; const m = THEME_ICONS.find(([re]) => re.test(th.name || '')); return m ? m[1] : ''; }
   // названия тем на плотном табло: как можно крупнее, но так, чтобы каждое влезло в свою плашку (длинные ужимаются)
   function fitThemes() {
     if (!$('#stage .board.big')) return;

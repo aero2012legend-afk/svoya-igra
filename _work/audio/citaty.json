@@ -88,5 +88,16 @@
   ],
   "ffmpeg": "afade=t=in:d=0.05,afade=t=out:st=9.20:d=0.35,loudnorm=I=-15:TP=-1.5:LRA=11",
   "note": "в файле: фраза с ~0.5 до 2.3 с"
+ },
+ {
+  "file": "media/music/citaty/r3_1200_got.mp3",
+  "source": "https://archive.org/download/game-of-thrones-s1_20260918/%D0%98%D0%B3%D1%80%D0%B0%20%D0%BF%D1%80%D0%B5%D1%81%D1%82%D0%BE%D0%BB%D0%BE%D0%B2%20%D0%A11%D0%AD01.mp4",
+  "title": "«Игра престолов» 1 сезон 1 серия (2011), русская озвучка: Нед Старк (Шон Бин) — «Он не вечно будет ребёнком. А зима близко.» (archive.org, game-of-thrones-s1_20260918, С1Э01.mp4, 11:36–11:46)",
+  "cut": [
+   696.5,
+   706.1
+  ],
+  "ffmpeg": "afade=t=in:d=0.05,afade=t=out:st=9.20:d=0.35,loudnorm=I=-15:TP=-1.5:LRA=11",
+  "note": "в файле: «Он не вечно будет ребёнком» 4.4–6.2 с, «А зима близко» 8.2–9.2 с"
  }
 ]

@@ -34,5 +34,41 @@
   "gain_db": -4.7,
   "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.10:d=1.2,volume=-4.7dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "припев «It's the eye of the tiger, it's the thrill of the fight … rising up to the challenge of our rival» (SoundCloud Ben Young, 4:06)"
+ },
+ {
+  "file": "media/music/narisoval/r3_900_waka.mp3",
+  "source": "https://soundcloud.com/darkland-23/waka-waka-version-world-cup-2010",
+  "title": "Shakira feat. Freshlyground — Waka Waka (This Time for Africa) (2010)",
+  "cut": [
+   48.3,
+   60.2
+  ],
+  "gain_db": -0.8,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=10.70:d=1.2,volume=-0.8dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "припев «Tsamina mina … waka waka … this time for Africa» (SoundCloud DarkLand 23, 3:20, оригинальная версия)"
+ },
+ {
+  "file": "media/music/narisoval/r3_2100_wind.mp3",
+  "source": "https://soundcloud.com/raptor01/scorpions-wind-of-change",
+  "title": "Scorpions — Wind of Change (1990)",
+  "cut": [
+   20.9,
+   33.3
+  ],
+  "gain_db": 8.5,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.20:d=1.2,volume=8.5dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "«I follow the Moskva down to Gorky Park, listening to the wind of change» (SoundCloud raptor01, 4:44)"
+ },
+ {
+  "file": "media/music/narisoval/r3_2400_krov.mp3",
+  "source": "https://soundcloud.com/kino-119988254/gruppa-krovi",
+  "title": "Кино — Группа крови (1988)",
+  "cut": [
+   64.0,
+   78.6
+  ],
+  "gain_db": -5.2,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=13.40:d=1.2,volume=-5.2dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "припев «Группа крови на рукаве, порядковый номер на рукаве, пожелай мне удачи в бою» (SoundCloud kino-119988254, 4:07)"
  }
 ]

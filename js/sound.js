@@ -41,6 +41,9 @@
   var SFX_NAMES = ('select flip whoosh open tick tickFast buzz correct wrong timeout cat auction trap coin land bribe roul round final fanfare ' +
     'join pop swap freeze bid angel devil bonus horn strike roll vote heart clap beep go win ' +
     'applause drumroll flyby mashup medal partial results sad sing tada rimshot laugh boo devillaugh').split(' ');
+  // у каждого раунда свой тембр интерфейса: <имя>_r2.mp3, <имя>_r3.mp3 (раунд 1 — обычные файлы)
+  var ROUND_SFX = ['select', 'open', 'buzz', 'correct', 'wrong', 'flip'], rnd = 1;
+  ROUND_SFX.forEach(function (n) { SFX_NAMES.push(n + '_r2', n + '_r3'); });
   // длинные эффекты приглушают музыку на столько секунд
   var DUCK_SEC = { fanfare: 3.2, win: 2.8, applause: 3.6, results: 2.4, tada: 2.0, medal: 2.0, round: 2.8, final: 4.0, timeout: 2.6, sad: 3.4,
     rimshot: 1.5, laugh: 2.4, boo: 2.6, angel: 3.4, devil: 3.4, devillaugh: 3.0, bonus: 2.4, trap: 2.4, auction: 2.4, mashup: 1.8, sing: 2.4, cat: 1.4, horn: 1.3,
@@ -322,7 +325,8 @@
         playEl(p, o.url, 1); autoDuck(name); return;
       }
     }
-    // 2) файл из media/sfx
+    // 2) файл из media/sfx (в раундах 2 и 3 — свой вариант звука, если он есть)
+    if (rnd > 1 && ROUND_SFX.indexOf(name) >= 0 && SFX_NAMES.indexOf(name + '_r' + rnd) >= 0 && st[name + '_r' + rnd] !== 'failed') name = name + '_r' + rnd;
     if (SFX_NAMES.indexOf(name) >= 0) {
       if (canFetch() && ctx) {
         startLoading();
@@ -622,6 +626,7 @@
     get muted() { return muted; },
     ctx: function () { init(); return ctx; }, out: function () { init(); return master; },
     music: music, duck: duck,
+    setRound: function (n) { rnd = Math.max(1, Math.min(3, n | 0)); },
     setMusicVolume: setMusicVolume, get musicVolume() { return musicVol; },
     setVolume: setVolume, get volume() { return vol; },
     get musicMode() { return mode; }

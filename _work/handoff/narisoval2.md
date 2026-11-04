@@ -8,13 +8,13 @@ Whisper: только без --vocals (demucs слишком медленный)
 |---|---|---|---|---|
 | 300 | Любэ — Конь (1994) | готов | готово 11.1-23.4 | ГОТОВО |
 | 600 | Pharrell — Happy | готов | готово 24.1-36.5 | ГОТОВО |
-| 900 | Shakira — Waka Waka | готов (n900) | src/waka.mp3 (150 с, SC xiomy-dhc..., найти припев --en) | нет |
-| 1200 | Survivor — Eye of the Tiger | готов (n1200) | src/tiger.mp3 (SC benjamin-young-886491672/survivor-eye-of-the-tiger) | нет |
+| 900 | Shakira — Waka Waka | готов | готово 48.3-60.2 (src/waka2.mp3; waka.mp3 — НЕ ТА песня) | ГОТОВО |
+| 1200 | Survivor — Eye of the Tiger | готов | готово 82.7-95 | ГОТОВО |
 | 1500 | тАТу — Нас не догонят (2001) | готов (n1500) | src/tatu.mp3 (SC russian-top-music/tatu-nas-ne-dogonyat); припев ~27-45 с | нет |
 | 1800 | Чайф — Аргентина-Ямайка 5:0 | НЕТ | src/chaif.mp3 (SC stanislav-kudriavtzev/argentina-yamayka-50), слова не распознаны | нет |
-| 2100 | Scorpions — Wind of Change | готов (n2100) | src/wind.mp3 (SC raptor01/scorpions-wind-of-change) | нет (старый Экспонат пока в JSON) |
+| 2100 | Scorpions — Wind of Change | готов | готово 20.9-33.3 | ГОТОВО |
 | 2400 | Кино — Группа крови | готов (n2400) | src/kino.mp3 (SC kino-119988254/gruppa-krovi) | нет |
 | 2700 | a-ha — Take On Me | готов (n2700) | src/aha.mp3 (SC rykumi/a-ha-take-on-me-official-video-2) | нет |
-| 3000 | Eagles — Hotel California | НЕТ | src/hotel.mp3 (474 с, SC zlskftpbm4iv/the-eagles-hotel-california — проверить, что оригинал); припев «Welcome to the Hotel California» | нет |
+| 3000 | Eagles — Hotel California | готов (n3000) | src/hotel.mp3 (474 с, SC zlskftpbm4iv/the-eagles-hotel-california — проверить, что оригинал); припев «Welcome to the Hotel California» | нет |
 
 В конце: удалить старые webp r3_300_pchelovod, 600_malinovaya, 900_provans, 1200_krossy, 1500_devyatka, 1800_tehno, 2100_eksponat, 2400_sinij, 2700_kometa, 3000_yunost; проверить, что в JSON нет ссылок на них; python3 _work/tools/build.py; review.py. Не использовать «Старый», работу, Касперского.
