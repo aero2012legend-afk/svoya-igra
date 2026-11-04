@@ -173,7 +173,7 @@ class Report:
 
 def check_theme(rno, th, src, rep):
     qs = th['questions']
-    want = [STEP[rno] * (k + 1) for k in range(PER_THEME)]
+    want = [th['flat']] * PER_THEME if th.get('flat') else [STEP[rno] * (k + 1) for k in range(PER_THEME)]  # flat — все клетки одной цены
     got = [q.get('price') for q in qs]
     if got != want:
         rep.errors.append(f'Р{rno} «{th["name"]}» ({src}): цены {got}, нужно {want}')
@@ -234,11 +234,11 @@ def place_specials(rno, themes):
     return used
 
 
-def write_question(out, q, i, special):
+def write_question(out, q, i, special, flat=False):
     ind = ' ' * 10
     if special:
         out.append(f'{ind}// {SPECIAL_NOTE[special]}')
-    elif i in MEDAL:
+    elif i in MEDAL and not flat:
         out.append(f'{ind}// {MEDAL[i]}')
     head = f'price: {js_num(q["price"])}'
     typ = special or q.get('type')
@@ -305,9 +305,9 @@ def build(partial):
         out += [f'    /* ============================ РАУНД {rno} ============================ */',
                 '    {', f"      name: 'Раунд {rno}',", '      themes: [']
         for t, (th, src) in enumerate(picked):
-            out.append(f"        {{ name: {js_str(th['name'])}, questions: [")
+            out.append(f"        {{ name: {js_str(th['name'])}," + (f" flat: {th['flat']}," if th.get('flat') else '') + " questions: [")
             for i, q in enumerate(th['questions']):
-                write_question(out, q, i, specials.get((t, i)))
+                write_question(out, q, i, specials.get((t, i)), bool(th.get('flat')))
             out.append('        ]},')
         out += ['      ],', '    },']
         kinds = {}

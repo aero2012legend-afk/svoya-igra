@@ -124,7 +124,7 @@
   const MEDALS = { 1: ['🥉', 'Бронза', 'bronze'], 2: ['🥈', 'Серебро', 'silver'], 3: ['🥇', 'Золото', 'gold'] };
   function medalOf(r, t, i) {
     const th = ((r && r.themes) || [])[t], n = th && th.questions ? th.questions.length : 0;
-    if (n < 6) return 0;
+    if (n < 6 || (th && th.flat)) return 0; // тема с одинаковой ценой (караоке по 777) — без медалей
     const k = i - (n - 3); return k >= 0 ? k + 1 : 0;
   }
   const qMedal = q => (q ? medalOf(PACK.rounds[q.r], q.t, q.i) : 0);
