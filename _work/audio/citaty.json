@@ -77,5 +77,16 @@
   ],
   "ffmpeg": "afade=t=in:d=0.05,afade=t=out:st=8.60:d=0.35,loudnorm=I=-15:TP=-1.5:LRA=11",
   "note": "в файле фраза с ~4.0 до ~8.1 с"
+ },
+ {
+  "file": "media/music/citaty/r3_600_shrek2.mp3",
+  "source": "https://archive.org/download/sherk-2-2004-divx-rus-dub/VideoOut.mp4",
+  "title": "«Шрек 2» (2004), русский дубляж: Осёл — «Мы ещё не приехали?» (archive.org, sherk-2-2004-divx-rus-dub, VideoOut.mp4, 9:27–9:36)",
+  "cut": [
+   566.6,
+   576.2
+  ],
+  "ffmpeg": "afade=t=in:d=0.05,afade=t=out:st=9.20:d=0.35,loudnorm=I=-15:TP=-1.5:LRA=11",
+  "note": "в файле: фраза с ~0.5 до 2.3 с"
  }
 ]
