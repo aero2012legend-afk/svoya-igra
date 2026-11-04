@@ -40,10 +40,10 @@
   /* ======================= каталог звуков ======================= */
   var SFX_NAMES = ('select flip whoosh open tick tickFast buzz correct wrong timeout cat auction trap coin land bribe roul round final fanfare ' +
     'join pop swap freeze bid angel devil bonus horn strike roll vote heart clap beep go win ' +
-    'applause drumroll flyby mashup medal partial results sad sing tada rimshot laugh boo').split(' ');
+    'applause drumroll flyby mashup medal partial results sad sing tada rimshot laugh boo devillaugh').split(' ');
   // длинные эффекты приглушают музыку на столько секунд
   var DUCK_SEC = { fanfare: 3.2, win: 2.8, applause: 3.6, results: 2.4, tada: 2.0, medal: 2.0, round: 2.8, final: 4.0, timeout: 2.6, sad: 3.4,
-    rimshot: 1.5, laugh: 2.4, boo: 2.6, angel: 3.4, devil: 3.4, bonus: 2.4, trap: 2.4, auction: 2.4, mashup: 1.8, sing: 2.4, cat: 1.4, horn: 1.3,
+    rimshot: 1.5, laugh: 2.4, boo: 2.6, angel: 3.4, devil: 3.4, devillaugh: 3.0, bonus: 2.4, trap: 2.4, auction: 2.4, mashup: 1.8, sing: 2.4, cat: 1.4, horn: 1.3,
     drumroll: 1.8, correct: 2.0, wrong: 1.4, partial: 1.4, bribe: 1.6, coin: 1.2, roll: 1.6, freeze: 1.8 };
   // музыка по режимам: [файл, усиление]
   var TRACKS = {

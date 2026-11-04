@@ -22,5 +22,17 @@
   "gain_db": -6.7,
   "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.20:d=1.2,volume=-6.7dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "припев «Because I'm happy, clap along if you feel like a room without a roof»; запись на SoundCloud, 3:54 (Teenage Kicks)"
+ },
+ {
+  "file": "media/music/narisoval/r3_1200_tiger.mp3",
+  "source": "https://soundcloud.com/benjamin-young-886491672/survivor-eye-of-the-tiger",
+  "title": "Survivor — Eye of the Tiger (1982)",
+  "cut": [
+   82.7,
+   95.0
+  ],
+  "gain_db": -4.7,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.10:d=1.2,volume=-4.7dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "припев «It's the eye of the tiger, it's the thrill of the fight … rising up to the challenge of our rival» (SoundCloud Ben Young, 4:06)"
  }
 ]

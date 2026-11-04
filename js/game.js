@@ -926,6 +926,7 @@
     busy = true;
     try {
       await flyby(PACK.rounds.map((r, i) => ({ label: r.name || `Раунд ${i + 1}`, themes: (r.themes || []).map(th => th.name) })).concat(finThemes().length ? [{ label: 'Финал', themes: ['???'] }] : []));
+      voice('r1');
       await overlay('round', { title: R().name || 'Раунд 1', sub: joke('start') || 'Поехали!' });
     } finally { busy = false; }
     G.chooser = pick(G.ents).id; G.phase = 'board'; boardIntro = true; curSig = null; changed();
@@ -941,6 +942,7 @@
     G.round++; G.q = null; G.phase = 'trans'; changed();
     busy = true;
     try {
+      voice('r' + (G.round + 1));
       await overlay('round', { title: R().name || `Раунд ${G.round + 1}`, sub: 'Цены выросли!' });
       await flyby([{ label: R().name || `Раунд ${G.round + 1}`, themes: R().themes.map(th => th.name) }]);
     } finally { busy = false; }
@@ -1013,8 +1015,20 @@
   }
   function skipRound() { if (G.phase !== 'board') return; snap(); R().themes.forEach((th, t) => (th.questions || []).forEach((x, i) => { G.played[`${G.round}-${t}-${i}`] = true; })); nextRound(); }
 
+  /* ----- голос ведущего: представление раундов и финала (media/voice/*.mp3) ----- */
+  let voiceEl = null;
+  function voice(name) {
+    stopVoice();
+    const a = voiceEl = new Audio(`media/voice/${name}.mp3`); a.muted = Sound.muted;
+    const done = () => { if (voiceEl === a) { voiceEl = null; Sound.duck(false); } };
+    a.addEventListener('ended', done); a.addEventListener('error', done);
+    Sound.duck(true); const p = a.play(); if (p && p.catch) p.catch(done);
+  }
+  function stopVoice() { const a = voiceEl; if (!a) return; voiceEl = null; try { a.pause(); } catch (e) { /* ничего */ } Sound.duck(false); }
+
   async function openCell(t, i, cellEl) {
     if (G.phase !== 'board' || busy) return;
+    stopVoice(); // ведущий открыл вопрос — представление дослушивать не нужно
     const key = `${G.round}-${t}-${i}`, d = qd(G.round, t, i);
     if (G.played[key] || !d) return;
     snap(); busy = true; Sound.play('select');
@@ -2229,6 +2243,7 @@
     const part = G.ents.filter(e => e.score > 0).map(e => e.id);
     if (!part.length) { toast('В финал никто не прошёл — ни у кого нет очков в плюсе'); return endGame(); }
     G.phase = 'trans'; changed();
+    voice('final');
     busy = true; await overlay('final'); busy = false;
     const so = part.slice().sort((a, b) => ((ent(a) || {}).score || 0) - ((ent(b) || {}).score || 0));
     G.fin = { stage: FT.length > 1 ? 'strike' : 'theme', part, so, turn: 0, left: FT.map((x, i) => i), ti: FT.length > 1 ? null : 0, bets: {}, answers: {}, judged: {}, opened: {}, order: null, tl: G.set.ftimer, tr: false, showA: false };
@@ -2410,7 +2425,7 @@
     auction: () => { Sound.play('auction'); [0, 380, 760].forEach(d => setTimeout(() => FX.burst(innerWidth * 0.53, innerHeight * 0.38, '#ffcc33', 45), d + 260)); },
     trap: () => Sound.play('trap'),
     angel: () => { Sound.play('angel'); FX.rain('✨', 36); setTimeout(() => FX.burst(innerWidth / 2, innerHeight * 0.36, '#fff3b0', 80), 300); },
-    devil: () => { Sound.play('devil'); FX.rise('🔥', 36); setTimeout(() => FX.burst(innerWidth / 2, innerHeight * 0.36, '#ff4d5e', 80), 300); },
+    devil: () => { Sound.play('devil'); setTimeout(() => Sound.play('devillaugh'), 350); FX.rise('🔥', 36); setTimeout(() => FX.burst(innerWidth / 2, innerHeight * 0.36, '#ff4d5e', 80), 300); },
     bonus: () => { Sound.play('bonus'); [0, 300, 600].forEach(d => setTimeout(() => FX.burst(innerWidth * (0.3 + d / 1500), innerHeight * 0.4, '#c58bff', 50), d + 200)); },
     music: () => Sound.play('open'),
     video: () => Sound.play('whoosh'),
@@ -2519,7 +2534,7 @@
   }
   function toggleFS() { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); }
   function toggleMute() {
-    Sound.toggleMute(); [MP && MP.el, MP && MP.mel, djEl, karA && karA.el].forEach(x => { if (x) x.muted = Sound.muted; });
+    Sound.toggleMute(); [MP && MP.el, MP && MP.mel, djEl, karA && karA.el, voiceEl].forEach(x => { if (x) x.muted = Sound.muted; });
     renderTop(); toast(Sound.muted ? '🔇 Звук выключен' : '🔊 Звук включён');
   }
 
