@@ -1843,7 +1843,7 @@
         const list = conEligibleB(c);
         if (c.id === 'kar') {
           const g = ent(c.g);
-          return el(`<div class="special con kar">${head}<div class="mic">🎤</div><div class="sp-info">${g ? `${nmB(g)}, кому отдаёшь микрофон?${hasPhone(g.id) ? ' Можно выбрать на телефоне 📱' : ''}` : 'Кто будет петь?'}</div>
+          return el(`<div class="special con karc">${head}<div class="mic">🎤</div><div class="sp-info">${g ? `${nmB(g)}, кому отдаёшь микрофон?${hasPhone(g.id) ? ' Можно выбрать на телефоне 📱' : ''}` : 'Кто будет петь?'}</div>
             <div class="sp-hint">Песня — сюрприз. Споёт хорошо — получит до ${fmt(q.price)}</div>${pickerHTML(list, 'cpick')}</div>`);
         }
         const ph = hasPhone(c.a);
@@ -1854,7 +1854,7 @@
       case 'ready': {
         if (c.id === 'kar') {
           const d = curD();
-          return el(`<div class="special con kar">${head}<div class="sp-info">🎤 Поёт ${nmB(A)}</div><div class="kar-song">${esc(d.q || '')}</div>${d.img ? `<img class="kar-img" src="${esc(d.img)}" alt="">` : ''}
+          return el(`<div class="special con karc">${head}<div class="sp-info">🎤 Поёт ${nmB(A)}</div><div class="kar-song">${esc(d.q || '')}</div>${d.img ? `<img class="kar-img" src="${esc(d.img)}" alt="">` : ''}
             <div class="con-rules">${esc(C.rules || '')}</div><div class="hostbar">${B2('cstart', '▶ Поехали!', 'gold big', 'Пробел')}</div></div>`);
         }
         const prompts = C.each && c.pr ? `<div class="sp-info">${esc(C.pl || 'Тема')}: ${esc(entName(c.a))} — <b>${esc(c.pr.a)}</b> · ${esc(entName(c.b))} — <b>${esc(c.pr.b)}</b></div>` : '';
@@ -1867,7 +1867,7 @@
       case 'vote': {
         const n = (c.voters || []).length;
         if (c.id === 'kar') {
-          return el(`<div class="special con kar">${head}<div class="mic">🎤</div><div class="sp-info">Как спел(а) ${nmB(A)}?</div>
+          return el(`<div class="special con karc">${head}<div class="mic">🎤</div><div class="sp-info">Как спел(а) ${nmB(A)}?</div>
             ${n ? '<div class="sp-hint">Оценивайте на телефонах: 👍 или 👎</div><div class="votes" id="vcount"></div>' : '<div class="sp-hint">Голосовать некому — оценивает ведущий</div>'}
             <div class="hostbar">${n ? B2('ccount', 'Подсчитать ▶', 'gold', '→') : B2('cwin', '👍 Зажёг(ла)!', 'ok', '', ' data-v="y"') + B2('cwin', '😐 Так себе — половина', '', '', ' data-v="h"') + B2('cwin', '👎 Мимо нот', 'bad', '', ' data-v="n"')}</div></div>`);
         }
@@ -1901,7 +1901,7 @@
       }
       case 'kar': {
         const d = curD();
-        return el(`<div class="special con kar play">${head}<div class="sp-info">🎤 Поёт ${nmB(A)}${d.q ? ` · <span class="mut">${esc(d.q)}</span>` : ''}</div>${karHTML(d).replace('class="kar"', 'class="kar big"')}${clock}
+        return el(`<div class="special con karc play">${head}<div class="sp-info">🎤 Поёт ${nmB(A)}${d.q ? ` · <span class="mut">${esc(d.q)}</span>` : ''}</div>${karHTML(d).replace('class="kar"', 'class="kar big"')}${clock}
           <div class="hostbar">${pause}${B2('cnext', 'Стоп — к оценкам ▶', 'gold', '→')}</div></div>`);
       }
       case 'hum': case 'draw': {
