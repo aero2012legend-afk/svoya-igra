@@ -37,14 +37,14 @@
  },
  {
   "file": "media/music/nash2007/r2_800_linkin.mp3",
-  "source": "https://soundcloud.com/jurko-ba-k/linkin-park-what-ive-done-1",
-  "title": "Linkin Park — What I've Done (2007)",
+  "source": "https://archive.org/download/youtube-pMePM9Q-bYk/Linkin_Park_-_What_I_ve_Done_Official_Music_Video-pMePM9Q-bYk.mkv",
+  "title": "Linkin Park — «What I've Done» (звук официального клипа, лучше качество)",
   "cut": [
-   30.5,
-   60.5
+   30.99,
+   60.99
   ],
   "gain_db": 0.5,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=0.5dB",
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=-1.4dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "гитарный рифф и начало первого куплета; слов названия нет"
  },
  {
