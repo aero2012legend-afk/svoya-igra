@@ -40,7 +40,7 @@
   /* ======================= каталог звуков ======================= */
   var SFX_NAMES = ('select flip whoosh open tick tickFast buzz correct wrong timeout cat auction trap coin land bribe roul round final fanfare ' +
     'join pop swap freeze bid angel devil bonus horn strike roll vote heart clap beep go win ' +
-    'applause drumroll flyby mashup medal partial results sad sing tada rimshot laugh boo devillaugh').split(' ');
+    'applause drumroll flyby mashup medal partial results sad sing tada rimshot laugh boo devillaugh thunder').split(' ');
   // у каждого раунда свой тембр интерфейса: <имя>_r2.mp3, <имя>_r3.mp3 (раунд 1 — обычные файлы)
   var ROUND_SFX = ['select', 'open', 'buzz', 'correct', 'wrong', 'flip'], rnd = 1;
   ROUND_SFX.forEach(function (n) { SFX_NAMES.push(n + '_r2', n + '_r3'); });

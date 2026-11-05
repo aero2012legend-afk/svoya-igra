@@ -4,7 +4,7 @@ OUT = '/home/user/svoya-igra/media/img/emoji'
 E = [(300, 'frozen', 'МУЛЬТФИЛЬМ', '❄️👸⛄'), (600, 'charlie', 'ФИЛЬМ', '🍫🏭🎫🎩'), (900, 'vino', 'ПЕСНЯ', '🌸🍷'),
      (1200, 'milya', 'ФИЛЬМ', '🟢🛣️🐁⚡️🪑'), (1500, 'element', 'ФИЛЬМ', '🔥💧🌍💨👩‍🦰'),
      (1800, 'rozy', 'ПЕСНЯ', '🌹🌹🌹👨‍🎨🏠'), (2100, 'yabloki', 'ПЕСНЯ', '🍎🍎❄️'), (2400, 'golubi', 'ФИЛЬМ', '❤️🕊️🕊️🌴'),
-     (2700, 'eksponat', 'ПЕСНЯ', '👠👠🍑🖼️'), (3000, 'pyos', 'МУЛЬТФИЛЬМ', '🐶🐺🍗🎤')]
+     (2700, 'kukla', 'ПЕСНЯ', '🪆🧙‍♂️🔮🌲'), (3000, 'pyos', 'МУЛЬТФИЛЬМ', '🐶🐺🍗🎤')]
 CSS = """html,body{margin:0;width:1280px;height:720px;overflow:hidden;font-family:'DejaVu Sans',sans-serif}
 body{background:radial-gradient(circle at 50% 45%,#fff6d8,#ffd9a8 70%,#f7b98b);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px}
 .tag{font-weight:900;font-size:44px;letter-spacing:.12em;color:#fff;background:#3a2b7a;padding:10px 34px;border-radius:999px;box-shadow:0 6px 0 rgba(0,0,0,.18)}

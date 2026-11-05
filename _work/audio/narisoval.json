@@ -1,30 +1,6 @@
 [
  {
-  "file": "media/music/narisoval/r3_300_kon.mp3",
-  "source": "https://soundcloud.com/shout_111/ukwqqzdsfslp",
-  "title": "Любэ — «Конь» (1994)",
-  "cut": [
-   11.1,
-   23.4
-  ],
-  "gain_db": 6.4,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.10:d=1.2,volume=6.4dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "зачин «Выйду ночью в поле с конём, ночкой тёмной тихо пойдём» (SoundCloud shout_111, оригинал, 3:46)"
- },
- {
-  "file": "media/music/narisoval/r3_600_happy.mp3",
-  "source": "https://soundcloud.com/teenage-kicks-1/happy-pharrell-williams",
-  "title": "Pharrell Williams — Happy (2013)",
-  "cut": [
-   24.1,
-   36.5
-  ],
-  "gain_db": -6.7,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.20:d=1.2,volume=-6.7dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "припев «Because I'm happy, clap along if you feel like a room without a roof»; запись на SoundCloud, 3:54 (Teenage Kicks)"
- },
- {
-  "file": "media/music/narisoval/r3_1200_tiger.mp3",
+  "file": "media/music/narisoval/r3_2700_tiger.mp3",
   "source": "https://soundcloud.com/benjamin-young-886491672/survivor-eye-of-the-tiger",
   "title": "Survivor — Eye of the Tiger (1982)",
   "cut": [
@@ -36,7 +12,7 @@
   "note": "припев «It's the eye of the tiger, it's the thrill of the fight … rising up to the challenge of our rival» (SoundCloud Ben Young, 4:06)"
  },
  {
-  "file": "media/music/narisoval/r3_900_waka.mp3",
+  "file": "media/music/narisoval/r3_2400_waka.mp3",
   "source": "https://soundcloud.com/darkland-23/waka-waka-version-world-cup-2010",
   "title": "Shakira feat. Freshlyground — Waka Waka (This Time for Africa) (2010)",
   "cut": [
@@ -46,30 +22,6 @@
   "gain_db": -0.8,
   "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=10.70:d=1.2,volume=-0.8dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "припев «Tsamina mina … waka waka … this time for Africa» (SoundCloud DarkLand 23, 3:20, оригинальная версия)"
- },
- {
-  "file": "media/music/narisoval/r3_2100_wind.mp3",
-  "source": "https://soundcloud.com/raptor01/scorpions-wind-of-change",
-  "title": "Scorpions — Wind of Change (1990)",
-  "cut": [
-   20.9,
-   33.3
-  ],
-  "gain_db": 8.5,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.20:d=1.2,volume=8.5dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "«I follow the Moskva down to Gorky Park, listening to the wind of change» (SoundCloud raptor01, 4:44)"
- },
- {
-  "file": "media/music/narisoval/r3_2400_krov.mp3",
-  "source": "https://soundcloud.com/kino-119988254/gruppa-krovi",
-  "title": "Кино — Группа крови (1988)",
-  "cut": [
-   64.0,
-   78.6
-  ],
-  "gain_db": -5.2,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=13.40:d=1.2,volume=-5.2dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "припев «Группа крови на рукаве, порядковый номер на рукаве, пожелай мне удачи в бою» (SoundCloud kino-119988254, 4:07)"
  },
  {
   "file": "media/music/narisoval/r3_3000_hotel.mp3",
@@ -84,39 +36,87 @@
   "note": "припев «Welcome to the Hotel California, such a lovely place» (archive.org, официальный аудио-трек 40th Anniversary Expanded Edition, 6:31; restore: http_proxy=$HTTPS_PROXY)"
  },
  {
-  "file": "media/music/narisoval/r3_1500_tatu.mp3",
-  "source": "https://soundcloud.com/russian-top-music/tatu-nas-ne-dogonyat",
-  "title": "t.A.T.u. — Нас не догонят (2001)",
+  "file": "media/music/narisoval/r3_600_krossy.mp3",
+  "source": "https://soundcloud.com/timabelorusskih/mokrye-krossy",
+  "title": "Тима Белорусских — «Мокрые кроссы» (припев)",
   "cut": [
-   35.9,
-   48.2
+   51.9,
+   64.7
   ],
-  "gain_db": -6.0,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.10:d=1.2,volume=-6.0dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "припев «Небо уронит, ночь на ладони, нас не догонят» (SoundCloud russian-top-music, 3:20)"
+  "gain_db": -7.2,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.60:d=1.2,volume=-7.2dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": ""
  },
  {
-  "file": "media/music/narisoval/r3_1800_chaif.mp3",
-  "source": "https://soundcloud.com/stanislav-kudriavtzev/argentina-yamayka-50",
-  "title": "Чайф — Аргентина — Ямайка 5:0",
+  "file": "media/music/narisoval/r3_900_led.mp3",
+  "source": "https://soundcloud.com/grebz-978226984/griby-taet-lyod",
+  "title": "Грибы — «Тает лёд» (припев)",
   "cut": [
-   31.9,
-   43.9
+   57.0,
+   69.5
   ],
-  "gain_db": -6.4,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=10.80:d=1.2,volume=-6.4dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "припев «Какая боль, какая боль, Аргентина — Ямайка пять ноль» (SoundCloud Stanislav Kudriavtzev, 3:19)"
+  "gain_db": -1.8,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.30:d=1.2,volume=-1.8dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": ""
  },
  {
-  "file": "media/music/narisoval/r3_2700_aha.mp3",
-  "source": "https://soundcloud.com/rykumi/a-ha-take-on-me-official-video-2",
-  "title": "a-ha — Take On Me (1985)",
+  "file": "media/music/narisoval/r3_300_malinka.mp3",
+  "source": "https://soundcloud.com/user-186479143-475895908/khabib-yagoda-malinka",
+  "title": "Хабиб — «Ягода малинка» (припев)",
   "cut": [
-   55.8,
-   68.0
+   59.2,
+   72.0
   ],
-  "gain_db": 2.7,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.00:d=1.2,volume=2.7dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "припев «Take on me, take on me, take me on» (SoundCloud Rykumi, 3:48; позиция по Whisper ~56.6)"
+  "gain_db": -10.1,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.60:d=1.2,volume=-10.1dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": ""
+ },
+ {
+  "file": "media/music/narisoval/r3_1200_pchelovod.mp3",
+  "source": "https://soundcloud.com/rasa-music-label/rasa-pchelovod",
+  "title": "RASA — «Пчеловод» (припев)",
+  "cut": [
+   59.4,
+   72.0
+  ],
+  "gain_db": -7.2,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.40:d=1.2,volume=-7.2dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": ""
+ },
+ {
+  "file": "media/music/narisoval/r3_2100_kometa.mp3",
+  "source": "https://soundcloud.com/jony-me/kometa",
+  "title": "JONY — «Комета» (припев)",
+  "cut": [
+   37.6,
+   50.4
+  ],
+  "gain_db": -8.1,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.60:d=1.2,volume=-8.1dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": ""
+ },
+ {
+  "file": "media/music/narisoval/r3_1500_eksponat.mp3",
+  "source": "https://soundcloud.com/dmitrydan/zjrciicwwnmy",
+  "title": "Ленинград — «Экспонат» (припев)",
+  "cut": [
+   57.8,
+   70.4
+  ],
+  "gain_db": -6.1,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=11.40:d=1.2,volume=-6.1dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": ""
+ },
+ {
+  "file": "media/music/narisoval/r3_1800_beverly.mp3",
+  "source": "https://soundcloud.com/bfz5uiut5y9t/zivert-beverly-hills",
+  "title": "Zivert — «Beverly Hills» (припев, по Whisper)",
+  "cut": [
+   41.7,
+   57.0
+  ],
+  "gain_db": -8.1,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=14.10:d=1.2,volume=-8.1dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": ""
  }
 ]

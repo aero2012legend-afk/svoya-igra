@@ -353,6 +353,9 @@
     try { Sound.setRound(fin ? 3 : +r); } catch (e) { /* старый sound.js */ }
     let p = 0;
     if (!fin && G.phase !== 'lobby' && R()) { let tot = 0, done = 0; (R().themes || []).forEach((th, t) => (th.questions || []).forEach((x, i) => { tot++; if (G.played[`${G.round}-${t}-${i}`]) done++; })); p = tot ? done / tot : 0; }
+    // живой фон WebGL (js/bg.js): небо раунда, солнце идёт по дуге по мере игры, погода
+    const wk = r === '1' ? 'snow' : r === '2' ? (p < 0.5 ? 'leaves' : 'rain') : r === '3' ? 'night' : 'storm';
+    if (window.BG) { BG.set({ rnd: r, p, weather: wk }); return; }
     if (!SKY.el) {
       SKY.el = el('<div id="sky"><canvas></canvas><div class="orb"></div><div class="flash"></div></div>'); $('#bg').appendChild(SKY.el);
       SKY.cv = $('canvas', SKY.el); SKY.cx = SKY.cv.getContext('2d');
@@ -1165,7 +1168,7 @@
     stopVoice(); // ведущий открыл вопрос — представление дослушивать не нужно
     const key = `${G.round}-${t}-${i}`, d = qd(G.round, t, i);
     if (G.played[key] || !d) return;
-    snap(); busy = true; Sound.play('select');
+    snap(); busy = true; // звук один — «переворот» клетки (flipCell)
     G.played[key] = true; G.qn = (G.qn || 0) + 1;
     const type = ['cat', 'auction', 'trap', 'bonus', 'karaoke'].includes(d.type) ? d.type : 'normal';
     const tot = isMediaQ(d) ? Math.max(G.set.timer, 30) : G.set.timer; // на музыку и видео — не меньше 30 секунд
@@ -1194,7 +1197,7 @@
   function autoOpen() { const k = G.q && G.q.key; setTimeout(() => { if (G.phase === 'q' && G.q && G.q.key === k && G.q.stage === 'read') openBuzz(); }, 1400); }
   function openBuzz() {
     const q = G.q; if (!q || q.stage !== 'read') return;
-    q.stage = 'open'; q.tl = q.tl > 0 ? q.tl : (q.tot || G.set.timer); Sound.play('open'); changed(); startTimer(); mediaPlay();
+    q.stage = 'open'; q.tl = q.tl > 0 ? q.tl : (q.tot || G.set.timer); if (!isMediaQ(curD())) Sound.play('open'); changed(); startTimer(); mediaPlay(); // у музыки и видео сигналом служит сама музыка
   }
   function onBuzz(eid, k) {
     const q = G.q;
@@ -1212,6 +1215,15 @@
     q.ans = eid; q.stage = 'ans'; q.al = G.set.atime || null; q.aup = false; Sound.play('buzz'); changed(); startAT();
     const c = $(`#scores .ent[data-id="${CSS.escape(eid)}"]`); if (c) { const r = c.getBoundingClientRect(); FX.burst(r.left + r.width / 2, r.top, ent(eid).color, 40); }
   }
+  // песню или слово угадали: экран вопроса «прыгает», по экрану летят ноты, пропущенное слово вспыхивает
+  function guessFX(d) {
+    if (!d) return; const music = isMediaQ(d) || d.kar;
+    setTimeout(() => {
+      const qs = $('#stage .qscreen'); if (qs) { qs.classList.remove('guessed'); void qs.offsetWidth; qs.classList.add('guessed'); }
+      if (music && !FX.lite) { FX.rain('🎵', 26); FX.rain('🎶', 16); }
+      const gp = $('#stage .kar .gap.open'); if (gp) { const r = gp.getBoundingClientRect(); FX.burst(r.left + r.width / 2, r.top + r.height / 2, '#ffd34d', 80); }
+    }, 120);
+  }
   function judge(ok) {
     const q = G.q; if (G.phase !== 'q' || !q || busy) return;
     const who = q.owner || (q.stage === 'ans' ? q.ans : null);
@@ -1222,6 +1234,7 @@
       if (G.x2[who]) { val *= 2; note = '(×2)'; delete G.x2[who]; } else if (G.bo[who]) { val *= 2; note = '(✨ ×2)'; delete G.bo[who]; }
       addScore(who, val); G.chooser = who; q.result = { who, ok: true, val, note };
       Sound.play('correct'); flash('ok'); FX.confetti(150); if (val >= 1000) FX.fireworks(1600); reveal(true); quip(joke('correct', entName(who)), 'ok');
+      guessFX(curD());
     } else {
       if (G.sh[who]) { val = 0; note = '(🛡️ щит спас)'; delete G.sh[who]; delete G.x2[who]; toast(`🛡️ Щит спас ${entName(who)} от штрафа!`); }
       else if (G.x2[who]) { val *= 2; note = '(×2)'; delete G.x2[who]; }
@@ -2649,7 +2662,7 @@
     devil: () => { Sound.play('devil'); setTimeout(() => Sound.play('devillaugh'), 350); FX.rise('🔥', 36); setTimeout(() => FX.burst(innerWidth / 2, innerHeight * 0.36, '#ff4d5e', 80), 300); },
     bonus: () => { Sound.play('bonus'); [0, 300, 600].forEach(d => setTimeout(() => FX.burst(innerWidth * (0.3 + d / 1500), innerHeight * 0.4, '#c58bff', 50), d + 200)); },
     qnext: () => Sound.play('whoosh'),
-    music: () => Sound.play('open'),
+    music: () => Sound.play('whoosh'),
     video: () => Sound.play('whoosh'),
     bribe: () => { Sound.play('bribe'); FX.rain('💰', 40); FX.rain('💵', 18); },
     round: () => Sound.play('round'),
@@ -2662,7 +2675,9 @@
     d = d || {};
     return new Promise(res => {
       closeOverlay();
-      const ov = $('#overlay'); ov.className = 'show ov-' + type; ov.innerHTML = OV[type](d);
+      const ov = $('#overlay'); ov.className = 'show ov-' + type;
+      ov.innerHTML = '<div class="ov-fx"><i class="ring"></i><i class="ring r2"></i><i class="bloom"></i><i class="streak"></i></div>' + OV[type](d);
+      if (!FX.lite) setTimeout(() => { if (ov.classList.contains('show')) { const t = $('.ov-title', ov); const r = t ? t.getBoundingClientRect() : null; if (r) FX.burst(r.left + r.width / 2, r.top + r.height / 2, getComputedStyle(t).color, 46); } }, 520);
       const rays = $('.ov-rays', ov); if (rays) rays.style.backgroundImage = `url(${raysImg(rays.classList.contains('bonus') ? 'bonus' : rays.classList.contains('m2') ? 'silver' : rays.classList.contains('m1') ? 'bronze' : 'gold')})`;
       let done = false;
       const fin = () => {

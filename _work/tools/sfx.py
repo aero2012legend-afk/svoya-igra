@@ -70,6 +70,14 @@ def soft_click(dur=0.05, f=900):
     return (n * 0.5 + np.sin(2 * np.pi * f * t)) * np.exp(-t / 0.012)
 
 
+def swell(b, dur=1.3):
+    t = t_(dur)
+    ch = sum(np.sin(2 * np.pi * n(b + d) * t) * w for d, w in ((0, 1.0), (4, 0.7), (7, 0.8), (12, 0.45))) / 3
+    env_ = (1 - np.exp(-t / 0.18)) * np.exp(-t / 0.42)
+    air = np.convolve(rng.standard_normal(len(t)), np.ones(40) / 40, 'same') * (1 - np.exp(-t / 0.25)) * np.exp(-t / 0.3) * 0.35
+    return ch * env_ + air
+
+
 def mix(*xs):
     out = np.zeros(max(len(x) for x in xs))
     for x in xs:
@@ -102,13 +110,13 @@ SETS = {
 }
 
 
-def synth():
+def synth(only=None):
     for suf, S in SETS.items():
         k, b = S['kind'], S['base']
         # выбор клетки — короткое мягкое «ток»
         save(reverb(mix(tone(n(b + 7), 0.35, k, d=0.08) * 0.8, soft_click() * 0.15), 0.4, 0.15), 'select' + suf, -9)
-        # вопрос открыт, можно жать — две ноты вверх, без металла
-        save(reverb(seq([n(b), n(b + 7)], k, 0.16, 1.1, 0.4), 0.7, 0.25), 'open' + suf, -8)
+        # вопрос открыт, можно жать — мягкий «вдох»: аккорд плавно нарастает и тает, без ударной атаки (не «звонок в дверь»)
+        save(reverb(swell(b), 0.8, 0.3), 'open' + suf, -12)
         # кто-то нажал кнопку — мягкое «буп» вверх
         save(reverb(mix(sweep(n(b - 5), n(b + 4), 0.32, 'tri', 0.18), tone(n(b + 4), 0.5, k, d=0.15) * 0.5), 0.5, 0.18), 'buzz' + suf, -7)
         # верно — мажорное арпеджио

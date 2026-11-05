@@ -34,5 +34,17 @@
   "demucs": "guide",
   "guide_db": -11,
   "ffmpeg": "volume=-5.3dB,afade=t=in:d=0.3,afade=t=out:st=20.50:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/karbattle/kroshka.mp3",
+  "source": "https://api.soundcloud.com/tracks/soundcloud%3Atracks%3A713643979",
+  "title": "Руки Вверх — «Крошка моя», припев для караоке-баттла (музыка + тихий голос)",
+  "cut": [
+   88.78,
+   110.78
+  ],
+  "demucs": "guide",
+  "guide_db": -11,
+  "ffmpeg": "volume=-5.7dB,afade=t=in:d=0.3,afade=t=out:st=20.50:d=1.5,alimiter=limit=0.89:attack=3:release=40"
  }
 ]
