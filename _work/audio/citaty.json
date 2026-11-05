@@ -116,5 +116,38 @@
   ],
   "ffmpeg": "afade=t=in:d=0.05,afade=t=out:st=9.00:d=0.35,loudnorm=I=-15:TP=-1.5:LRA=11",
   "note": "в файле: «Ты не пройдёшь» 0.4–4.0 с (после паузы), «Бегите, глупцы» ~6.8–9.4 с"
+ },
+ {
+  "file": "media/music/citaty/r3_2400_preis.mp3",
+  "source": "https://www.myinstants.com/media/sounds/idushchii-k-reke-ia-v-svoiom-poznanii-preispolnilsia.mp3",
+  "title": "Мем «Я в своём познании настолько преисполнился» (Идущий к реке) — звук после ответа",
+  "cut": [
+   0.0,
+   11.6
+  ],
+  "gain_db": 0.3,
+  "ffmpeg": "volume=0.3dB,afade=t=in:d=0.02,afade=t=out:st=11.30:d=0.3,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/citaty/r3_1500_galya.mp3",
+  "source": "https://www.myinstants.com/media/sounds/galia-otmena.mp3",
+  "title": "Мем «Галя, у нас отмена!» — звук после ответа",
+  "cut": [
+   0.0,
+   3.79
+  ],
+  "gain_db": -3.9,
+  "ffmpeg": "volume=-3.9dB,afade=t=in:d=0.02,afade=t=out:st=3.49:d=0.3,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/citaty/r3_1800_fiasko.mp3",
+  "source": "https://www.myinstants.com/media/sounds/eto-fiasko-bratan.mp3",
+  "title": "Мем «Это фиаско, братан» — звук после ответа",
+  "cut": [
+   0.0,
+   1.36
+  ],
+  "gain_db": -1.6,
+  "ffmpeg": "volume=-1.6dB,afade=t=in:d=0.02,afade=t=out:st=1.06:d=0.3,alimiter=limit=0.89:attack=3:release=40"
  }
 ]
