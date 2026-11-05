@@ -2,30 +2,54 @@
  "r1": {
   "music": "https://api.soundcloud.com/tracks/soundcloud%3Atracks%3A1397308975",
   "music_credit": "Vasil Yatsevich — Taiko Invasion (royalty free)",
-  "semi": -2, "tempo": 0.95, "room": 1.6, "wet": 0.22, "mvol": 0.6,
+  "semi": -2,
+  "tempo": 0.95,
+  "room": 1.6,
+  "wet": 0.22,
+  "mvol": 0.6,
   "text": "Внимание! | Свет — приглушить. Телефоны — к бою! | Сегодня здесь решится, кто самый умный, самый смелый и самый безбашенный в этой компании! | Впереди — фильмы и мультики, мемы и музыка, коты в мешках, аукционы и ловушки! | Ангел подарит удачу… а дьявол заставит петь и танцевать! | Не прячьтесь от конкурсов — за смелость здесь платят очками! | Первый раунд… | ~Начинаем!"
  },
  "r2": {
   "music": "https://api.soundcloud.com/tracks/soundcloud%3Atracks%3A2217044510",
   "music_credit": "Alex-Productions — Rise of Legends (no copyright music)",
-  "semi": -2, "tempo": 0.95, "room": 1.8, "wet": 0.22, "mvol": 0.6,
+  "semi": -2,
+  "tempo": 0.95,
+  "room": 1.8,
+  "wet": 0.22,
+  "mvol": 0.6,
   "text": "Второй раунд! | Цены удвоены — а значит, и ошибки стоят вдвое дороже! | Лица звёзд, склеенные в одно. Хиты нулевых. Загадки, от которых закипает мозг! | Отстающие — это ваш шанс отыграться! | Лидеры — оглянитесь: вас уже догоняют! | Второй раунд… | ~Поехали!"
  },
  "r3": {
   "music": "https://api.soundcloud.com/tracks/soundcloud%3Atracks%3A2405208033",
   "music_credit": "Vasil Yatsevich — Final Act (royalty free)",
-  "semi": -2.5, "tempo": 0.94, "room": 2.0, "wet": 0.24, "mvol": 0.6,
+  "semi": -2.5,
+  "tempo": 0.94,
+  "room": 2.0,
+  "wet": 0.24,
+  "mvol": 0.6,
   "text": "Третий раунд. | Самый дорогой. Самый громкий. Самый безумный. | Здесь одна ошибка обнуляет вечер, а одна удача делает вас легендой! | Микрофоны — наготове: впереди караоке, и судить вас будут друзья — без пощады! | Всё решится здесь и сейчас. | Третий раунд… | ~В бой!"
  },
  "final": {
   "music": "https://api.soundcloud.com/tracks/soundcloud%3Atracks%3A2209430711",
   "music_credit": "Vasil Yatsevich — Neural Burn (royalty free)",
-  "crowd": "https://www.myinstants.com/media/sounds/crowd-cheer-and-applause.mp3", "crowd_vol": 0.55,
-  "semi": -1.5, "tempo": 0.92, "room": 3.2, "dark": 0.7, "wet": 0.32, "mvol": 0.55, "gap": 0.55, "lead": 2.8, "tail": 4.5,
+  "crowd": "https://www.myinstants.com/media/sounds/crowd-cheer-and-applause.mp3",
+  "crowd_vol": 0.3,
+  "semi": -1.5,
+  "tempo": 0.92,
+  "room": 2.4,
+  "dark": 0.75,
+  "wet": 0.2,
+  "mvol": 0.32,
+  "gap": 0.55,
+  "lead": 2.8,
+  "tail": 4.5,
   "text": "Дамы и господа! | Леди и джентльмены! | Три раунда позади. Ставки сделаны. Пульс — сто двадцать! | До финала дошли только самые умные, самые смелые и самые наглые! | Это главный бой этого вечера! | ~Встречайте… | ~финалистов!"
  },
  "devillaugh": {
-  "laughs": ["https://www.myinstants.com/media/sounds/evil-laugh-deep.mp3", "https://www.myinstants.com/media/sounds/icniwno.mp3"],
+  "laughs": [
+   "https://www.myinstants.com/media/sounds/evil-laugh-deep.mp3",
+   "https://www.myinstants.com/media/sounds/icniwno.mp3"
+  ],
   "credit": "myinstants: «Evil Laugh — Deep», «Demon laugh»; обработка — ниже на квинту, гул, огромный зал"
  }
 }
