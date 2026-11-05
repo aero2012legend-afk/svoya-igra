@@ -30,7 +30,7 @@ SPECIALS = [('auction', 2), ('cat', 2), ('trap', 4), ('bonus', 6)]
 SLOTS = {'auction': (6, 6), 'cat': (1, 6), 'trap': (0, 6), 'bonus': (0, 6)}
 FXS = {'blur', 'deblur', 'pixel', 'zoom', 'crop', 'tiles', 'silhouette', 'negative', 'mirror'}
 FIELD_ORDER = ['q', 'a', 'c', 'hint', 'img', 'fx', 'area', 'px', 'tiles', 'aimg', 'audio', 'video', 'start', 'end', 'aend', 'aaudio',
-               'minus', 'loop', 'gw', 'kstart', 'kdur', 'kar', 'pics', 'names', 'catTheme', 'contest']
+               'minus', 'loop', 'gw', 'mute', 'kstart', 'kdur', 'kar', 'pics', 'names', 'catTheme', 'contest']
 EXTRAS = [  # ключ в extras.json, комментарий в questions.js
     ('angelTruth', 'Ловушка «Ангел» → «Правда»: вопросы, на которые надо ответить честно'),
     ('angelDare', 'Ловушка «Ангел» → «Действие»: лёгкие задания'),
@@ -88,7 +88,8 @@ HEADER = r"""/* ================================================================
               даёт подсветку точно по словам; строчки после end скрыты до ответа,
               пропущенное слово пишется как ___ (или {слово}: до ответа видно пустое место)
      minus  — та же песня без голоса (минус) на той же шкале времени: после пропуска
-              музыка играет дальше до конца таймера; gw — пропущенное слово для строчки караоке
+              музыка играет дальше до конца таймера; gw — пропущенное слово для строчки караоке;
+              mute — [[от, до], …] повторы слова-ответа после пропуска: на них вместо голоса звучит минус
      loop   — false: не повторять звук по кругу (по умолчанию всё длиннее 10 секунд повторяется, пока идёт таймер)
      type   — особая клетка (необязательно):
               'cat'     — 🐱 Кот в мешке: вопрос отдают другому игроку (catTheme — своя тема)
@@ -247,7 +248,7 @@ def write_question(out, q, i, special, flat=False):
     lines = [head]
     keys = [k for k in FIELD_ORDER if k in q] + [k for k in q if k not in FIELD_ORDER and k not in ('price', 'type')]
     groups = [('q',), ('a',), ('c',), ('hint',), ('img', 'fx', 'area', 'px', 'tiles', 'aimg'), ('audio', 'video', 'start', 'end', 'aend'), ('aaudio',),
-              ('minus', 'loop', 'gw', 'kstart', 'kdur'),
+              ('minus', 'loop', 'gw', 'mute', 'kstart', 'kdur'),
               ('pics', 'names'), ('catTheme', 'contest')]
     done = set()
     for g in groups:
