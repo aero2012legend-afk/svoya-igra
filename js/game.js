@@ -1802,7 +1802,7 @@
     if (c.id === 'kar') { // очки певцу — цена × доля 👍; голосовать некому — оценивает ведущий
       const vals = Object.values(c.votes || {}), y = vals.filter(x => x === 'y').length, n = vals.length - y;
       const share = manual ? { y: 1, h: 0.5, n: 0 }[manual] || 0 : y + n ? y / (y + n) : 0;
-      const pts = share > 0 ? r10(q.price * share) : 0;
+      const pts = share >= 1 ? q.price : share > 0 ? r10(q.price * share) : 0; // полный успех — ровно цена клетки (777, а не 780)
       const how = manual ? (manual === 'y' ? 'Зажёг(ла)! 🔥' : manual === 'h' ? 'Неплохо 🙂' : 'Мимо нот 🙈') : `👍 ${y} · 👎 ${n}`;
       return conFinish(pts ? { [c.a]: pts } : {}, pts ? c.a : null, `${entName(c.a)}: ${how} — ${pts ? sgn(pts) : 'без очков'}`);
     }
