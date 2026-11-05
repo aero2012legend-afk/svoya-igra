@@ -2749,7 +2749,7 @@
     const items = [];
     if (['board', 'end'].includes(G.phase)) items.push(['⚙ Игроки и настройки', 'lobby']);
     if (G.phase === 'board') items.push(['⏭ Следующий раунд', 'skipround'], ['🏁 Сразу к финалу', 'tofinal']);
-    items.push(['🔑 Пульт ведущего', 'pult'], ['↻ Новая игра', 'newgame'], ['📡 Другой сервер связи', 'broker'], ['🎲 Новый код комнаты', 'newroom'], [document.body.classList.contains('lite') ? '✨ Эффекты: включить полные' : '🍃 Эффекты: облегчить (если тормозит)', 'fxmode']);
+    items.push(['🔑 Пульт ведущего', 'pult'], ['↻ Новая игра', 'newgame'], ...(Net.local || NONET ? [] : [['📡 Другой сервер связи', 'broker']]), ['🎲 Новый код комнаты', 'newroom'], [document.body.classList.contains('lite') ? '✨ Эффекты: включить полные' : '🍃 Эффекты: облегчить (если тормозит)', 'fxmode']);
     document.body.appendChild(el(`<div class="tmenu">${items.map(([t, a]) => `<button data-act="${a}">${t}</button>`).join('')}</div>`));
   }
   function modal(inner) {
