@@ -11,6 +11,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 JS = """const fs=require('fs'),vm=require('vm');const c={window:{}};vm.runInNewContext(fs.readFileSync(process.argv[1],'utf8'),c);
 const G=c.window.GAME,out=[];G.rounds.forEach((r,ri)=>r.themes.forEach(t=>t.questions.forEach(q=>{for(const k of ['audio','video','minus','aaudio'])if(q[k])out.push({r:ri+1,theme:t.name,price:q.price,file:q[k],a:q.a||'',k});})));
 (G.danceSongs||[]).forEach(f=>out.push({r:0,theme:'Танцевальный баттл',price:'',file:f,a:'',k:'dance'}));
+(G.karbattle||[]).forEach(x=>out.push({r:0,theme:'Караоке-баттл',price:'',file:x.audio,a:x.artist+' — '+x.title,k:'karbattle'}));
 console.log(JSON.stringify(out));"""
 
 

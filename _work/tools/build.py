@@ -278,6 +278,18 @@ def dance_songs(rep):
     return '[' + ', '.join(js_str(s) for s in songs) + ']'
 
 
+def kar_battle(rep):
+    """Припевы для караоке-баттла — из _work/content/karbattle.json (музыка вне git, как и вся остальная)."""
+    f = os.path.join(ROOT, '_work', 'content', 'karbattle.json')
+    songs = json.load(open(f, encoding='utf-8')) if os.path.exists(f) else []
+    out = []
+    for x in songs:
+        rep.check_file('Караоке-баттл', x['audio'], media=True)
+        kar = ', '.join(f'[{js_num(l[0])}, {js_str(l[1])}' + (f', [{", ".join(js_num(t) for t in l[2])}]' if len(l) > 2 else '') + ']' for l in x.get('kar', []))
+        out.append(f"    {{ artist: {js_str(x['artist'])}, title: {js_str(x['title'])}, audio: {js_str(x['audio'])}, kar: [{kar}] }},")
+    return '[\n' + '\n'.join(out) + '\n  ]' if out else '[]'
+
+
 def build(partial):
     themes, final, extras = load_content()
     rep = Report()
@@ -289,7 +301,9 @@ def build(partial):
            "     Пример: music: { board: ['media/bgm/моя.mp3'], think: false }, — false выключает музыку экрана */", '',
            '  /* Песни для танцевального баттла (каждый баттл — новая). Пусто — играет встроенный бит.',
            "     Пример: danceSongs: ['media/dance/song1.mp3', 'media/dance/song2.mp3'], */",
-           f'  danceSongs: {dance_songs(rep)},', '', '  rounds: [']
+           f'  danceSongs: {dance_songs(rep)},', '',
+           '  /* Караоке-баттл: каждому игроку — свой припев (музыка с тихим голосом) и строчки со временем слов */',
+           f'  karbattle: {kar_battle(rep)},', '', '  rounds: [']
     summary, missing = [], []
     for rno, names in LAYOUT.items():
         picked = []

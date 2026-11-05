@@ -13,18 +13,6 @@
   "note": "исходник темы 165 с, нужна только первая фраза; громкость доведена до -15 LUFS"
  },
  {
-  "file": "media/music/igrulki/r1_800_ducktales.mp3",
-  "source": "https://soundcloud.com/n1n10d0h/ducktales-nes-moon-theme",
-  "title": "DuckTales (NES, Capcom, 1989) — Moon Theme, Хиросиге Тономура (Ninten, «DuckTales (NES) Moon Theme»)",
-  "cut": [
-   0.0,
-   30.0
-  ],
-  "gain_db": -2.7,
-  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=28.50:d=1.5,volume=-2.7dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "оригинал 92.7 с, взято вступление и основная тема"
- },
- {
   "file": "media/music/igrulki/r1_700_pacman.mp3",
   "source": "https://www.myinstants.com/media/sounds/pacman_introduction_music-kp-826387403.mp3",
   "title": "Pac-Man (Namco, 1980): стартовая мелодия (myinstants «Pac-Man Intro»), повторена трижды",

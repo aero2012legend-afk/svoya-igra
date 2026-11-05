@@ -1,17 +1,5 @@
 [
  {
-  "file": "media/music/igrulki/r3_600_duckhunt.mp3",
-  "source": "https://www.myinstants.com/media/sounds/07-laugh.mp3",
-  "title": "Duck Hunt (NES, Nintendo, 1984): смех собаки (myinstants «Duck Hunt Laugh»)",
-  "cut": [
-   0.0,
-   1.59
-  ],
-  "gain_db": -0.4,
-  "ffmpeg": "afade=t=in:d=0.01,afade=t=out:st=1.45:d=0.14,volume=-0.4dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "исходник 1,59 с (-14,6 LUFS), берём целиком; запасные копии: myinstants dog-laugh-duck-hunt.mp3, duck-hunt-dog-laughing.mp3"
- },
- {
   "file": "media/music/igrulki/r3_1500_subway.mp3",
   "source": "https://www.myinstants.com/media/sounds/subway-surfers-theme.mp3",
   "title": "Subway Surfers (Kiloo/SYBO, 2012): главная тема (myinstants «Subway Surfers Theme»)",

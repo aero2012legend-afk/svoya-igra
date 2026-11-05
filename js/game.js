@@ -12,6 +12,8 @@
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const pick = a => a[Math.floor(Math.random() * a.length)];
   const r10 = v => Math.max(10, Math.round(v / 10) * 10);
+  const RM = () => Math.max(1, (G && G.round || 0) + 1); // награды конкурсов растут с раундом: ×1, ×2, ×3
+  const rulesOf = C => String(C.rules || '').replace(/\b100 очков/g, `${100 * RM()} очков`).replace(/\bот 200 до 1000\b/g, `от ${200 * RM()} до ${1000 * RM()}`).replace(/теряет 300\b/g, `теряет ${300 * RM()}`);
   const fmt = n => (n < 0 ? '−' : '') + Math.abs(Math.round(n)).toLocaleString('ru-RU');
   const sgn = n => (n >= 0 ? '+' : '−') + Math.abs(Math.round(n)).toLocaleString('ru-RU');
   const clean = (s, n) => String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f<>]/g, '').trim().slice(0, n);
@@ -773,6 +775,11 @@
   const gapWord = d => String(d.gw || String(d.a || '').split(/\s+[(«]/)[0] || '').trim();
   // откуда караоке берёт время и что показывать: обычный вопрос или конкурс «Караоке»
   function karCtx() {
+    const c0 = G.q && G.q.con;
+    if (G.phase === 'q' && c0 && c0.id === 'sing' && c0.step === 'play' && karA && karA.kb && Array.isArray(karA.kb.kar)) {
+      const L = karA.kb.kar.filter(x => Array.isArray(x) && x.length >= 2); if (!L.length) return null;
+      return { L, t: karA.el ? karA.el.currentTime : 0, rv: true, cut: 0, d: { kar: L } };
+    }
     const q = G.q, d = curD(); if (G.phase !== 'q' || !q || !Array.isArray(d.kar)) return null;
     const L = d.kar.filter(x => Array.isArray(x) && x.length >= 2); if (!L.length) return null;
     if (q.con) { const c = q.con; return c.id === 'kar' && c.step === 'play' ? { L, t: karA && karA.el ? karA.el.currentTime : 0, rv: true, cut: 0, d } : null; }
@@ -898,7 +905,12 @@
     const qs = $('#stage .qscreen'), qt = qs && $('.qtext', qs), hb = qs && $('.hostbar', qs); if (!qt || !hb) return;
     const pb = parseFloat(getComputedStyle(qs).paddingBottom) || 0, over = () => hb.offsetTop + hb.offsetHeight + pb - qs.clientHeight;
     let fs = parseFloat(qt.style.fontSize) || 3;
+    qs.style.zoom = '';
     for (let k = 0; k < 10 && over() > 1 && fs > 1.7; k++) { fs = Math.max(1.7, fs * 0.92); qt.style.fontSize = fs.toFixed(2) + 'rem'; }
+    // всё равно не влезло (картинка + ответ + комментарий) — уменьшаем весь экран вопроса, чтобы кнопки не прятались под карточками игроков
+    if (over() > 1) { const need = hb.offsetTop + hb.offsetHeight + pb; qs.style.zoom = Math.max(0.55, qs.clientHeight / need).toFixed(3); }
+    // картинка догрузилась позже — пересчитать
+    $$('img', qs).forEach(im => { if (!im.complete && !im.dataset.fitq) { im.dataset.fitq = 1; im.addEventListener('load', () => fitQ(), { once: true }); } });
   }
   function hostButtons(q) {
     const B = (a, label, cls, k) => `<button class="btn ${cls || ''}" data-act="${a}">${label}${k ? `<kbd>${k}</kbd>` : ''}</button>`;
@@ -1228,6 +1240,18 @@
     mediaStop();
     await mediaPrep(q, { audio: d.aaudio, loop: false });
     if (G.q === q && q.stage === 'reveal') mediaPlay();
+  }
+  // скрытый бонус: после конкурса — сам вопрос этой клетки (а не сразу табло)
+  function bonusHasQ() { const q = G.q, d = q && curD(); return !!(q && q.type === 'bonus' && q.con && q.con.step === 'result' && d && String(d.q || '').trim()); }
+  function bonusNext() { return bonusHasQ() ? bonusToQ() : backToBoard(); }
+  async function bonusToQ() {
+    const q = G.q; if (!bonusHasQ() || busy) return;
+    snap(); busy = true;
+    q.type = 'normal'; q.con = null; q.tried = []; q.ans = null; q.owner = null; q.result = null; q.tw = 0;
+    q.tot = q.tl = G.set.timer; q.tr = false;
+    try { await overlay('qnext'); } finally { busy = false; }
+    if (G.q !== q) return;
+    q.stage = 'read'; changed(); autoOpen();
   }
   function backToBoard() {
     if (G.phase !== 'q' || !G.q || busy) return;
@@ -1593,7 +1617,7 @@
     { id: 'rps', icon: '✊', name: 'Камень-ножницы-бумага', stake: true, rules: 'Выбор — тайно на телефоне. Победитель получает ставку, проигравший теряет 300. Ничья — переигровка.' },
     { id: 'dance', icon: '💃', name: 'Танцевальный баттл', need: 'dance', pickWord: 'партнёра по баттлу', rules: '30 секунд танцуете вдвоём под музыку, потом остальные голосуют на телефонах. Победителю — по 100 очков за каждый голос.' },
     { id: 'shot', icon: '🥃', name: 'Стопка без рук', need: 'drink', stake: true, rules: 'Руки за спину! Выпить стопку, не касаясь её руками. Каждый, кто справился, получает ставку.' },
-    { id: 'sing', icon: '🎤', name: 'Караоке-баттл', need: 'sing', perf: 20, pl: 'Тема песни', pickWord: 'соперника по караоке', rules: 'Каждый поёт по 20 секунд на заданную тему, потом голосование. Победителю — по 100 очков за голос.' },
+    { id: 'sing', icon: '🎤', name: 'Караоке-баттл', need: 'sing', perf: 20, pl: 'Тема песни', pickWord: 'соперника по караоке', rules: 'Каждому — свой припев популярной песни: 20 секунд под музыку, слова на экране. Потом голосование. Победителю — по 100 очков за голос.' },
     { id: 'tap', icon: '👆', name: 'Тап-баттл', phone: true, stake: true, rules: '10 секунд жмите на кнопку телефона как можно быстрее. Кто больше нажал — получает ставку.' },
     { id: 'react', icon: '⚡', name: 'Дуэль реакции', phone: true, stake: true, rules: 'Экран телефона красный — ждём. Стал зелёным — жми! Кто быстрее, получает ставку. Нажал раньше времени — проиграл.' },
     { id: 'croc', icon: '🐊', name: 'Крокодил', needA: 'act', phoneA: true, solo: true, stake: true, deck: 'croc', show: 'Покажи его без слов и звуков', rules: 'Слово пришло тебе на телефон. Покажи его без слов и звуков за 60 секунд! Ставку получат показывающий и тот, кто угадал первым.' },
@@ -1625,7 +1649,9 @@
   }
   function conAfterSpin(c) { const C = CX[c.id]; return !C ? 'spin' : C.solo ? (C.stake ? 'stake' : 'ready') : 'pick'; }
   const conPicker = c => (c.id === 'kar' ? c.g : c.a); // кто выбирает на шаге pick
-  const conPrompt = c => (c.id === 'sing' ? c.theme : c.pr ? c.pr[c.turn === 'b' ? 'b' : 'a'] : '') || '';
+  const kbSong = (c, side) => (c && c.songs && Array.isArray(PACK.karbattle) ? PACK.karbattle[c.songs[side || (c.turn === 'b' ? 'b' : 'a')]] : null);
+  const kbName = x => (x ? `${x.artist} — «${x.title}»` : '');
+  const conPrompt = c => (c.id === 'sing' ? (c.songs ? kbName(kbSong(c)) : c.theme) : c.pr ? c.pr[c.turn === 'b' ? 'b' : 'a'] : '') || '';
   function pubCon(c) {
     const C = CX[c.id] || {};
     const o = { id: c.id || null, i: C.icon || '🎁', n: C.name || 'Бонус-конкурс', st: c.step, a: c.a, b: c.b, stake: c.stake || 0 };
@@ -1661,7 +1687,13 @@
     const C = CX[c.id] || {};
     if (step === 'ready' && SHOWC.includes(c.id) && !c.word) { c.word = drawCard(C.deck); sendPrivate(c.a, { k: G.q.key, word: c.word }); }
     if (step === 'ready' && (c.id === 'chain' || c.id === 'tongue') && !c.word) c.word = drawCard(C.deck);
-    if (step === 'ready' && c.id === 'sing' && !c.theme) c.theme = pick(SING);
+    if (step === 'ready' && c.id === 'sing' && !c.theme && !c.songs) {
+      const L = Array.isArray(PACK.karbattle) ? PACK.karbattle.filter(x => x && x.audio) : [];
+      if (L.length >= 2) { // по припеву каждому, без повторов за игру
+        G.kbu = (G.kbu || []).filter(i => i < L.length); let free = L.map((_, i) => i).filter(i => !G.kbu.includes(i)); if (free.length < 2) { G.kbu = []; free = L.map((_, i) => i); }
+        const a = pick(free), b = pick(free.filter(i => i !== a)); c.songs = { a, b }; G.kbu.push(a, b);
+      } else c.theme = pick(SING);
+    }
     if (step === 'ready' && C.each && !c.pr) { const x = drawCard(C.deck); let y = drawCard(C.deck); for (let k = 0; k < 5 && y === x; k++) y = drawCard(C.deck); c.pr = { a: x, b: y }; }
   }
   function conWho(eid) { const q = G.q, c = q && q.con; if (!c || c.step !== 'who' || !ent(eid)) return; snap(); c.a = eid; c.step = 'spin'; changed(); conAuto(); }
@@ -1696,7 +1728,7 @@
   async function conStake() {
     const q = G.q, c = q && q.con; if (!c || c.step !== 'stake' || busy) return;
     busy = true; snap();
-    const gen = () => 100 * (2 + Math.floor(Math.random() * 9)); // от 200 до 1000
+    const gen = () => 100 * RM() * (2 + Math.floor(Math.random() * 9)); // от 200 до 1000 × номер раунда
     c.stake = FORCE.stake || gen(); publish();
     try { await spinSlot($('#slot'), () => fmt(gen()), fmt(c.stake)); } finally { busy = false; }
     if (G.q !== q) return;
@@ -1708,7 +1740,7 @@
     switch (c.id) {
       case 'rps': c.ch = { a: null, b: null }; c.rnd = c.rnd || 1; Sound.play('open'); break;
       case 'dance': conTimer(30, () => conToVote()); discoStart(); break;
-      case 'sing': case 'toast': case 'parody': c.turn = 'a'; conTimer(CX[c.id].perf, () => conSingNext()); Sound.play('open'); break;
+      case 'sing': case 'toast': case 'parody': c.turn = 'a'; conTimer(CX[c.id].perf, () => conSingNext()); Sound.play('open'); if (c.id === 'sing' && c.songs) kbPlay(); break;
       case 'shot': c.ok = { a: null, b: null }; conTimer(30, null); Sound.play('roll'); break;
       case 'tap': c.taps = { a: 0, b: 0 }; c.fin = { a: false, b: false }; c.go = false; c.gid = Net.id(); changed(); return conCountdown(() => conTapGo());
       case 'react': return conReactRound();
@@ -1744,6 +1776,18 @@
     if (c.tr) { const p = e.play(); if (p && p.catch) p.catch(() => {}); }
     karLoop();
   }
+  // караоке-баттл: припев текущего игрока (музыка с тихим голосом) через тот же плеер, что и караоке-клетка
+  async function kbPlay() {
+    const q = G.q, c = q && q.con, x = kbSong(c), k = q && q.key, turn = c && c.turn; if (!x) return;
+    karStop();
+    const A = karA = { key: k, el: null, kb: x };
+    await mediaPermit(); const url = await mediaUrl(x.audio);
+    if (karA !== A || !G.q || G.q.key !== k || c.step !== 'play' || c.turn !== turn) return;
+    const e = A.el = new Audio(url); e.preload = 'auto'; e.muted = Sound.muted;
+    e.addEventListener('error', () => { if (karA === A) toast('⚠ Нет файла с песней — пусть поёт а капелла 🙂'); });
+    e.src = url; if (c.tr) { const p = e.play(); if (p && p.catch) p.catch(() => {}); }
+    karLoop();
+  }
   let conOnEnd = null;
   function conTimer(sec, onEnd) {
     const c = G.q.con; c.tot = sec; c.tl = sec; c.tr = true; conOnEnd = onEnd;
@@ -1758,7 +1802,7 @@
   }
   function conPause() {
     const c = G.q && G.q.con; if (!c || c.step !== 'play' || !c.tot || c.tl <= 0) return;
-    const ka = c.id === 'kar' && karA && karA.el;
+    const ka = (c.id === 'kar' || (c.id === 'sing' && c.songs)) && karA && karA.el;
     if (c.tr) { c.tr = false; clearInterval(cInt); cInt = null; if (discoOn) discoMusic(false); if (ka) ka.pause(); }
     else {
       c.tr = true; cLast = performance.now(); clearInterval(cInt); cInt = setInterval(cTick, 100);
@@ -1789,7 +1833,7 @@
   }
   function conSingNext() {
     const q = G.q, c = q && q.con; if (!c || c.step !== 'play' || !PERFC.includes(c.id)) return;
-    if (c.turn === 'a') { c.turn = 'b'; Sound.play('whoosh'); conTimer(CX[c.id].perf, () => conSingNext()); changed(); } else conToVote();
+    if (c.turn === 'a') { c.turn = 'b'; karStop(); Sound.play('whoosh'); conTimer(CX[c.id].perf, () => conSingNext()); changed(); if (c.id === 'sing' && c.songs) kbPlay(); } else conToVote();
   }
   function conVote(pid, eid, k, v) {
     const q = G.q, c = q && q.con; if (!c || c.step !== 'vote' || q.key !== k || !(c.id === 'kar' ? ['y', 'n'] : ['a', 'b']).includes(v) || !(c.voters || []).includes(pid) || c.votes[pid]) return;
@@ -1807,13 +1851,15 @@
       return conFinish(pts ? { [c.a]: pts } : {}, pts ? c.a : null, `${entName(c.a)}: ${how} — ${pts ? sgn(pts) : 'без очков'}`);
     }
     if (manual) { // голосовать некому — решает ведущий
-      if (manual === 'tie') return conFinish({ [c.a]: 300, [c.b]: 300 }, null, 'Ничья! Каждому по 300');
-      const w = manual === 'a' ? c.a : c.b; return conFinish({ [w]: 300 }, w, `${entName(w)} побеждает!`);
+      const m3 = 300 * RM();
+      if (manual === 'tie') return conFinish({ [c.a]: m3, [c.b]: m3 }, null, `Ничья! Каждому по ${fmt(m3)}`);
+      const w = manual === 'a' ? c.a : c.b; return conFinish({ [w]: m3 }, w, `${entName(w)} побеждает!`);
     }
     const vals = Object.values(c.votes), va = vals.filter(x => x === 'a').length, vb = vals.length - va;
-    if (va === vb) return conFinish({ [c.a]: 100 * va, [c.b]: 100 * vb }, null, va ? `Ничья ${va} : ${vb}! Каждому по ${fmt(100 * va)}` : 'Голосов нет — ничья, без очков');
+    const pv = 100 * RM(); // очков за голос
+    if (va === vb) return conFinish({ [c.a]: pv * va, [c.b]: pv * vb }, null, va ? `Ничья ${va} : ${vb}! Каждому по ${fmt(pv * va)}` : 'Голосов нет — ничья, без очков');
     const w = va > vb ? c.a : c.b, n = Math.max(va, vb);
-    conFinish({ [w]: 100 * n }, w, `${entName(w)} побеждает со счётом ${n} : ${Math.min(va, vb)}!`);
+    conFinish({ [w]: pv * n }, w, `${entName(w)} побеждает со счётом ${n} : ${Math.min(va, vb)}!`);
   }
   function conRps(eid, k, v, host) {
     const q = G.q, c = q && q.con; if (!c || c.id !== 'rps' || c.step !== 'play' || busy || !c.ch || (!host && q.key !== k) || !RPS[v]) return;
@@ -1835,7 +1881,7 @@
     const A = c.ch.a, B = c.ch.b;
     if (A === B) { toast('Ничья! Переигровка'); Sound.play('swap'); c.rnd = (c.rnd || 1) + 1; c.ch = { a: null, b: null }; return changed(); }
     const aw = beats(A, B), w = aw ? c.a : c.b, l = aw ? c.b : c.a, wv = aw ? A : B, lv = aw ? B : A;
-    snap(); conFinish({ [w]: c.stake, [l]: -300 }, w, `${entName(w)} побеждает: ${RPS[wv][1].toLowerCase()} бьёт ${RPS[lv][1].toLowerCase()}!`);
+    snap(); conFinish({ [w]: c.stake, [l]: -300 * RM() }, w, `${entName(w)} побеждает: ${RPS[wv][1].toLowerCase()} бьёт ${RPS[lv][1].toLowerCase()}!`);
   }
   function conShot(side, ok) {
     const q = G.q, c = q && q.con; if (!c || c.id !== 'shot' || c.step !== 'play' || !c.ok || !['a', 'b'].includes(side)) return;
@@ -1971,7 +2017,7 @@
       if (c.id === 'rps' && !c.mini) { c.mini = true; curSig = null; return render(); } // телефон отвалился — ведущий вводит выбор сам
     }
     if (c.step === 'vote') { if (c.voters && c.voters.length) conCount(); return; }
-    if (c.step === 'result') return backToBoard();
+    if (c.step === 'result') return bonusNext();
   }
   // экран конкурса
   const nmB = e => (e ? `<b style="color:${e.color}">${esc(e.name)}</b>` : '—');
@@ -2009,11 +2055,11 @@
         if (c.id === 'kar') {
           const d = curD();
           return el(`<div class="special con karc">${head}<div class="sp-info">🎤 Поёт ${nmB(A)}</div><div class="kar-song">${esc(d.q || '')}</div>${d.img ? `<img class="kar-img" src="${esc(d.img)}" alt="">` : ''}
-            <div class="con-rules">${esc(C.rules || '')}</div><div class="hostbar">${B2('cstart', '▶ Поехали!', 'gold big', 'Пробел')}</div></div>`);
+            <div class="con-rules">${esc(rulesOf(C))}</div><div class="hostbar">${B2('cstart', '▶ Поехали!', 'gold big', 'Пробел')}</div></div>`);
         }
         const prompts = C.each && c.pr ? `<div class="sp-info">${esc(C.pl || 'Тема')}: ${esc(entName(c.a))} — <b>${esc(c.pr.a)}</b> · ${esc(entName(c.b))} — <b>${esc(c.pr.b)}</b></div>` : '';
-        return el(`<div class="special con">${head}${vsHTML(c)}<div class="con-rules">${esc(C.rules || '')}</div>
-        ${c.id === 'sing' ? `<div class="sp-info">Тема песни: <b>${esc(c.theme || '')}</b></div>` : ''}${prompts}${SHOWC.includes(c.id) ? '<div class="sp-hint">🤫 Задание пришло на телефон игроку и на пульт ведущего</div>' : ''}
+        return el(`<div class="special con">${head}${vsHTML(c)}<div class="con-rules">${esc(rulesOf(C))}</div>
+        ${c.id === 'sing' ? (c.songs ? `<div class="sp-info">🎤 ${nmB(ent(c.a))}: <b>${esc(kbName(kbSong(c, 'a')))}</b><br>🎤 ${nmB(ent(c.b))}: <b>${esc(kbName(kbSong(c, 'b')))}</b></div><div class="sp-hint">Каждый поёт свой припев 20 секунд под музыку — слова на экране</div>` : `<div class="sp-info">Тема песни: <b>${esc(c.theme || '')}</b></div>`) : ''}${prompts}${SHOWC.includes(c.id) ? '<div class="sp-hint">🤫 Задание пришло на телефон игроку и на пульт ведущего</div>' : ''}
         ${c.id === 'chain' ? `<div class="con-word">${esc(c.word || '')}</div>` : ''}
         <div class="hostbar">${SHOWC.includes(c.id) || c.id === 'chain' ? B2('cword', '🔄 Другое задание') : ''}${B2('cstart', '▶ Начать', 'gold big', 'Пробел')}</div></div>`);
       }
@@ -2032,7 +2078,7 @@
       case 'result': {
         const pts = (c.res && c.res.pts) || {};
         const rows = Object.keys(pts).filter(id => pts[id] && ent(id)).map(id => `<div class="cp ${pts[id] > 0 ? 'pos' : 'neg'}" style="--c:${ent(id).color}">${esc(entName(id))} <b>${sgn(pts[id])}</b></div>`).join('');
-        return el(`<div class="special con">${head}<div class="con-res">🏆 ${esc(c.res ? c.res.text : '')}</div><div class="con-pts">${rows}</div><div class="hostbar">${B2('board', 'К табло ▶', 'gold', '→')}</div></div>`);
+        return el(`<div class="special con">${head}<div class="con-res">🏆 ${esc(c.res ? c.res.text : '')}</div><div class="con-pts">${rows}</div><div class="hostbar">${bonusHasQ() ? B2('bq', 'К вопросу ▶', 'gold', '→') : B2('board', 'К табло ▶', 'gold', '→')}</div></div>`);
       }
     }
     return el('<div></div>');
@@ -2050,6 +2096,8 @@
       case 'dance': return el(`<div class="special con dance">${head}${vsHTML(c)}<div class="sp-title sm glow">💃 ТАНЦУЮТ! 🕺</div>${clock}<div class="hostbar">${pause}${B2('cnext', 'Стоп — к голосованию ▶', 'gold', '→')}</div></div>`);
       case 'sing': case 'toast': case 'parody': {
         const e = c.turn === 'b' ? B : A, verb = c.id === 'sing' ? 'Поёт' : c.id === 'toast' ? 'Тост говорит' : 'Пародирует';
+        if (c.id === 'sing' && c.songs) return el(`<div class="special con karc play">${head}<div class="sp-info">🎤 Поёт ${nmB(e)} · <span class="mut">${esc(kbName(kbSong(c)))}</span></div>${karHTML({ kar: [1] }).replace('class="kar"', 'class="kar big"')}${clock}
+          <div class="hostbar">${pause}${B2('cnext', c.turn === 'b' ? 'К голосованию ▶' : `Теперь ${esc(B ? B.name : '')} ▶`, 'gold', '→')}</div></div>`);
         return el(`<div class="special con sing">${head}<div class="mic">${C.icon}</div><div class="sp-info">${verb}: ${nmB(e)}</div><div class="sp-hint">${esc(C.pl || 'Тема')}: <b>${esc(conPrompt(c))}</b></div>${clock}
           <div class="hostbar">${pause}${B2('cnext', c.turn === 'b' ? 'К голосованию ▶' : `Теперь ${esc(B ? B.name : '')} ▶`, 'gold', '→')}</div></div>`);
       }
@@ -2223,6 +2271,7 @@
     const s = new Set();
     PACK.rounds.forEach(r => (r.themes || []).forEach(th => (th.questions || []).forEach(x => { ['audio', 'video', 'minus', 'aaudio'].forEach(k => { if (x[k]) s.add(x[k]); }); })));
     (PACK.danceSongs || []).forEach(x => { if (x) s.add(x); });
+    (PACK.karbattle || []).forEach(x => { if (x && x.audio) s.add(x.audio); });
     return Array.from(s);
   };
   async function mediaCheck() {
@@ -2573,7 +2622,8 @@
     trap: () => `<div class="ov-emoji">🚨</div><div class="ov-title">⚠ ЛОВУШКА ⚠</div><div class="ov-sub">Ангел или дьявол? Решит монетка…</div>${PACK.jokes && PACK.jokes.trap ? `<div class="ov-sub sm">${esc(joke('trap'))}</div>` : ''}`,
     angel: () => `<div class="ov-halo"></div><div class="ov-emoji angel">😇</div><div class="ov-title">${letters('АНГЕЛ')}</div><div class="ov-sub">Небеса сегодня добры</div>`,
     devil: () => `<div class="ov-flames"></div><div class="ov-emoji devil">😈</div><div class="ov-title">${letters('ДЬЯВОЛ')}</div><div class="ov-sub">Сейчас будет жарко…</div>`,
-    bonus: () => `<div class="ov-rays bonus"></div><div class="ov-qs"><span>?</span><span>?</span><span>?</span></div><div class="ov-title">${letters('БОНУС!')}</div><div class="ov-sub">Вместо вопроса — конкурс</div>`,
+    bonus: () => `<div class="ov-rays bonus"></div><div class="ov-qs"><span>?</span><span>?</span><span>?</span></div><div class="ov-title">${letters('БОНУС!')}</div><div class="ov-sub">Сначала конкурс, потом — вопрос</div>`,
+    qnext: () => `<div class="ov-rays"></div><div class="ov-emoji">❓</div><div class="ov-title">${letters('А теперь — вопрос!')}</div>`,
     music: () => `<div class="ov-eq">${'<i></i>'.repeat(9)}</div><div class="ov-title">${letters('Угадай мелодию')}</div><div class="ov-sub">🎵 Слушаем внимательно</div>`,
     video: () => `<div class="ov-film"></div><div class="ov-emoji clap">🎬</div><div class="ov-title">${letters('Видеовопрос')}</div><div class="ov-sub">Смотрим внимательно!</div>`,
     bribe: d => `<div class="ov-rays"></div><div class="ov-emoji">💰</div><div class="ov-title">${esc(d.name)}<br>подкупает судью!</div><div class="ov-sub">−${fmt(d.cost)} очков · ${d.hint ? 'подсказка ушла на телефон 🤫' : 'судья, шепни подсказку на ушко 🤫'}</div><div class="ov-sub sm">${esc(joke('bribe', d.name))}</div>`,
@@ -2583,7 +2633,7 @@
     karaoke: () => `<div class="ov-rays"></div><div class="ov-emoji mic">🎤</div><div class="ov-title">${letters('Караоке!')}</div><div class="ov-sub">Кому достанется микрофон?</div>`,
     final: () => { const FT = finThemes(); return `<div class="ov-title">${letters('ФИНАЛ')}</div><div class="ov-sub">${FT.length > 1 ? `${FT.length} тем — по очереди вычёркиваем, пока не останется одна` : 'Тема: ' + esc((FT[0] || {}).theme || '')}</div>${PACK.jokes && PACK.jokes.final ? `<div class="ov-sub sm">${esc(joke('final'))}</div>` : ''}`; },
   };
-  const OVDUR = { cat: 3400, auction: 3000, trap: 2600, angel: 2700, devil: 2700, bonus: 2600, music: 2100, video: 2000, bribe: 3000, round: 2600, final: 3400, medal: 2600, mashup: 2200, karaoke: 2800 };
+  const OVDUR = { cat: 3400, auction: 3000, trap: 2600, angel: 2700, devil: 2700, bonus: 2600, music: 2100, video: 2000, bribe: 3000, round: 2600, final: 3400, medal: 2600, mashup: 2200, karaoke: 2800, qnext: 1700 };
   const OVFX = {
     cat: () => { Sound.play('whoosh'); setTimeout(() => { Sound.play('cat'); FX.burst(innerWidth / 2, innerHeight * 0.4, '#ffcc33', 70); }, 1050); },
     auction: () => { Sound.play('auction'); [0, 380, 760].forEach(d => setTimeout(() => FX.burst(innerWidth * 0.53, innerHeight * 0.38, '#ffcc33', 45), d + 260)); },
@@ -2591,6 +2641,7 @@
     angel: () => { Sound.play('angel'); FX.rain('✨', 36); setTimeout(() => FX.burst(innerWidth / 2, innerHeight * 0.36, '#fff3b0', 80), 300); },
     devil: () => { Sound.play('devil'); setTimeout(() => Sound.play('devillaugh'), 350); FX.rise('🔥', 36); setTimeout(() => FX.burst(innerWidth / 2, innerHeight * 0.36, '#ff4d5e', 80), 300); },
     bonus: () => { Sound.play('bonus'); [0, 300, 600].forEach(d => setTimeout(() => FX.burst(innerWidth * (0.3 + d / 1500), innerHeight * 0.4, '#c58bff', 50), d + 200)); },
+    qnext: () => Sound.play('whoosh'),
     music: () => Sound.play('open'),
     video: () => Sound.play('whoosh'),
     bribe: () => { Sound.play('bribe'); FX.rain('💰', 40); FX.rain('💵', 18); },
@@ -2733,7 +2784,7 @@
   function escAction() {
     if (ovResolve) return closeOverlay();
     if ($('.emenu, .tmenu')) return closeMenus();
-    if (G.phase === 'q' && G.q && (G.q.stage === 'reveal' || (G.q.con && G.q.con.step === 'result'))) backToBoard();
+    if (G.phase === 'q' && G.q && (G.q.stage === 'reveal' || (G.q.con && G.q.con.step === 'result'))) bonusNext();
   }
   function act(a, ds) {
     Sound.init();
@@ -2753,6 +2804,7 @@
       case 'reveal': return reveal();
       case 'mp1': case 'mp2': return mashPartial(a === 'mp2' ? 2 : 1);
       case 'board': return backToBoard();
+      case 'bq': return bonusToQ();
       case 'catgive': return catGive(ds.id);
       case 'bid': return placeBid(ds.id, ds.v, true);
       case 'bidc': return bidCustom(ds.id);

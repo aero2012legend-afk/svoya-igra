@@ -24,15 +24,15 @@
   "note": "один полный цикл мелодии (≈12.6 с, в исходнике 16 повторов), без слов; в игре играет по кругу, без start/end"
  },
  {
-  "file": "media/music/kinchiki/r1_1000_requiem.mp3",
-  "source": "https://soundcloud.com/nonesuchrecords/kronos-quartet-clint-mansell",
-  "title": "«Реквием по мечте» — «Lux Aeterna», Клинт Мэнселл / Kronos Quartet (официальная загрузка Nonesuch Records; вступление главной темы)",
+  "file": "media/music/kinchiki/r1_1000_bttf.mp3",
+  "source": "https://soundcloud.com/user5139758/03-alan-silvestri-back-to-the",
+  "title": "«Назад в будущее» (1985) — главная тема, Алан Сильвестри (трек «Back To The Future» с саундтрека, 3:20; та же запись в загрузке Graham Boag — https://soundcloud.com/graham-boag/back-to-the-future-main-theme)",
   "cut": [
-   22.5,
-   52.5
+   4.5,
+   34.5
   ],
-  "gain_db": 2.3,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=2.3dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "оригинал 3:54; вырезано вступление главной темы (в исходнике ~24 с)"
+  "gain_db": 4.1,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=4.1dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "с нарастания перед фанфарой (в исходнике фанфара ~7 с); две подачи темы"
  }
 ]

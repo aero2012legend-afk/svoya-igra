@@ -24,18 +24,6 @@
   "note": "громкость исходника подтянута до −15 LUFS; заменяет английскую запись (myinstants)"
  },
  {
-  "file": "media/music/kinchiki/r3_3000_bladerunner.mp3",
-  "source": "https://archive.org/download/07.-blade-runner-blues/01.%20Main%20Titles.mp3",
-  "title": "«Бегущий по лезвию» (1982) — Вангелис, «Main Titles» (альбом «Blade Runner», 1994, archive.org; первые ~25 с: нарастающий аккорд заставки и синтезаторные волны)",
-  "cut": [
-   0.3,
-   30.3
-  ],
-  "gain_db": 1.4,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=1.4dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "с самого начала трека (звук в исходнике с ~1 с); в игре без start/end"
- },
- {
   "file": "media/music/kinchiki/r3_600_diamond.mp3",
   "source": "https://www.dailymotion.com/video/x7yc3oq",
   "title": "«Бриллиантовая рука» (1968, реж. Леонид Гайдай): закадровый голос в Стамбуле — «Дальше следует непереводимая игра слов с использованием местных идиоматических выражений.» (Dailymotion BORDO «Бриллиантовая рука - 1 часть», 3251 с; реплика на 1176.7–1181.4 с; при пересоздании скачивается вся часть ≈200 МБ)",
@@ -46,5 +34,17 @@
   "gain_db": 5.7,
   "ffmpeg": "afade=t=in:d=0.05,afade=t=out:st=5.00:d=0.4,volume=5.7dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "в игре играет целиком (start/end не нужны); русская речь (закадровый голос); проверено Whisper; громкость ≈ −15 LUFS"
+ },
+ {
+  "file": "media/music/kinchiki/r3_3000_interstellar.mp3",
+  "source": "https://soundcloud.com/bardia-rassouli/zimmer-cornfield-chase",
+  "title": "«Интерстеллар» (2014) — «Cornfield Chase», Ханс Циммер (оригинальная запись, 2:08; официальная загрузка Hans Zimmer на SoundCloud защищена DRM)",
+  "cut": [
+   42.8,
+   72.8
+  ],
+  "gain_db": 5.7,
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=5.7dB,alimiter=limit=0.89:attack=3:release=40",
+  "note": "тихая подводка и первое мощное вступление органа/струнных (в исходнике ~44.3 с)"
  }
 ]

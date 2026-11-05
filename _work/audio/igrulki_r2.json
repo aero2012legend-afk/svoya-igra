@@ -1,29 +1,5 @@
 [
  {
-  "file": "media/music/igrulki/r2_1200_sonic.mp3",
-  "source": "https://soundcloud.com/imasake-kun/sonic-the-hedgehog-ost-1-green",
-  "title": "Sonic the Hedgehog (Sega Mega Drive/Genesis, 1991) — Green Hill Zone, Масато Накамура (Classic Sonic Ost's, «Sonic The Hedgehog Ost 1 - Green Hill Zone»)",
-  "cut": [
-   0.45,
-   30.45
-  ],
-  "gain_db": -3.6,
-  "ffmpeg": "afade=t=in:d=0.05,afade=t=out:st=28.50:d=1.5,volume=-3.6dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "оригинал 141,6 с, зацикленная тема (петля 38,4 с); музыка начинается на 0,5 с"
- },
- {
-  "file": "media/music/igrulki/r2_400_mk.mp3",
-  "source": "https://www.myinstants.com/media/sounds/e64a3c_mortal_kombat_2_finish_him_sound_effect.mp3",
-  "title": "Mortal Kombat (аркада/Sega, 1992–93): голос диктора «Finish him!» (Mortal Kombat 2, звуковая кнопка myinstants «Finish Him! (MK2)»)",
-  "cut": [
-   0.0,
-   1.3
-  ],
-  "gain_db": -4.1,
-  "ffmpeg": "afade=t=in:d=0.01,afade=t=out:st=1.15:d=0.15,volume=-4.1dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "1,3 с; проверено Whisper: «FINISH HIM!»; в игре без end"
- },
- {
   "file": "media/music/igrulki/r2_1600_among.mp3",
   "source": "https://www.myinstants.com/media/sounds/emergency-meeting.mp3",
   "title": "Among Us (InnerSloth, 2018): сигнал «Emergency Meeting» (myinstants «Emergency meeting - Among Us»)",

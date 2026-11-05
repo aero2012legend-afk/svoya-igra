@@ -36,18 +36,6 @@
   "note": "в игре играет целиком (start/end не нужны); перенарезано из студийной версии (прежняя нарезка с Dailymotion «подлагивала»); проверено: нет пауз и повторов; японский вокал, слова «Naruto» нет"
  },
  {
-  "file": "media/music/multyahi/r3_2700_kolobki.mp3",
-  "source": "https://www.dailymotion.com/video/x303v7y",
-  "title": "«Следствие ведут Колобки» (рисованный, 1986–1987, Татарский и Ковалёв, ТО «Экран»): Коллега — «Ой, шеф, а я вас вижу!», Шеф (Леонид Броневой) — «Аналогично.» (Dailymotion «Следствие ведут Колобки (1987)», Р-Мяу, 20:38 — весь фильм; реплика на 229.8–233.3 с; это НЕ кукольные «Колобки» 1983 года)",
-  "cut": [
-   229.45,
-   233.95
-  ],
-  "gain_db": 5.6,
-  "ffmpeg": "afade=t=in:d=0.05,afade=t=out:st=4.15:d=0.35,volume=5.6dB,alimiter=limit=0.89:attack=3:release=40",
-  "note": "в игре играет целиком (start/end не нужны); проверено Whisper: в нарезке ровно две реплики; громкость ≈ −15.2 LUFS; при пересоздании скачивается весь фильм (≈68 МБ, hls-380)"
- },
- {
   "file": "media/music/multyahi/r3_300_southpark_ru.mp3",
   "source": "https://archive.org/download/sppilots/003%20-%20Cartman%20Gets%20an%20Anal%20Probe%20-%20Unaired%20Pilot%20Episode.mp4",
   "title": "«Южный парк» (South Park), русский дубляж пилота (неэфирная версия «Cartman Gets an Anal Probe», архив.org «South Park Pilot Episodes (Russian Dub)»): Стэн «О, боже мой! Они убили Кенни!», Кайл «Сволочь!»",
