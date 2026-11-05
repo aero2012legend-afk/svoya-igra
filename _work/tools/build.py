@@ -150,6 +150,8 @@ def load_content():
         if name == 'extras.json':
             extras = d
             continue
+        if name == 'karbattle.json':  # песни караоке-баттла — отдельный список, не темы
+            continue
         for th in d.get('themes', []):
             key = (th.get('round'), th.get('name'))
             if key in themes:

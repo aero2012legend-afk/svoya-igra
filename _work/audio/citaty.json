@@ -149,5 +149,35 @@
   ],
   "gain_db": -1.6,
   "ffmpeg": "volume=-1.6dB,afade=t=in:d=0.02,afade=t=out:st=1.06:d=0.3,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/citaty/r3_900_baraban.mp3",
+  "source": "https://www.myinstants.com/media/sounds/vrashchaite-baraban-iakubovich.mp3",
+  "title": "Леонид Якубович, «Поле чудес»: «Вращайте барабан!» — звук после ответа",
+  "cut": [
+   0.0,
+   5.0
+  ],
+  "ffmpeg": "afade=t=in:d=0.03,afade=t=out:st=4.65:d=0.3,loudnorm=I=-15:TP=-1.5:LRA=11"
+ },
+ {
+  "file": "media/music/citaty/r3_2700_stark.mp3",
+  "source": "https://www.myinstants.com/media/sounds/genii-milliarder-pleiboi-filantrop.mp3",
+  "title": "«Мстители» (2012), русский дубляж: Тони Старк — «Гений, миллиардер, плейбой, филантроп» — звук после ответа",
+  "cut": [
+   0.0,
+   2.667
+  ],
+  "ffmpeg": "afade=t=in:d=0.03,afade=t=out:st=2.32:d=0.3,loudnorm=I=-15:TP=-1.5:LRA=11"
+ },
+ {
+  "file": "media/music/citaty/r3_3000_zadornov.mp3",
+  "source": "https://www.myinstants.com/media/sounds/zadornov-nu-tupye.mp3",
+  "title": "Михаил Задорнов: «Ну, тупы-ые!» — звук после ответа",
+  "cut": [
+   0.0,
+   1.3
+  ],
+  "ffmpeg": "afade=t=in:d=0.03,afade=t=out:st=0.95:d=0.3,loudnorm=I=-15:TP=-1.5:LRA=11"
  }
 ]

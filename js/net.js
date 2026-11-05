@@ -11,9 +11,14 @@
     { name: 'Mosquitto', url: 'wss://test.mosquitto.org:8081/mqtt' },
     { name: 'Eclipse', url: 'wss://mqtt.eclipseprojects.io:443/mqtt' },
   ];
-  var RX_LIMIT = 4500, TX_LIMIT = 9000; // после стольких байт — новое соединение
+  var RX_LIMIT = 4500, TX_LIMIT = 9000; // после стольких байт — новое соединение (только для интернет-серверов)
   var params = new URLSearchParams(location.search);
-  var override = params.get('broker'); // для проверки: ?broker=ws://localhost:8888/mqtt
+  // игра открыта с компьютера в домашней сети (server.py): всё идёт через него, интернет не нужен
+  var host = location.hostname;
+  var local = /^https?:$/.test(location.protocol) && !params.get('internet') &&
+    (host === 'localhost' || /^\d{1,3}(\.\d{1,3}){3}$/.test(host) || /\.local$/.test(host)); // адрес вида 192.168.1.5:8080 — это наш компьютер
+  var override = params.get('broker') || (local ? (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/mqtt' : null); // для проверки: ?broker=ws://localhost:8888/mqtt
+  if (local) { RX_LIMIT = Infinity; TX_LIMIT = Infinity; } // по Wi-Fi соединение не «замерзает» — переподключаться незачем
   var PREFIX = 'sviq1/';
   var PING = new Uint8Array([0xC0, 0]);
   var te = new TextEncoder(), td = new TextDecoder();
@@ -202,7 +207,7 @@
     return s;
   }
   function brokerUrl(i) { return override || (BROKERS[i] || BROKERS[0]).url; }
-  function brokerName(i) { return override ? 'локальный' : (BROKERS[i] || BROKERS[0]).name; }
+  function brokerName(i) { return local ? 'этот компьютер (Wi-Fi)' : override ? 'локальный' : (BROKERS[i] || BROKERS[0]).name; }
   // WebRTC: ждём, пока соберутся адреса (но не дольше ms)
   function iceDone(pc, ms) {
     return new Promise(function (res) {
@@ -234,8 +239,9 @@
   }
 
   window.Net = {
-    BROKERS: BROKERS, PREFIX: PREFIX, Client: Client, code: code, brokerUrl: brokerUrl, brokerName: brokerName, override: override, params: params,
-    rtc: typeof RTCPeerConnection === 'function' && !params.get('nortc'),
+    BROKERS: BROKERS, PREFIX: PREFIX, Client: Client, code: code, brokerUrl: brokerUrl, brokerName: brokerName, override: override, params: params, local: local,
+    // по Wi-Fi через свой компьютер и так мгновенно; прямое WebRTC нужно только при связи через интернет
+    rtc: typeof RTCPeerConnection === 'function' && !params.get('nortc') && !local,
     ICE: [{ urls: 'stun:stun.l.google.com:19302' }], iceDone: iceDone,
     id: function () { return Math.random().toString(36).slice(2, 10); },
     hash: hash, finThemes: finThemes, stripPack: stripPack,

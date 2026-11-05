@@ -744,3 +744,6 @@ body.lite .ent.hasav .av { animation: none; }
 .wifibox { display: flex; flex-direction: column; align-items: center; gap: .3rem; padding: .7rem; border-radius: 1rem; background: #fff; color: #0b1550; }
 .wifibox canvas { width: 11rem; height: 11rem; image-rendering: pixelated; }
 .wifibox .wfh { font-weight: 900; font-size: 1.1rem; } .wifibox .wfn { font-weight: 800; font-size: 1rem; max-width: 11rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* лобби без локального сервера: подсказка вместо QR-кода */
+.qrbox .nonet { max-width: 22rem; padding: 1.2rem 1.4rem; font-size: 1.15rem; line-height: 1.45; color: #0b1550; text-align: center; }

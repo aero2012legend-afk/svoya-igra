@@ -96,12 +96,14 @@
   const isOnline = eid => { const now = Date.now(); return Object.values(G.phones).some(p => p.ent === eid && now - p.seen < 35000); };
   const members = eid => Object.values(G.phones).filter(p => p.ent === eid).map(p => p.name);
   const bribeCost = q => r10((q.stake || q.price) * G.set.bribe / 100);
-  const baseUrl = () => (/^https?:$/.test(location.protocol) ? new URL('.', location.href).href : (PACK.siteUrl || PAGES));
+  let LAN = null; // адрес компьютера в Wi-Fi, если игра открыта с локального сервера
+  if (Net.local) fetch('/__lan').then(r => r.json()).then(j => { if (j && j.ip) { LAN = j; curSig = null; render(); } }).catch(() => {});
+  const baseUrl = () => (/^https?:$/.test(location.protocol) ? (LAN && /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? `${location.protocol}//${LAN.ip}:${LAN.port}${new URL('.', location.href).pathname}` : new URL('.', location.href).href) : (PACK.siteUrl || PAGES));
   function siteUrl(page, extra) {
     const u = new URL(baseUrl() + page);
     u.searchParams.set('r', G.room); u.searchParams.set('b', G.broker);
     if (extra) Object.keys(extra).forEach(k => u.searchParams.set(k, extra[k]));
-    if (Net.override) u.searchParams.set('broker', Net.override);
+    if (Net.override && !Net.local) u.searchParams.set('broker', Net.override);
     return u.href;
   }
   const playUrl = () => siteUrl('play.html');
@@ -133,8 +135,10 @@
 
   /* ================= связь ================= */
   const T = s => Net.PREFIX + G.room + '/' + s;
+  const NONET = !Net.local && !Net.params.get('internet') && !Net.params.get('broker');
   function netStart() {
     if (client) client.close();
+    if (NONET) { client = null; netOnline = false; return; }
     everOnline = false; netOnline = false;
     const c = client = new Net.Client(Net.brokerUrl(G.broker));
     c.subscribe(T('i')); c.subscribe(T('c/' + G.key));
@@ -145,7 +149,7 @@
       renderTop(); if (G.phase === 'lobby') updLobby();
     });
     clearTimeout(connT);
-    if (!Net.override) connT = setTimeout(() => {
+    if (!Net.override && !Net.local) connT = setTimeout(() => {
       if (c === client && !everOnline) {
         G.broker = (G.broker + 1) % Net.BROKERS.length; save();
         toast('Пробую другой сервер связи: ' + Net.brokerName(G.broker));
@@ -541,7 +545,7 @@
       if (box.dataset.h !== html) { box.innerHTML = html; box.dataset.h = html; }
     }
     const ns = $('#netstat');
-    if (ns) ns.innerHTML = netOnline ? `<span class="on">●</span> Связь есть · сервер ${esc(Net.brokerName(G.broker))}` : `● Подключаемся к серверу ${esc(Net.brokerName(G.broker))}…`;
+    if (ns) ns.innerHTML = NONET ? '● Телефоны: только Wi-Fi — запусти игру через «Запустить игру»' : netOnline ? `<span class="on">●</span> Связь есть · сервер ${esc(Net.brokerName(G.broker))}` : `● Подключаемся к серверу ${esc(Net.brokerName(G.broker))}…`;
     $$('[data-set]').forEach(s => { if (document.activeElement !== s) s.value = String(G.set[s.dataset.set]); });
     const ms = $('#mstat'); if (ms) { const h = mediaStatus(); if (ms.dataset.h !== h) { ms.innerHTML = h; ms.dataset.h = h; } }
     const wb = $('#wifibox'), wf = wifiGet(), wsig = wf ? wf.s + '\n' + wf.p : '';
@@ -551,7 +555,10 @@
       if (wf) drawQR($('#wqr'), `WIFI:T:${wf.p ? 'WPA' : 'nopass'};S:${wifiEsc(wf.s)};${wf.p ? `P:${wifiEsc(wf.p)};` : ''};`);
     }
     const qr = $('#qr'), url = playUrl();
-    if (qr && qr.dataset.url !== url) {
+    if (NONET) {
+      const box = $('.qrbox'); if (box && !box.dataset.nonet) { box.dataset.nonet = 1; box.innerHTML = '<div class="nonet">📶 Телефоны подключаются только по Wi-Fi.<br>Запусти игру на этом компьютере через <b>«Запустить игру»</b> (файл в папке с игрой) — QR-код появится здесь.</div>'; }
+      const ju = $('#joinurl'); if (ju) ju.textContent = ''; const sc = $('.scan'); if (sc) sc.style.display = 'none';
+    } else if (qr && qr.dataset.url !== url) {
       drawQR(qr, url); qr.dataset.url = url;
       const u = new URL(url); $('#joinurl').textContent = u.host + u.pathname; $('#roomcode').textContent = G.room;
     }

@@ -1,0 +1,38 @@
+[
+ {
+  "file": "media/music/karbattle/polkovnik.mp3",
+  "source": "https://api.soundcloud.com/tracks/soundcloud%3Atracks%3A540584586",
+  "title": "Би-2 — «Полковнику никто не пишет», припев для караоке-баттла (музыка + тихий голос)",
+  "cut": [
+   61.28,
+   83.28
+  ],
+  "demucs": "guide",
+  "guide_db": -11,
+  "ffmpeg": "volume=-9.5dB,afade=t=in:d=0.3,afade=t=out:st=20.50:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/karbattle/vladivostok.mp3",
+  "source": "https://api.soundcloud.com/tracks/soundcloud%3Atracks%3A8333036",
+  "title": "Мумий Тролль — «Владивосток 2000», припев для караоке-баттла (музыка + тихий голос)",
+  "cut": [
+   78.0,
+   100.0
+  ],
+  "demucs": "guide",
+  "guide_db": -11,
+  "ffmpeg": "volume=-4.3dB,afade=t=in:d=0.3,afade=t=out:st=20.50:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ },
+ {
+  "file": "media/music/karbattle/vyhoda.mp3",
+  "source": "https://api.soundcloud.com/tracks/soundcloud%3Atracks%3A693332587",
+  "title": "Сплин — «Выхода нет», припев для караоке-баттла (музыка + тихий голос)",
+  "cut": [
+   64.64,
+   86.64
+  ],
+  "demucs": "guide",
+  "guide_db": -11,
+  "ffmpeg": "volume=-5.3dB,afade=t=in:d=0.3,afade=t=out:st=20.50:d=1.5,alimiter=limit=0.89:attack=3:release=40"
+ }
+]

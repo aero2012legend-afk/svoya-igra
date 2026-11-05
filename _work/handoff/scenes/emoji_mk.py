@@ -2,7 +2,7 @@
 import subprocess
 OUT = '/home/user/svoya-igra/media/img/emoji'
 E = [(300, 'frozen', 'МУЛЬТФИЛЬМ', '❄️👸⛄'), (600, 'charlie', 'ФИЛЬМ', '🍫🏭🎫🎩'), (900, 'vino', 'ПЕСНЯ', '🌸🍷'),
-     (1200, 'gena', 'ПЕСНЯ ИЗ МУЛЬТФИЛЬМА', '🐊🪗🎂☔'), (1500, 'ironiya', 'ФИЛЬМ', '🛁🍾✈️🏢🏢❄️'),
+     (1200, 'milya', 'ФИЛЬМ', '🟢🛣️🐁⚡️🪑'), (1500, 'element', 'ФИЛЬМ', '🔥💧🌍💨👩‍🦰'),
      (1800, 'rozy', 'ПЕСНЯ', '🌹🌹🌹👨‍🎨🏠'), (2100, 'yabloki', 'ПЕСНЯ', '🍎🍎❄️'), (2400, 'golubi', 'ФИЛЬМ', '❤️🕊️🕊️🌴'),
      (2700, 'eksponat', 'ПЕСНЯ', '👠👠🍑🖼️'), (3000, 'pyos', 'МУЛЬТФИЛЬМ', '🐶🐺🍗🎤')]
 CSS = """html,body{margin:0;width:1280px;height:720px;overflow:hidden;font-family:'DejaVu Sans',sans-serif}

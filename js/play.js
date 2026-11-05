@@ -99,7 +99,7 @@
     let txt = '';
     if (client && !linked() && Date.now() - offSince > 1500) txt = '📡 Нет связи — переподключаемся… Нажми, чтобы обновить';
     else if (linked() && S && Date.now() - lastMsg > 20000) txt = '⏳ Экран игры не отвечает… Нажми, чтобы обновить';
-    else if (online && !rtcOpen && myEnt() && Date.now() - joinedAt > 15000) txt = '📶 Связь идёт через интернет и может тормозить. Подключись к Wi-Fi — тому же, что у компьютера с игрой';
+    else if (online && !rtcOpen && !Net.local && myEnt() && Date.now() - joinedAt > 15000) txt = '📶 Связь идёт через интернет и может тормозить. Подключись к Wi-Fi — тому же, что у компьютера с игрой';
     if (nb.textContent !== txt) nb.textContent = txt;
     nb.style.display = txt ? 'block' : 'none';
   }
@@ -558,7 +558,7 @@
     if (t.closest('#rcgo')) {
       const v = (($('#rc') || {}).value || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); if (v.length < 4) return;
       room = v;
-      try { history.replaceState(null, '', '?r=' + room + '&b=' + bi + (Net.override ? '&broker=' + encodeURIComponent(Net.override) : '') + location.hash); } catch (err) { /* ничего */ }
+      try { history.replaceState(null, '', '?r=' + room + '&b=' + bi + (Net.override && !Net.local ? '&broker=' + encodeURIComponent(Net.override) : '') + location.hash); } catch (err) { /* ничего */ }
       sig = ''; start(); return;
     }
     if (t.closest('#joinbtn')) return doJoin(null);
