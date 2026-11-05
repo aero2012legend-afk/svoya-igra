@@ -1252,7 +1252,7 @@
     stopTimer(); stopAT(); q.stage = 'reveal'; if (silent !== true) Sound.play('flip'); changed();
     const d = curD();
     if (d.aaudio) return answerAudio(q, d); // после ответа звучит своя вставка (отрывок песни, цитата, звук)
-    if (MP && MP.el && MP.key === q.key && +d.aend > +d.end) { MP.stopAt = MP.cont ? 0 : +d.aend; try { MP.el.currentTime = +d.end || 0; } catch (e) { /* ещё не загрузилось */ } mediaPlay(); } // песня продолжается — все слышат пропущенное (а если файл длинный — и дальше)
+    if (MP && MP.el && MP.key === q.key && +d.aend > +d.end) { MP.stopAt = MP.cont ? 0 : +d.aend; if (MP.cont) { MP.muting = false; setVol(MP, 1); } try { MP.el.currentTime = +d.end || 0; } catch (e) { /* ещё не загрузилось */ } mediaPlay(); } // песня продолжается — все слышат пропущенное (а если файл длинный — и дальше)
     else if (MP && MP.started) mediaPlay(); // после ответа пусть доиграет
   }
   // звук после ответа (aaudio): играет целиком, вместо музыки вопроса
@@ -2343,14 +2343,14 @@
     // вместо самого слова (и его повторов из поля mute: [[от, до], …]) на эти доли секунды звучит минус
     if (d.minus && en && +d.aend > en) e.addEventListener('loadedmetadata', () => { if (MP === m && e.duration > +d.aend + 2) m.cont = true; }, { once: true });
     m.stopAt = en || 0;
-    e.addEventListener('timeupdate', () => { if (m.stopAt && e.currentTime >= m.stopAt) { e.pause(); toMinus(m); } });
+    e.addEventListener('timeupdate', () => { if (m.stopAt && e.currentTime >= m.stopAt) { if (m.cont && G.q && G.q.stage === 'open') return contStart(m); e.pause(); toMinus(m); } });
     // песня короче таймера — играет по кругу, пока идёт время (loop: true/false; по умолчанию — всё, что длиннее 10 секунд)
     const loop = () => (d.loop != null ? !!d.loop : (e.duration || 0) - st >= 10);
     e.addEventListener('ended', () => { if (MP === m && loop() && !m.stopAt && !m.cont && G.q && G.q.key === m.key && G.q.stage === 'open' && G.q.tr) { try { e.currentTime = st; } catch (err) { /* ничего */ } mediaPlay(); } });
     e.src = url; m.el = e;
     const web = url.startsWith('blob:') || /^https?:$/.test(location.protocol);
     if (kind === 'audio' && web) {
-      try { const ctx = Sound.ctx(); if (ctx) { const s = ctx.createMediaElementSource(e), an = ctx.createAnalyser(); an.fftSize = 256; an.smoothingTimeConstant = 0.6; s.connect(an); an.connect(Sound.out()); m.src = s; m.an = an; m.buf = new Uint8Array(an.frequencyBinCount); } } catch (err) { m.an = null; }
+      try { const ctx = Sound.ctx(); if (ctx) { const s = ctx.createMediaElementSource(e), an = ctx.createAnalyser(), g = ctx.createGain(); an.fftSize = 256; an.smoothingTimeConstant = 0.6; s.connect(g); g.connect(an); an.connect(Sound.out()); m.src = s; m.an = an; m.g = g; m.buf = new Uint8Array(an.frequencyBinCount); } } catch (err) { m.an = null; }
     }
     // минус (та же песня без голоса, на той же шкале времени): после пропущенного слова музыка играет дальше до конца таймера
     if (kind === 'audio' && d.minus && en) {
@@ -2372,26 +2372,36 @@
     if (MP !== m || !m.mel || m.mode === 'minus' || !G.q || G.q.key !== m.key || G.q.stage !== 'open' || !G.q.tr) return;
     m.mode = 'minus'; try { m.mel.currentTime = m.stopAt; } catch (e) { /* ещё не загрузилось */ }
     const p = m.mel.play(); if (p && p.catch) p.catch(() => {});
-    if (m.cont) contWatch(m);
   }
-  // «песня идёт дальше»: следим, где сейчас музыка, и переключаемся минус ↔ оригинал на вырезанных словах
+  // «песня идёт дальше»: оригинал играет без остановки, на пропущенном слове (и его повторах) — тишина и короткий «пик»
+  function setVol(m, v) {
+    try { if (m.g) { const ctx = Sound.ctx(); m.g.gain.cancelScheduledValues(ctx.currentTime); m.g.gain.setTargetAtTime(v, ctx.currentTime, 0.006); return; } } catch (e) { /* без Web Audio */ }
+    if (m.el) m.el.volume = v;
+  }
+  function bleep(sec) {
+    if (Sound.muted) return;
+    try {
+      const ctx = Sound.ctx(); if (!ctx) return; const t = ctx.currentTime, d = Math.max(0.25, Math.min(1.4, sec));
+      const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = 1000;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.16, t + 0.012); g.gain.setValueAtTime(0.16, t + d - 0.03); g.gain.linearRampToValueAtTime(0, t + d);
+      o.connect(g); g.connect(Sound.out()); o.start(t); o.stop(t + d + 0.02);
+    } catch (e) { /* без звука */ }
+  }
+  function contStart(m) { m.stopAt = 0; m.mode = 'orig'; clearInterval(m.wt); contWatch(m); }
   function contWatch(m) {
     clearInterval(m.cw);
     const d = curD(), mutes = [[+d.end, +d.aend]].concat(Array.isArray(d.mute) ? d.mute : []).filter(x => +x[1] > +x[0]);
-    const inMute = t => mutes.some(x => t >= +x[0] - 0.03 && t < +x[1]);
-    m.cw = setInterval(() => {
+    const muteAt = t => mutes.find(x => t >= +x[0] - 0.04 && t < +x[1]);
+    const tick = () => {
       if (MP !== m) { clearInterval(m.cw); return; }
-      if (!G.q || G.q.key !== m.key || G.q.stage !== 'open' || !G.q.tr) return; // пауза, ответ игрока или ответ ведущего — ничего не трогаем
-      const cur = mEl(m); if (!cur || cur.paused) return;
-      const t = cur.currentTime;
-      if (m.mode === 'minus' && !inMute(t) && t < (m.el.duration || 0) - 0.3) {
-        m.mel.pause(); try { m.el.currentTime = t; } catch (e) { /* ничего */ } m.mode = 'orig'; m.stopAt = 0;
-        const p = m.el.play(); if (p && p.catch) p.catch(() => {}); mediaUI();
-      } else if (m.mode !== 'minus' && m.mel && inMute(t)) {
-        m.el.pause(); try { m.mel.currentTime = t; } catch (e) { /* ничего */ } m.mode = 'minus';
-        const p = m.mel.play(); if (p && p.catch) p.catch(() => {}); mediaUI();
-      }
-    }, 15);
+      const q = G.q; if (!q || q.key !== m.key) return;
+      if (q.stage === 'reveal') { if (m.muting) { m.muting = false; setVol(m, 1); } return; } // ответ — слово слышно
+      if (!m.el || m.el.paused) return;
+      const t = m.el.currentTime, x = muteAt(t);
+      if (x && !m.muting) { m.muting = true; setVol(m, 0); bleep(+x[1] - t); mediaUI(); }
+      else if (!x && m.muting) { m.muting = false; setVol(m, 1); mediaUI(); }
+    };
+    tick(); m.cw = setInterval(tick, 10);
   }
   function mediaAttach() {
     const m = MP; if (!m || !G.q || G.q.key !== m.key) return;
@@ -2404,7 +2414,7 @@
     const m = MP; if (!m) return;
     const msg = m.err ? `⚠ Нет файла: ${esc(m.path)}<small>Положи его в папку media или выбери папку в лобби. Можно просто напеть 🙂</small>` : '';
     const e = mEl(m), lbl = $('#vizlbl');
-    if (lbl) lbl.innerHTML = msg || (e && !e.paused ? (m.mode === 'minus' ? (m.cont ? '🤐 слово вырезано — допойте!' : '🎤 минус — подпевайте!') : '') : m.started ? '⏸ пауза' : '🎵 музыка начнётся вместе с таймером');
+    if (lbl) lbl.innerHTML = msg || (e && !e.paused ? (m.muting ? '🤐 слово вырезано — допойте!' : m.mode === 'minus' ? '🎤 минус — подпевайте!' : '') : m.started ? '⏸ пауза' : '🎵 музыка начнётся вместе с таймером');
     const slot = $('#vslot'); if (slot) { const w = $('.merr', slot); if (msg && !w) slot.appendChild(el(`<div class="merr">${msg}</div>`)); }
   }
   function mediaPlay() {
@@ -2426,6 +2436,7 @@
     if (!m.stopAt) return;
     m.wt = setInterval(() => {
       if (MP !== m || !m.el || m.el.paused || !m.stopAt) { clearInterval(m.wt); return; }
+      if (m.cont && G.q && G.q.stage === 'open' && m.el.currentTime >= m.stopAt - 0.06) { clearInterval(m.wt); return contStart(m); }
       if (m.el.currentTime >= m.stopAt - 0.04) { m.el.pause(); try { m.el.currentTime = m.stopAt; } catch (e) { /* ещё не загрузилось */ } clearInterval(m.wt); toMinus(m); }
     }, 15);
   }
