@@ -288,7 +288,7 @@ def kar_battle(rep):
     for x in songs:
         rep.check_file('Караоке-баттл', x['audio'], media=True)
         kar = ', '.join(f'[{js_num(l[0])}, {js_str(l[1])}' + (f', [{", ".join(js_num(t) for t in l[2])}]' if len(l) > 2 else '') + ']' for l in x.get('kar', []))
-        out.append(f"    {{ artist: {js_str(x['artist'])}, title: {js_str(x['title'])}, audio: {js_str(x['audio'])}, kar: [{kar}] }},")
+        out.append(f"    {{ artist: {js_str(x['artist'])}, title: {js_str(x['title'])}, audio: {js_str(x['audio'])}, " + (f"len: {js_num(x['len'])}, " if x.get('len') else '') + f"kar: [{kar}] }},")
     return '[\n' + '\n'.join(out) + '\n  ]' if out else '[]'
 
 

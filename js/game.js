@@ -1673,6 +1673,8 @@
   const conPicker = c => (c.id === 'kar' ? c.g : c.a); // кто выбирает на шаге pick
   const kbSong = (c, side) => (c && c.songs && Array.isArray(PACK.karbattle) ? PACK.karbattle[c.songs[side || (c.turn === 'b' ? 'b' : 'a')]] : null);
   const kbName = x => (x ? `${x.artist} — «${x.title}»` : '');
+  // караоке-баттл: время выступления = длина припева (с разгоном перед первой строчкой)
+  const perfOf = c => { const x = c.id === 'sing' && c.songs ? kbSong(c) : null; return x && +x.len > 0 ? Math.ceil(+x.len) : CX[c.id].perf; };
   const conPrompt = c => (c.id === 'sing' ? (c.songs ? kbName(kbSong(c)) : c.theme) : c.pr ? c.pr[c.turn === 'b' ? 'b' : 'a'] : '') || '';
   function pubCon(c) {
     const C = CX[c.id] || {};
@@ -1762,7 +1764,7 @@
     switch (c.id) {
       case 'rps': c.ch = { a: null, b: null }; c.rnd = c.rnd || 1; Sound.play('open'); break;
       case 'dance': conTimer(30, () => conToVote()); discoStart(); break;
-      case 'sing': case 'toast': case 'parody': c.turn = 'a'; conTimer(CX[c.id].perf, () => conSingNext()); Sound.play('open'); if (c.id === 'sing' && c.songs) kbPlay(); break;
+      case 'sing': case 'toast': case 'parody': c.turn = 'a'; conTimer(perfOf(c), () => conSingNext()); Sound.play('open'); if (c.id === 'sing' && c.songs) kbPlay(); break;
       case 'shot': c.ok = { a: null, b: null }; conTimer(30, null); Sound.play('roll'); break;
       case 'tap': c.taps = { a: 0, b: 0 }; c.fin = { a: false, b: false }; c.go = false; c.gid = Net.id(); changed(); return conCountdown(() => conTapGo());
       case 'react': return conReactRound();
@@ -1855,7 +1857,7 @@
   }
   function conSingNext() {
     const q = G.q, c = q && q.con; if (!c || c.step !== 'play' || !PERFC.includes(c.id)) return;
-    if (c.turn === 'a') { c.turn = 'b'; karStop(); Sound.play('whoosh'); conTimer(CX[c.id].perf, () => conSingNext()); changed(); if (c.id === 'sing' && c.songs) kbPlay(); } else conToVote();
+    if (c.turn === 'a') { c.turn = 'b'; karStop(); Sound.play('whoosh'); conTimer(perfOf(c), () => conSingNext()); changed(); if (c.id === 'sing' && c.songs) kbPlay(); } else conToVote();
   }
   function conVote(pid, eid, k, v) {
     const q = G.q, c = q && q.con; if (!c || c.step !== 'vote' || q.key !== k || !(c.id === 'kar' ? ['y', 'n'] : ['a', 'b']).includes(v) || !(c.voters || []).includes(pid) || c.votes[pid]) return;
