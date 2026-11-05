@@ -1220,7 +1220,7 @@
     stopTimer(); stopAT(); q.stage = 'reveal'; if (silent !== true) Sound.play('flip'); changed();
     const d = curD();
     if (d.aaudio) return answerAudio(q, d); // после ответа звучит своя вставка (отрывок песни, цитата, звук)
-    if (MP && MP.el && MP.key === q.key && +d.aend > +d.end) { MP.stopAt = +d.aend; try { MP.el.currentTime = +d.end || 0; } catch (e) { /* ещё не загрузилось */ } mediaPlay(); } // песня продолжается — все слышат пропущенное
+    if (MP && MP.el && MP.key === q.key && +d.aend > +d.end) { MP.stopAt = MP.cont ? 0 : +d.aend; try { MP.el.currentTime = +d.end || 0; } catch (e) { /* ещё не загрузилось */ } mediaPlay(); } // песня продолжается — все слышат пропущенное (а если файл длинный — и дальше)
     else if (MP && MP.started) mediaPlay(); // после ответа пусть доиграет
   }
   // звук после ответа (aaudio): играет целиком, вместо музыки вопроса
