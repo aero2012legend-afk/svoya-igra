@@ -5,10 +5,10 @@
   "title": "Sonic the Hedgehog (Sega Mega Drive/Genesis, 1991) — Green Hill Zone, Масато Накамура (Classic Sonic Ost's, «Sonic The Hedgehog Ost 1 - Green Hill Zone»)",
   "cut": [
    0.45,
-   23.0
+   30.45
   ],
   "gain_db": -3.6,
-  "ffmpeg": "afade=t=in:d=0.05,afade=t=out:st=21.35:d=1.2,volume=-3.6dB,alimiter=limit=0.89:attack=3:release=40",
+  "ffmpeg": "afade=t=in:d=0.05,afade=t=out:st=28.50:d=1.5,volume=-3.6dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "оригинал 141,6 с, зацикленная тема (петля 38,4 с); музыка начинается на 0,5 с"
  },
  {

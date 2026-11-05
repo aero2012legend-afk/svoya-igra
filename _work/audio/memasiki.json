@@ -5,10 +5,10 @@
   "title": "Эдуард Хиль — «Я очень рад, ведь я, наконец, возвращаюсь домой» (вокализ, «Трололо»), запись из ТВ-концерта 1976 года, из которой вырос мем (загрузка «Mr. LowLowLow Original Upload»)",
   "cut": [
    3.8,
-   20.3
+   33.8
   ],
   "gain_db": 0.5,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=15.3:d=1.2,volume=0.5dB,alimiter=limit=0.89:attack=3:release=40",
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=0.5dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "в исходнике голос вступает на ~5-й секунде; в вырезке — после ~1,2 с оркестрового вступления. Запасной вариант (студийная версия, на полтона ниже): soundcloud.com/user-872253167/eduard-khil-trololo-by-runforthecube"
  },
  {
@@ -17,10 +17,10 @@
   "title": "Rick Astley — «Never Gonna Give You Up» (1987), оригинальная запись, 3:32 (рикролл): «Gotta make you understand… Never gonna give you up… let you down… run around and desert you… make you cry»",
   "cut": [
    36.9,
-   51.3
+   66.9
   ],
   "gain_db": 0.0,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=14.1:d=0.3,alimiter=limit=0.89:attack=3:release=40",
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,alimiter=limit=0.89:attack=3:release=40",
   "note": "официальные загрузки Рика Эстли на SoundCloud защищены DRM, поэтому взята обычная загрузка оригинала (212,5 с); резка по паузам между фразами: обрыв приходится на паузу после «make you cry». В игре без start/end: файл играет целиком"
  }
 ]

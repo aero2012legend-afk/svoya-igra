@@ -4,11 +4,11 @@
   "source": "https://www.dailymotion.com/video/x7xik5b",
   "title": "«Бэтмен» (Batman: The Animated Series, 1992) — заставка с музыкой Дэнни Элфмана (запись заставки, Dailymotion «Batman: The Animated Series - Intro (English)», Moviepilot, 60 с)",
   "cut": [
-   37.5,
-   59.0
+   29.81,
+   59.81
   ],
   "gain_db": 6.9,
-  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=20.30:d=1.2,volume=6.9dB,alimiter=limit=0.89:attack=3:release=40",
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=28.50:d=1.5,volume=6.9dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "без слов; в игре играет целиком; громкость ≈ −15.0 LUFS"
  },
  {
@@ -29,10 +29,10 @@
   "title": "«Наруто» (Naruto, 2002), опенинг 1 «R★O★C★K★S» группы Hound Dog (SoundCloud animeofficial, полная студийная версия, 292 с): гитарное вступление и начало куплета",
   "cut": [
    8.0,
-   30.0
+   38.0
   ],
   "gain_db": -4.7,
-  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=20.80:d=1.2,volume=-4.7dB,alimiter=limit=0.89:attack=3:release=40",
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=28.50:d=1.5,volume=-4.7dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "в игре играет целиком (start/end не нужны); перенарезано из студийной версии (прежняя нарезка с Dailymotion «подлагивала»); проверено: нет пауз и повторов; японский вокал, слова «Naruto» нет"
  },
  {
@@ -65,10 +65,10 @@
   "title": "«Люди Икс» (X-Men: The Animated Series, 1992) — заглавная тема без слов (Dailymotion «X-Men: The Animated Series - Intro», Tomatazos, 60 с)",
   "cut": [
    0.0,
-   24.0
+   30.0
   ],
   "gain_db": -8.4,
-  "ffmpeg": "afade=t=in:d=0.2,afade=t=out:st=22.80:d=1.2,volume=-8.4dB,alimiter=limit=0.89:attack=3:release=40",
+  "ffmpeg": "afade=t=in:d=0.2,afade=t=out:st=28.50:d=1.5,volume=-8.4dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "без слов; в игре играет целиком (start/end не нужны); громкость ≈ −15 LUFS"
  }
 ]

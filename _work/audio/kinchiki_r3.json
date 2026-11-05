@@ -5,10 +5,10 @@
   "title": "«Крёстный отец» (1972) — Нино Рота, «Main Title (The Godfather Waltz)» (оригинальный саундтрек, archive.org; та же запись, что в официальной загрузке Nino Rota на SoundCloud — сверено по хромаграмме)",
   "cut": [
    0.6,
-   22.6
+   30.6
   ],
   "gain_db": 3.5,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=20.80:d=1.2,volume=3.5dB,alimiter=limit=0.89:attack=3:release=40",
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=3.5dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "соло трубы: две полные фразы вальса, с первой ноты (в исходнике ~1.0 с)"
  },
  {
@@ -29,10 +29,10 @@
   "title": "«Бегущий по лезвию» (1982) — Вангелис, «Main Titles» (альбом «Blade Runner», 1994, archive.org; первые ~25 с: нарастающий аккорд заставки и синтезаторные волны)",
   "cut": [
    0.3,
-   25.8
+   30.3
   ],
   "gain_db": 1.4,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=24.00:d=1.5,volume=1.4dB,alimiter=limit=0.89:attack=3:release=40",
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=1.4dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "с самого начала трека (звук в исходнике с ~1 с); в игре без start/end"
  },
  {

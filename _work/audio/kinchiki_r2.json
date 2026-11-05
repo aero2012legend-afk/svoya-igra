@@ -17,10 +17,10 @@
   "title": "«Назад в будущее» (1985) — главная тема, Алан Сильвестри (трек «Back To The Future» с саундтрека, 3:20; та же запись в загрузке Graham Boag — https://soundcloud.com/graham-boag/back-to-the-future-main-theme)",
   "cut": [
    4.5,
-   27.5
+   34.5
   ],
   "gain_db": 4.1,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=21.8:d=1.2,volume=4.1dB,alimiter=limit=0.89:attack=3:release=40",
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=4.1dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "с нарастания перед фанфарой (в исходнике фанфара ~7 с); две подачи темы"
  },
  {
@@ -41,10 +41,10 @@
   "title": "«Интерстеллар» (2014) — «Cornfield Chase», Ханс Циммер (оригинальная запись, 2:08; официальная загрузка Hans Zimmer на SoundCloud защищена DRM)",
   "cut": [
    42.8,
-   65.8
+   72.8
   ],
   "gain_db": 5.7,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=21.8:d=1.2,volume=5.7dB,alimiter=limit=0.89:attack=3:release=40",
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=5.7dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "тихая подводка и первое мощное вступление органа/струнных (в исходнике ~44.3 с)"
  },
  {

@@ -17,10 +17,10 @@
   "title": "Looney Tunes / Merrie Melodies — заглавная тема («Merrily We Roll Along»), SoundCloud «ARB Radio»",
   "cut": [
    1.0,
-   19.4
+   31.0
   ],
   "gain_db": -2.0,
-  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=17.60:d=0.8,volume=-2.0dB,alimiter=limit=0.89:attack=3:release=40",
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=28.50:d=1.5,volume=-2.0dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "без слов; в игре играет целиком (заставка — подсказка к вопросу про охотника Элмера Фадда)"
  },
  {

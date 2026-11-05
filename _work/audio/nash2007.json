@@ -5,10 +5,10 @@
   "title": "Rihanna feat. Jay-Z — Umbrella (2007)",
   "cut": [
    0.5,
-   16.8
+   30.5
   ],
   "gain_db": 7.3,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=15.10:d=1.2,volume=7.3dB,alimiter=limit=0.84:attack=3:release=40:level=disabled",
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=7.3dB,alimiter=limit=0.84:attack=3:release=40:level=disabled",
   "note": "вступительный рэп Jay-Z (до слов «Rihanna, where you at»); слов названия и имени исполнительницы во фрагменте нет; радиоверсия, официальный канал Rihanna на Dailymotion (restore в этой среде: http_proxy=$HTTPS_PROXY)"
  },
  {
@@ -17,10 +17,10 @@
   "title": "Crazy Frog — Axel F (2005)",
   "cut": [
    0.7,
-   15.7
+   30.7
   ],
   "gain_db": 2.1,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=13.80:d=1.2,volume=2.1dB",
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=2.1dB",
   "note": "главная мелодия «Axel F» в версии лягушки; слов нет"
  },
  {
@@ -29,10 +29,10 @@
   "title": "Дима Билан — Believe (2008)",
   "cut": [
    12.5,
-   29.2
+   42.5
   ],
   "gain_db": 3.6,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=15.50:d=1.2,volume=3.6dB",
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=3.6dB",
   "note": "скрипичный проигрыш и первая строка куплета; слова «Believe» во фрагменте нет; студийная версия (аудиодорожка клипа на Dailymotion; restore в этой среде: http_proxy=$HTTPS_PROXY)"
  },
  {
@@ -41,10 +41,10 @@
   "title": "Linkin Park — What I've Done (2007)",
   "cut": [
    30.5,
-   47.0
+   60.5
   ],
   "gain_db": 0.5,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=15.30:d=1.2,volume=0.5dB",
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=0.5dB",
   "note": "гитарный рифф и начало первого куплета; слов названия нет"
  },
  {
@@ -52,11 +52,11 @@
   "source": "https://soundcloud.com/bakuridzedima/8kuhfvawtkow",
   "title": "Градусы — Режиссёр (2009)",
   "cut": [
-   16.0,
-   31.0
+   14.8,
+   44.8
   ],
   "gain_db": -4.9,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=13.80:d=1.2,volume=-4.9dB",
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=-4.9dB",
   "note": "вступление и начало первого куплета; слова «режиссёр» во фрагменте нет"
  },
  {
@@ -65,10 +65,10 @@
   "title": "Edward Maya feat. Vika Jigulina — Stereo Love (2009)",
   "cut": [
    32.0,
-   46.0
+   62.0
   ],
   "gain_db": -0.5,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=12.80:d=1.2,volume=-0.5dB",
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=-0.5dB",
   "note": "инструментальная аккордеонная тема, без вокала"
  },
  {
@@ -77,10 +77,10 @@
   "title": "Серебро — Song #1 (2007)",
   "cut": [
    7.2,
-   20.5
+   37.2
   ],
   "gain_db": -3.8,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=12.10:d=1.2,volume=-3.8dB",
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=-3.8dB",
   "note": "вступительные строки перед первым куплетом; слов «Song #1» во фрагменте нет"
  },
  {
@@ -89,10 +89,10 @@
   "title": "Gorillaz feat. De La Soul — Feel Good Inc. (2005)",
   "cut": [
    22.9,
-   34.6
+   52.9
   ],
   "gain_db": 5.7,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=10.50:d=1.2,volume=5.7dB,alimiter=limit=0.84:attack=3:release=40:level=disabled",
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=5.7dB,alimiter=limit=0.84:attack=3:release=40:level=disabled",
   "note": "инструментальное вступление (бас и смех), без вокала; дорожка клипа на Dailymotion, песня начинается на 22.7 с (restore в этой среде: http_proxy=$HTTPS_PROXY)"
  },
  {
@@ -100,11 +100,11 @@
   "source": "https://soundcloud.com/wallxcrewst/gnarls-barkley-crazy",
   "title": "Gnarls Barkley — Crazy (2006)",
   "cut": [
-   24.3,
-   36.0
+   6.3,
+   36.3
   ],
   "gain_db": -5.4,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=10.50:d=1.2,volume=-5.4dB",
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=-5.4dB",
   "note": "конец первого куплета; запись обрывается перед словами «Does that make me crazy?»"
  },
  {
@@ -113,10 +113,10 @@
   "title": "Lordi — Hard Rock Hallelujah (2006)",
   "cut": [
    13.0,
-   25.0
+   43.0
   ],
   "gain_db": -12.0,
-  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=10.80:d=1.2,volume=-12.0dB",
+  "ffmpeg": "afade=t=in:d=0.4,afade=t=out:st=28.50:d=1.5,volume=-12.0dB",
   "note": "риф и начало первого куплета после выкриков названия; слов названия во фрагменте нет"
  }
 ]

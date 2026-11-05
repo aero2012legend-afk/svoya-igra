@@ -18,10 +18,10 @@
   "title": "DuckTales (NES, Capcom, 1989) — Moon Theme, Хиросиге Тономура (Ninten, «DuckTales (NES) Moon Theme»)",
   "cut": [
    0.0,
-   22.0
+   30.0
   ],
   "gain_db": -2.7,
-  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=20.8:d=1.2,volume=-2.7dB,alimiter=limit=0.89:attack=3:release=40",
+  "ffmpeg": "afade=t=in:d=0.3,afade=t=out:st=28.50:d=1.5,volume=-2.7dB,alimiter=limit=0.89:attack=3:release=40",
   "note": "оригинал 92.7 с, взято вступление и основная тема"
  },
  {
