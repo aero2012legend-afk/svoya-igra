@@ -304,10 +304,12 @@
     }
   }
   // аватарка игрока: эмодзи («e:🐸») или маленькое фото JPEG (data:), приходит с телефона
-  const AVAS = ['🦄', '🐸', '🐵', '🦖', '🤡', '👽', '🐷', '🐔', '🦆', '🐙', '🧛', '🤠', '🥸', '😎', '🤖', '👻', '🐼', '🦊', '🐻', '🦁', '🐯', '🦉', '🐳', '🍔'];
+  // смешные аватарки — картинки media/img/ava/a01…a24.jpg (значение 'i:01'); старые эмодзи 'e:…' тоже понимаем
+  const AVAS = Array.from({ length: 24 }, (_, i) => 'i:' + String(i + 1).padStart(2, '0'));
+  const avaUrl = v => (v && v.startsWith('i:') ? `media/img/ava/a${v.slice(2)}.jpg` : v && v.startsWith('data:') ? v : '');
   function setAva(eid, v) {
     const e = ent(eid); v = String(v || '');
-    if (!e || !(/^e:.{1,8}$/u.test(v) || (/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(v) && v.length < 24000))) return;
+    if (!e || !(/^e:.{1,8}$/u.test(v) || /^i:\d{2}$/.test(v) || (/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(v) && v.length < 24000))) return;
     if (e.av === v) return;
     e.av = v; Sound.play('pop'); save(); renderScores();
   }
@@ -487,7 +489,7 @@
       if (av.dataset.v !== sig) {
         av.dataset.v = sig; c.classList.toggle('hasav', !!sig);
         av.textContent = sig.startsWith('e:') ? sig.slice(2) : '';
-        av.style.backgroundImage = sig.startsWith('data:') ? `url("${sig}")` : '';
+        av.style.backgroundImage = avaUrl(sig) ? `url("${avaUrl(sig)}")` : '';
       }
       $('.dot', c).classList.toggle('on', isOnline(e.id)); $('.dot', c).classList.toggle('p2p', p2p(e.id));
       $('.mem', c).textContent = G.mode === 'teams' ? members(e.id).join(', ') : '';
@@ -2889,7 +2891,7 @@
       case 'm-minus': return adjScore(ds.id, -100);
       case 'm-score': return editScore(ds.id);
       case 'wifi': return wifiSetup();
-      case 'm-ava': { const e = ent(ds.id); if (!e) return; const cur = (e.av || '').slice(2); e.av = 'e:' + pick(AVAS.filter(x => x !== cur)); Sound.play('pop'); return changed(); }
+      case 'm-ava': { const e = ent(ds.id); if (!e) return; e.av = pick(AVAS.filter(x => x !== e.av)); Sound.play('pop'); return changed(); }
       case 'm-pr': { const e = ent(ds.id); if (!e || !ds.k) return; snap(); const v = !entPref(e.id, ds.k); e.pr = Object.assign({}, e.pr, { [ds.k]: v ? 1 : 0 }); return changed(); }
       case 'lobby': return toLobby();
       case 'skipround': return skipRound();

@@ -179,13 +179,14 @@
     if (fresh) PREFS.forEach(([k]) => { const b = $(`[data-pf="${k}"]`); if (b) b.classList.toggle('on', !!draftPr[k]); });
   }
   /* ----- аватарка: селфи или смешная картинка, уходит на телевизор ----- */
-  const AVAS = ['🦄', '🐸', '🐵', '🦖', '🤡', '👽', '🐷', '🐔', '🦆', '🐙', '🧛', '🤠', '🥸', '😎', '🤖', '👻', '🐼', '🦊', '🐻', '🦁', '🐯', '🦉', '🐳', '🍔'];
+  const AVAS = Array.from({ length: 24 }, (_, i) => 'i:' + String(i + 1).padStart(2, '0')); // смешные картинки media/img/ava/aNN.jpg
+  const avaUrl = v => (v && v.startsWith('i:') ? `media/img/ava/a${v.slice(2)}.jpg` : v && v.startsWith('data:') ? v : '');
   const AVKEY = 'sviq.ava' + SFX;
   function avaHTML() {
     const a = ls(AVKEY) || '';
-    const cur = a.startsWith('data:') ? `<div class="avcur" style="background-image:url('${a}')"></div>` : `<div class="avcur">${a.startsWith('e:') ? esc(a.slice(2)) : '🙂'}</div>`;
+    const cur = avaUrl(a) ? `<div class="avcur" style="background-image:url('${avaUrl(a)}')"></div>` : `<div class="avcur">${a.startsWith('e:') ? esc(a.slice(2)) : '🙂'}</div>`;
     return `<div class="avbox"><div class="t sm">Твоя аватарка на экране</div><div class="avrow">${cur}<button class="go sm" id="avcam">📸 Селфи</button></div>
-      <div class="avgrid">${AVAS.map(x => `<button data-av="${x}">${x}</button>`).join('')}</div><input type="file" id="avfile" accept="image/*" capture="user" hidden></div>`;
+      <div class="avgrid">${AVAS.map(x => `<button data-av="${x}" class="${x === a ? 'on' : ''}" style="background-image:url('${avaUrl(x)}')"></button>`).join('')}</div><input type="file" id="avfile" accept="image/*" capture="user" hidden></div>`;
   }
   function setMyAva(v) { ls(AVKEY, v); send({ t: 'ava', v }); vib(20); sig = ''; render(); }
   function sendMyAva() { const v = ls(AVKEY); if (v) send({ t: 'ava', v }); }
@@ -570,7 +571,7 @@
     const pcb = t.closest('[data-pc]'); if (pcb) { pad.col = pcb.dataset.pc; app.querySelectorAll('.pc').forEach(b => b.classList.toggle('on', b === pcb)); return; }
     const pwb = t.closest('[data-pw]'); if (pwb) { pad.w = +pwb.dataset.pw; pwb.dataset.pw = pad.w === 2 ? 1 : 2; pwb.textContent = pad.w === 2 ? '✏️ тонко' : '🖌 толсто'; return; }
     if (t.closest('#pclr')) { const cv = $('#pad'); if (cv) { const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); } send({ t: 'draw', k: pad.k, clr: 1 }); vib(20); return; }
-    const avb = t.closest('[data-av]'); if (avb) { setMyAva('e:' + avb.dataset.av); return; }
+    const avb = t.closest('[data-av]'); if (avb) { setMyAva(avb.dataset.av); return; }
     if (t.closest('#avcam')) { const f = $('#avfile'); if (f) f.click(); return; }
     const q = S && S.q;
     if (t.closest('#coinbtn') && q) return press('coin' + q.k, { t: 'coin', k: q.k });
